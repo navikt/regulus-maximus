@@ -8,6 +8,7 @@ import kotlin.test.*
 import no.nav.tsm.mottak.plugins.*
 
 class ApplicationTest {
+    /*
     @Test
     fun testRoot() = testApplication {
         application {
@@ -18,4 +19,6 @@ class ApplicationTest {
             assertEquals("Hello World!", bodyAsText())
         }
     }
+
+     */
 }

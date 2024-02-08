@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.plugins
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.response.*
@@ -14,8 +15,14 @@ fun Application.configureMonitoring() {
     }
 
     routing {
-        get("/prometheus") {
+        get("/internal/prometheus") {
             call.respond(appMicrometerRegistry.scrape())
+        }
+        get("/internal/is_alive") {
+            call.respond(HttpStatusCode.OK)
+        }
+        get("/internal/is_ready") {
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
