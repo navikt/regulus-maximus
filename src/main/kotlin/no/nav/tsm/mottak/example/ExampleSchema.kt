@@ -1,0 +1,36 @@
+package no.nav.tsm.mottak.example
+
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import kotlinx.serialization.Serializable
+import kotlinx.coroutines.Dispatchers
+import org.jetbrains.exposed.sql.*
+
+@Serializable
+data class ExposedExample(val text: String, val someNumber: Int)
+
+object ExampleService {
+    private object Example : Table() {
+        val id = integer("id").autoIncrement()
+        val text = text("text")
+        val someNumber = integer("some_number")
+
+        override val primaryKey = PrimaryKey(id)
+    }
+
+    suspend fun <T> dbQuery(block: suspend () -> T): T =
+        newSuspendedTransaction(Dispatchers.IO) { block() }
+
+    suspend fun create(example: ExposedExample): Int = dbQuery {
+        Example.insert {
+            it[text] = example.text
+            it[someNumber] = example.someNumber
+        }[Example.id]
+    }
+
+    suspend fun delete(id: Int) {
+        dbQuery {
+            Example.deleteWhere { Example.id.eq(id) }
+        }
+    }
+}
