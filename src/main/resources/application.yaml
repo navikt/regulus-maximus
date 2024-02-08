@@ -6,6 +6,8 @@ ktor:
   deployment:
     port: 8080
   database:
-    dbUrl: postgresql://$DB_HOST:$DB_PORT/$DB_DATABASE
     dbUser: $DB_USERNAME
     dbPassword: $DB_PASSWORD
+    dbHost: $DB_HOST
+    dbPort: $DB_PORT
+    dbName: $DB_DATABASE
