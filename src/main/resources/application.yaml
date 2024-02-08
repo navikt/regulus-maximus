@@ -6,6 +6,6 @@ ktor:
   deployment:
     port: 8080
   database:
-    dbUrl: $NAIS_SOMETHING_DATABASE
-    dbUser: $NAIS_DB_USER_INJECTED_FOR_US
-    dbPassword: $NAIS_DB_USER_INJECTED_FOR_US
+    dbUrl: postgresql://$DB_HOST:$DB_PORT/$DB_DATABASE
+    dbUser: $DB_USERNAME
+    dbPassword: $DB_PASSWORD
