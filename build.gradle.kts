@@ -43,6 +43,9 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
+    // Used for local dev tools only
+    implementation("io.ktor:ktor-server-html-builder:$ktor_version")
+
     compileOnly("org.flywaydb:flyway-core:$flyway_version")
 
     testImplementation("io.ktor:ktor-server-tests-jvm")
