@@ -8,7 +8,7 @@ import no.nav.tsm.mottak.example.ExampleService
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
+        get("/hello-world") {
             ExampleService.create(ExposedExample(
                 text = "Hello",
                 someNumber = 42

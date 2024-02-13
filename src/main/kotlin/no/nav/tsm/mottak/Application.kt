@@ -14,4 +14,3 @@ fun Application.module() {
     configureDatabases()
     configureRouting()
 }
-
