@@ -42,7 +42,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-
+    implementation("org.apache.kafka:kafka-clients:3.4.0")
     // Used for local dev tools only
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
 
