@@ -13,3 +13,6 @@ ktor:
     dbHost: localhost
     dbPort: 5432
     dbName: postgres
+  kafka:
+    config:
+      bootstrap.servers: "localhost:9092"

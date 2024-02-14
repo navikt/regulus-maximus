@@ -2,11 +2,13 @@ package no.nav.tsm.mottak
 
 import io.ktor.server.application.*
 import io.ktor.server.config.*
+import java.util.Properties
 
 class Environment(
     val jdbcUrl: String,
     val dbUser: String,
     val dbPassword: String,
+    val kafkaConfig: Properties
 )
 
 object EnvironmentSingleton {
@@ -24,6 +26,11 @@ object EnvironmentSingleton {
             jdbcUrl = "jdbc:postgresql://$host:$port/$database",
             dbUser = config.requiredEnv("ktor.database.dbUser"),
             dbPassword = config.requiredEnv("ktor.database.dbPassword"),
+            kafkaConfig = Properties().apply {
+                config.config("ktor.kafka.config").toMap().forEach {
+                    this[it.key] = it.value
+                }
+            }
         )
             .also { instance = it }
     }
