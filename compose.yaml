@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: postgres
     image: 'postgres:15'
     ports:
       - '5432:5432'
@@ -11,3 +12,56 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  kafka:
+    container_name: kafka
+    image: 'confluentinc/cp-kafka:6.2.0'
+    ports:
+      - '9092:9092'
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --list --zookeeper zookeeper:2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  zookeeper:
+    container_name: zookeeper
+    image: 'confluentinc/cp-zookeeper:6.2.0'
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "zookeeper-shell zookeeper:2181 ls /"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  kafka-init:
+    container_name: kafka-init
+    image: confluentinc/cp-kafka:6.2.0
+    depends_on:
+      - kafka
+    command: /bin/bash -c "
+      retry_count=5;
+      retry_interval=10;
+      echo 'Waiting for Kafka to be ready...';
+      cub kafka-ready -b kafka:9092 1 60;
+      for i in $$(seq 1 $$retry_count); do
+      echo 'Attempt ' $$i ' to create topics...';
+      if kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic sykmeldinger-input && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic sykmeldinger-med-behandlingsutfall; then
+      echo 'Topics created successfully.';
+      break;
+      else
+      echo 'Failed to create topics, retrying in ' $$retry_interval ' seconds...';
+      sleep $$retry_interval;
+      fi;
+      done"
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+
