@@ -15,11 +15,5 @@ services:
   kafka:
     image: confluentinc/confluent-local:7.6.0
     container_name: kafka
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_PROCESS_ROLES: 'broker,controller'
+    ports:
+      - "9092:9092"
