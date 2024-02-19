@@ -6,21 +6,24 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
+import org.koin.ktor.ext.inject
 
 fun Routing.indexPageRoute() {
+  val exampleService by inject<ExampleService>()
+
   get("/") { call.respondHtml(HttpStatusCode.OK) { indexPage() } }
 
   get("/styles.css") { call.respondText(globalCss, ContentType.Text.CSS) }
 
   get("/htmx/list-example") {
-    val items = ExampleService.getAll()
+    val items = exampleService.getAll()
     call.respondHtml(HttpStatusCode.OK) { listExample(items) }
   }
 
   post("/htmx/post-sykmelding") {
     val someNumber = (0..100).random()
 
-    ExampleService.create(
+    exampleService.create(
         ExposedExample(
             text = "Some text with random number: ${System.currentTimeMillis()}",
             someNumber = someNumber))
