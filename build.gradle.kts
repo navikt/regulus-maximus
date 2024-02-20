@@ -6,6 +6,7 @@ val logback_encoder_version: String by project
 val prometheus_version: String by project
 val exposed_version: String by project
 val flyway_version: String by project
+val koin_version: String by project
 val postgres_version: String by project
 
 plugins {
@@ -42,6 +43,8 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.insert-koin:koin-ktor:$koin_version")
+    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
     // Used for local dev tools only
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
