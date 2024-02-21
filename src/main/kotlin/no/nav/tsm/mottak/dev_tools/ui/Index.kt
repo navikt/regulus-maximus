@@ -24,16 +24,18 @@ import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.koin.ktor.ext.inject
 import java.util.*
 
-
 fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
+    val exampleService by inject<ExampleService>()
+
     get("/") { call.respondHtml(HttpStatusCode.OK) { indexPage() } }
 
     get("/styles.css") { call.respondText(globalCss, ContentType.Text.CSS) }
 
     get("/htmx/list-example") {
-        val items = ExampleService.getAll()
+        val items = exampleService.getAll()
         call.respondHtml(HttpStatusCode.OK) { listExample(items) }
     }
 
@@ -46,7 +48,7 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
                 "Some message with random number: $someNumber"
             )
         ).get()
-        ExampleService.create(
+        exampleService.create(
             ExposedExample(
                 text = "Some text with random number: ${System.currentTimeMillis()}",
                 someNumber = someNumber
@@ -72,7 +74,7 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
                 "a new sykmelding med utfall: $someNumber"
             )
         ).get()
-        ExampleService.create(
+        exampleService.create(
             ExposedExample(
                 text = "a new sykmelding med utfall: ${System.currentTimeMillis()}",
                 someNumber = someNumber

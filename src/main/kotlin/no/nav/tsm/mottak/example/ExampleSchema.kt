@@ -8,7 +8,19 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 
 @Serializable data class ExposedExample(val text: String, val someNumber: Int)
 
-object ExampleService {
+// This is just a stub to test Koin, TODO: delete
+class ExampleTransitiveDependency() {
+  fun logMe() {
+    println("I'm a transitive dependency")
+  }
+}
+
+class ExampleService(private val exampleTransitiveDependency: ExampleTransitiveDependency) {
+  init {
+    println("I am init")
+    exampleTransitiveDependency.logMe()
+  }
+
   private object Example : Table() {
     val id = integer("id").autoIncrement()
     val text = text("text")
