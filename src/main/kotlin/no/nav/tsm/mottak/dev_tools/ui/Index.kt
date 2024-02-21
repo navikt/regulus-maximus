@@ -1,14 +1,30 @@
+
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.*
+import kotlinx.html.HTML
+import kotlinx.html.body
+import kotlinx.html.button
+import kotlinx.html.div
+import kotlinx.html.h1
+import kotlinx.html.h2
+import kotlinx.html.head
+import kotlinx.html.header
+import kotlinx.html.id
+import kotlinx.html.img
+import kotlinx.html.li
+import kotlinx.html.link
+import kotlinx.html.main
+import kotlinx.html.script
+import kotlinx.html.title
+import kotlinx.html.ul
 import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.UUID
+import java.util.*
 
 
 fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
@@ -46,6 +62,33 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
             }
         }
     }
+
+    post("/htmx/post-utfall") {
+        val someNumber = (100..200).random()
+        kafkaProducer.send(
+            ProducerRecord(
+                "sykmelding-utfall",
+                UUID.randomUUID().toString(),
+                "a new sykmelding med utfall: $someNumber"
+            )
+        ).get()
+        ExampleService.create(
+            ExposedExample(
+                text = "a new sykmelding med utfall: ${System.currentTimeMillis()}",
+                someNumber = someNumber
+            )
+        )
+
+        call.respondHtml {
+            body {
+                div(classes = "success-feedback") {
+                    attributes["remove-me"] = "5s"
+                    +"Sykmelding med utfall \"posted\" to Kafka, with random number: $someNumber"
+                }
+            }
+        }
+    }
+
 }
 
 fun HTML.indexPage() {
@@ -94,6 +137,21 @@ fun HTML.indexPage() {
                     +"Get messages"
                 }
                 div { id = "last-ten-messages" }
+            }
+
+            div(classes = "utfall-poster") {
+                h2 { +"Post a sykmelding utfall to the Kafka Producer" }
+                button {
+                    attributes["hx-post"] = "/htmx/post-utfall"
+                    attributes["hx-trigger"] = "click"
+                    attributes["hx-target"] = "#utfall-posted"
+                    attributes["hx-swap"] = "beforeend"
+                    +"Post utfall"
+                }
+                div {
+                    id = "utfall-posted"
+                    attributes["hx-ext"] = "remove-me"
+                }
             }
         }
     }

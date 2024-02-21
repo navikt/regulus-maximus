@@ -5,7 +5,7 @@ import java.time.Duration
 
 class SykmeldingConsumer(val kafkaConsumer: KafkaConsumer<String, String>) {
     fun consumeSykmelding() {
-        kafkaConsumer.subscribe(listOf("sykmelding-input"))
+        kafkaConsumer.subscribe(listOf("sykmelding-input", "sykmelding-utfall"))
         while(true) {
             val records = kafkaConsumer.poll(Duration.ofMillis(100))
             for (record in records) {
