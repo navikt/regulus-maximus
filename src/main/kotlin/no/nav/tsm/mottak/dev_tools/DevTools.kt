@@ -3,6 +3,7 @@ package no.nav.tsm.mottak.dev_tools
 import indexPageRoute
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import no.nav.tsm.mottak.dev_tools.kafka.configureDevConsumer
 import no.nav.tsm.mottak.env
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -20,5 +21,6 @@ fun Application.module() {
 }
 
 fun Application.configureDevRoutes(kafkaProducer: KafkaProducer<String, String>) {
+  configureDevConsumer()
   routing { indexPageRoute(kafkaProducer) }
 }
