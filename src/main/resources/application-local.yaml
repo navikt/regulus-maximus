@@ -4,7 +4,7 @@ ktor:
   application:
     modules:
       - no.nav.tsm.mottak.ApplicationKt.module
-      - no.nav.tsm.mottak.dev_tools.DevToolsKt.module
+      - no.nav.tsm.mottak.dev_tools.DevToolsKt.devTools
   deployment:
     port: 8080
   database:

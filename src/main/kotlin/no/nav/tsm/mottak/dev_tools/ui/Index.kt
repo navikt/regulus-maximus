@@ -24,10 +24,12 @@ import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.Headers
+import org.apache.kafka.common.header.internals.RecordHeaders
 import org.koin.ktor.ext.inject
 import java.util.*
 
-fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
+fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>, topic: String) {
     val exampleService by inject<ExampleService>()
 
     get("/") { call.respondHtml(HttpStatusCode.OK) { indexPage() } }
@@ -43,10 +45,14 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
         val someNumber = (0..100).random()
         kafkaProducer.send(
             ProducerRecord(
-                "sykmelding-input",
+                topic,
+                null,
+                null,
                 UUID.randomUUID().toString(),
-                "Some message with random number: $someNumber"
-            )
+                "Some message with random number: $someNumber",
+                RecordHeaders().apply {
+                    add("type", "sykmelding-input".toByteArray())
+                })
         ).get()
 
         call.respondHtml {
@@ -63,10 +69,14 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
         val someNumber = (100..200).random()
         kafkaProducer.send(
             ProducerRecord(
-                "sykmelding-utfall",
+                topic,
+                null,
+                null,
                 UUID.randomUUID().toString(),
-                "a new sykmelding med utfall: $someNumber"
-            )
+                "a new sykmelding med utfall: $someNumber",
+                RecordHeaders().apply {
+                    add("type", "sykmelding-utfall".toByteArray())
+                })
         ).get()
 
         call.respondHtml {
