@@ -48,12 +48,6 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
                 "Some message with random number: $someNumber"
             )
         ).get()
-        exampleService.create(
-            ExposedExample(
-                text = "Some text with random number: ${System.currentTimeMillis()}",
-                someNumber = someNumber
-            )
-        )
 
         call.respondHtml {
             body {
@@ -74,12 +68,6 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
                 "a new sykmelding med utfall: $someNumber"
             )
         ).get()
-        exampleService.create(
-            ExposedExample(
-                text = "a new sykmelding med utfall: ${System.currentTimeMillis()}",
-                someNumber = someNumber
-            )
-        )
 
         call.respondHtml {
             body {
