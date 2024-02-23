@@ -6,16 +6,23 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeaders
 import org.slf4j.LoggerFactory
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
 class SykmeldingConsumer(
-    private val kafkaConsumer: KafkaConsumer<String, String>,
-    private val exampleService: ExampleService,
-    private val topic: String,
+    private val kafkaConsumer: KafkaConsumer<String, SykmeldingInput>,
+    private val sykmeldingInputTopic: String,
+    private val sykmeldingOutputTopic: String,
+    private val kafkaProducer: KafkaProducer<String, SykmeldingMedUtfall>,
 ) {
 
     companion object {
@@ -37,41 +44,40 @@ class SykmeldingConsumer(
 
     private suspend fun processMessages() {
         try {
-            val records = kafkaConsumer.poll(10.seconds.toJavaDuration())
+            val records = kafkaConsumer.poll(1.seconds.toJavaDuration())
             records.forEach { record ->
                 processRecord(record)
             }
         } catch (ex: Exception) {
             println("Error processing messages: ${ex.message}")
             kafkaConsumer.unsubscribe()
-            delay(60.seconds)
+            delay(1.seconds)
             subscribeToKafkaTopics()
         }
     }
 
 
-    private suspend fun processRecord(record: ConsumerRecord<String, String>) {
-        val type = record.headers().single { it.key() == "type" }.value().toString(Charsets.UTF_8)
-        logger.info("Received message from topic: ${record.topic()}: type: $type")
-        if (type == "sykmelding-input") {
-            exampleService.create(
-                ExposedExample(
-                    text = record.value().toString(),
-                    someNumber = (0..100).random()
+    private suspend fun processRecord(record: ConsumerRecord<String, SykmeldingInput>) {
+        logger.info("Received message from topic: ${record.topic()}")
+        withContext(Dispatchers.IO) {
+            kafkaProducer.send(
+                ProducerRecord(
+                    sykmeldingOutputTopic,
+                    UUID.randomUUID().toString(),
+                    finnBehandlingsutfall(record.value()),
                 )
-            )
-        } else if (type == "sykmelding-utfall") {
-
-            exampleService.create(
-                ExposedExample(
-                    text = record.value().toString(),
-                    someNumber = (100..200).random()
-                )
-            )
+            ).get()
         }
     }
 
+    private fun finnBehandlingsutfall(sykmeldingInput: SykmeldingInput): SykmeldingMedUtfall {
+        return SykmeldingMedUtfall(
+            sykmeldingInput,
+            "OK"
+        )
+    }
+
     private fun subscribeToKafkaTopics() {
-        kafkaConsumer.subscribe(listOf(topic))
+        kafkaConsumer.subscribe(listOf(sykmeldingInputTopic))
     }
 }

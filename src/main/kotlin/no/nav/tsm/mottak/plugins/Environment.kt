@@ -10,6 +10,7 @@ class Environment(
     val dbPassword: String,
     val kafkaConfig: Properties,
     val mottattSykmeldingTopic: String = "tsm.mottak-sykmelding",
+    val sykmeldingMedUtfall: String = "tsm.mottak-sykmelding-med-utfall"
 )
 private fun ApplicationConfig.requiredEnv(name: String) =
     propertyOrNull(name)?.getString()
