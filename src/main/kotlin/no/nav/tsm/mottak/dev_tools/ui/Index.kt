@@ -22,12 +22,17 @@ import kotlinx.html.title
 import kotlinx.html.ul
 import no.nav.tsm.mottak.example.ExampleService
 import no.nav.tsm.mottak.example.ExposedExample
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.cache.Cache
+import org.apache.kafka.common.header.Headers
+import org.apache.kafka.common.header.internals.RecordHeaders
 import org.koin.ktor.ext.inject
 import java.util.*
 
-fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
+fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, SykmeldingInput>, topic: String, cache: Map<String, SykmeldingMedUtfall>) {
     val exampleService by inject<ExampleService>()
 
     get("/") { call.respondHtml(HttpStatusCode.OK) { indexPage() } }
@@ -35,45 +40,25 @@ fun Routing.indexPageRoute(kafkaProducer: KafkaProducer<String, String>) {
     get("/styles.css") { call.respondText(globalCss, ContentType.Text.CSS) }
 
     get("/htmx/list-example") {
-        val items = exampleService.getAll()
+        val items = cache.entries.map { it.key to it.value }
         call.respondHtml(HttpStatusCode.OK) { listExample(items) }
     }
 
     post("/htmx/post-sykmelding") {
         val someNumber = (0..100).random()
+        val uuid = UUID.randomUUID().toString()
         kafkaProducer.send(
             ProducerRecord(
-                "sykmelding-input",
-                UUID.randomUUID().toString(),
-                "Some message with random number: $someNumber"
-            )
-        ).get()
+                topic,
+                uuid,
+                SykmeldingInput(uuid),
+        )).get()
 
         call.respondHtml {
             body {
                 div(classes = "success-feedback") {
                     attributes["remove-me"] = "5s"
                     +"Sykmelding \"posted\" to Kafka, with random number: $someNumber"
-                }
-            }
-        }
-    }
-
-    post("/htmx/post-utfall") {
-        val someNumber = (100..200).random()
-        kafkaProducer.send(
-            ProducerRecord(
-                "sykmelding-utfall",
-                UUID.randomUUID().toString(),
-                "a new sykmelding med utfall: $someNumber"
-            )
-        ).get()
-
-        call.respondHtml {
-            body {
-                div(classes = "success-feedback") {
-                    attributes["remove-me"] = "5s"
-                    +"Sykmelding med utfall \"posted\" to Kafka, with random number: $someNumber"
                 }
             }
         }
@@ -128,25 +113,10 @@ fun HTML.indexPage() {
                 }
                 div { id = "last-ten-messages" }
             }
-
-            div(classes = "utfall-poster") {
-                h2 { +"Post a sykmelding utfall to the Kafka Producer" }
-                button {
-                    attributes["hx-post"] = "/htmx/post-utfall"
-                    attributes["hx-trigger"] = "click"
-                    attributes["hx-target"] = "#utfall-posted"
-                    attributes["hx-swap"] = "beforeend"
-                    +"Post utfall"
-                }
-                div {
-                    id = "utfall-posted"
-                    attributes["hx-ext"] = "remove-me"
-                }
-            }
         }
     }
 }
 
-fun HTML.listExample(items: List<ExposedExample>) {
-    body { ul { items.map { li { +"${it.text} - ${it.someNumber}" } } } }
+fun HTML.listExample(items: List<Pair<String, SykmeldingMedUtfall>>) {
+    body { ul { items.map { li { +"${it.first} - ${it.second}" } } } }
 }

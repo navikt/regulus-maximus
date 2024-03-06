@@ -8,7 +8,7 @@ val exposed_version: String by project
 val flyway_version: String by project
 val koin_version: String by project
 val postgres_version: String by project
-
+val jackson_version: String by project
 plugins {
     kotlin("jvm") version "1.9.22"
     id("io.ktor.plugin") version "2.3.7"
@@ -46,6 +46,8 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
     implementation("org.apache.kafka:kafka-clients:3.4.0")
     // Used for local dev tools only
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")

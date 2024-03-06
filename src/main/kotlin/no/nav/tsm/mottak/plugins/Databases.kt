@@ -1,22 +1,21 @@
 package no.nav.tsm.mottak.plugins
 
-import no.nav.tsm.mottak.env
 import io.ktor.server.application.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.*
 
 
-fun Application.configureDatabases() {
+fun Application.configureDatabases(environment: Environment) {
     Flyway.configure()
-        .dataSource(environment.env.jdbcUrl, environment.env.dbUser, environment.env.dbPassword)
+        .dataSource(environment.jdbcUrl, environment.dbUser, environment.dbPassword)
         .validateMigrationNaming(true)
         .load()
         .migrate()
 
     Database.connect(
-        url = environment.env.jdbcUrl,
-        user = environment.env.dbUser,
-        password = environment.env.dbPassword,
+        url = environment.jdbcUrl,
+        user = environment.dbUser,
+        password = environment.dbPassword,
         driver = "org.postgresql.Driver",
     )
 }
