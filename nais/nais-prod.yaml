@@ -1,0 +1,54 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: regulus-maximus
+  namespace: tsm
+  labels:
+    team: tsm
+    system: mottak
+spec:
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        databases:
+          - name: regulus-maximus
+            envVarPrefix: DB
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
+        pointInTimeRecovery: true
+  image: {{ image }}
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 90
+  port: 8080
+  liveness:
+    path: /internal/is_alive
+    initialDelay: 10
+    timeout: 5
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /internal/is_ready
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  secureLogs:
+    enabled: false
+  kafka:
+    pool: nav-dev
