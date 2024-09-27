@@ -2,62 +2,35 @@ package no.nav.tsm.mottak.sykmelding.kafka
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import no.nav.tsm.mottak.example.ExampleService
-import no.nav.tsm.mottak.example.ExposedExample
+import no.nav.tsm.mottak.config.KafkaConfigProperties
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.header.internals.RecordHeaders
 import org.slf4j.LoggerFactory
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
+@Service
 class SykmeldingConsumer(
-    private val kafkaConsumer: KafkaConsumer<String, SykmeldingInput>,
-    private val sykmeldingInputTopic: String,
-    private val sykmeldingOutputTopic: String,
-    private val kafkaProducer: KafkaProducer<String, SykmeldingMedUtfall>,
+    private val kafkaConfigProperties: KafkaConfigProperties
 ) {
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
-    }
 
-    suspend fun consumeSykmelding() = withContext(Dispatchers.IO) {
-        subscribeToKafkaTopics()
-        try {
-            while (isActive) {
-                processMessages()
-            }
-        } finally {
-            logger.info("unsubscribing and closing kafka consumer")
-            kafkaConsumer.unsubscribe()
-            kafkaConsumer.close()
-        }
-    }
+    private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    private suspend fun processMessages() {
-        try {
-            val records = kafkaConsumer.poll(1.seconds.toJavaDuration())
-            records.forEach { record ->
-                processRecord(record)
-            }
-        } catch (ex: Exception) {
-            println("Error processing messages: ${ex.message}")
-            kafkaConsumer.unsubscribe()
-            delay(1.seconds)
-            subscribeToKafkaTopics()
-        }
+    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
+    fun consume(cr: ConsumerRecord<String, SykmeldingMedUtfall>?) {
+        logger.info("Received message from topic: ${kafkaConfigProperties.topics.mottattSykmelding}")
+        // mer kode
     }
 
 
-    private suspend fun processRecord(record: ConsumerRecord<String, SykmeldingInput>) {
+    /*private suspend fun processRecord(record: ConsumerRecord<String, SykmeldingInput>) {
         logger.info("Received message from topic: ${record.topic()}")
         withContext(Dispatchers.IO) {
             kafkaProducer.send(
@@ -69,8 +42,8 @@ class SykmeldingConsumer(
             ).get()
         }
     }
-
-    private fun finnBehandlingsutfall(sykmeldingInput: SykmeldingInput): SykmeldingMedUtfall {
+*/
+/*    private fun finnBehandlingsutfall(sykmeldingInput: SykmeldingInput): SykmeldingMedUtfall {
         return SykmeldingMedUtfall(
             sykmeldingInput,
             "OK"
@@ -79,5 +52,5 @@ class SykmeldingConsumer(
 
     private fun subscribeToKafkaTopics() {
         kafkaConsumer.subscribe(listOf(sykmeldingInputTopic))
-    }
+    }*/
 }

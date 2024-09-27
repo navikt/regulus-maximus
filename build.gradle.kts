@@ -25,11 +25,15 @@ val koin_version= "3.5.3"
 val jackson_version= "2.16.1"
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    //implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.kafka:spring-kafka")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    // Provides Reactive Relational Database Connectivity to persist data in SQL stores using Spring Data in reactive applications.
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheus_version")
     implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")

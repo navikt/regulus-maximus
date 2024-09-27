@@ -1,9 +1,10 @@
 package no.nav.tsm.mottak.plugins
 
-import io.ktor.server.application.Application
-import io.ktor.server.config.ApplicationConfig
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 import java.util.Properties
 
+@Configuration
 class Environment(
     val jdbcUrl: String,
     val dbUser: String,

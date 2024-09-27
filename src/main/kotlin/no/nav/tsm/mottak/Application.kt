@@ -1,19 +1,18 @@
 package no.nav.tsm.mottak
 
-import io.ktor.server.application.*
-import io.ktor.server.netty.*
-import no.nav.tsm.mottak.plugins.*
-import org.koin.ktor.ext.get
+import no.nav.tsm.mottak.config.KafkaConfigProperties
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.runApplication
+import org.springframework.cache.annotation.EnableCaching
+import org.springframework.kafka.annotation.EnableKafka
+
+@SpringBootApplication
+@EnableCaching
+@EnableKafka
+@EnableConfigurationProperties(KafkaConfigProperties::class)
+class Application
 
 fun main(args: Array<String>) {
-    EngineMain.main(args)
-}
-
-fun Application.module() {
-    configureDependencyInjection()
-    configureMonitoring()
-    configureSerialization()
-    configureDatabases(get())
-    configureRouting()
-    configureConsumer(get())
+    runApplication<Application>(*args)
 }
