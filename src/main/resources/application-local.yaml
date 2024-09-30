@@ -1,18 +1,29 @@
-ktor:
-  environment: local
-  development: true
-  application:
-    modules:
-      - no.nav.tsm.mottak.ApplicationKt.module
-      - no.nav.tsm.mottak.dev_tools.DevToolsKt.devTools
-  deployment:
-    port: 8080
-  database:
-    dbUser: postgres
-    dbPassword: postgres
-    dbHost: localhost
-    dbPort: 5432
-    dbName: postgres
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/my_database
+    username: my_user
+    password: my_password
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/my_database?reWriteBatchedInserts=true"
+    username: my_user
+    password: my_password
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
   kafka:
-    config:
-      bootstrap.servers: "localhost:9092"
+    bootstrap-servers: localhost:9092
+    group-id: regulus-maximus
+    topics:
+      mottatt-sykmelding: tsm.mottak-sykmelding
+      sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      max-poll-records: 1
+      auto-offset-reset: none
+      enable-auto-commit: false
+server:
+  port: 8080
