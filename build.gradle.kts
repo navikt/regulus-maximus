@@ -32,8 +32,9 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    // Provides Reactive Relational Database Connectivity to persist data in SQL stores using Spring Data in reactive applications.
+
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.postgresql:r2dbc-postgresql")
 
     implementation("io.micrometer:micrometer-registry-prometheus:$prometheus_version")
     implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")
@@ -44,12 +45,15 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
     implementation("org.apache.kafka:kafka-clients:3.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.5")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.postgresql:postgresql")
 
     compileOnly("org.flywaydb:flyway-core:$flyway_version")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

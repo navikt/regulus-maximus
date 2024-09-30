@@ -28,29 +28,4 @@ class SykmeldingConsumer(
         logger.info("Received message from topic: ${kafkaConfigProperties.topics.mottattSykmelding}")
         // mer kode
     }
-
-
-    /*private suspend fun processRecord(record: ConsumerRecord<String, SykmeldingInput>) {
-        logger.info("Received message from topic: ${record.topic()}")
-        withContext(Dispatchers.IO) {
-            kafkaProducer.send(
-                ProducerRecord(
-                    sykmeldingOutputTopic,
-                    UUID.randomUUID().toString(),
-                    finnBehandlingsutfall(record.value()),
-                )
-            ).get()
-        }
-    }
-*/
-/*    private fun finnBehandlingsutfall(sykmeldingInput: SykmeldingInput): SykmeldingMedUtfall {
-        return SykmeldingMedUtfall(
-            sykmeldingInput,
-            "OK"
-        )
-    }
-
-    private fun subscribeToKafkaTopics() {
-        kafkaConsumer.subscribe(listOf(sykmeldingInputTopic))
-    }*/
 }
