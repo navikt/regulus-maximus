@@ -4,15 +4,8 @@ spring:
     username: my_user
     password: my_password
   flyway:
-    enabled: true
+    url: jdbc:postgresql://localhost:5432/my_database
     locations: classpath:db/migration
-  datasource:
-    url: "jdbc:postgresql://localhost:5432/my_database?reWriteBatchedInserts=true"
-    username: my_user
-    password: my_password
-    hikari:
-      minimum-idle: 1
-      maximum-pool-size: 5
   kafka:
     bootstrap-servers: localhost:9092
     group-id: regulus-maximus
@@ -25,5 +18,8 @@ spring:
       max-poll-records: 1
       auto-offset-reset: none
       enable-auto-commit: false
+  sql:
+    init:
+      mode: always
 server:
   port: 8080

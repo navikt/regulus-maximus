@@ -1,30 +1,23 @@
 package no.nav.tsm.mottak.controller
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tsm.mottak.service.SykmeldingService
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.time.LocalDateTime
 import java.util.*
 
+@Profile("local") // kun i lokal utvikling
 @RestController
 class SykmeldingController(
     private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
-    private val sykmeldingService: SykmeldingService
+    private val sykmeldingService: SykmeldingService,
 ) {
 
     private val topic = "tsm.mottak-sykmelding"
@@ -106,10 +99,10 @@ class SykmeldingController(
     fun listExample(): Flux<String> {
         logger.info("Fetching sykmeldinger from cache")
 
-        val lastTenSykmeldinger = sykmeldingService.getAllSykmeldinger()
-            .takeLast(10)
+        val lastTenSykmeldinger = sykmeldingService.getLatestSykmeldinger()
 
-        return Flux.fromIterable(lastTenSykmeldinger)
+
+        return lastTenSykmeldinger.take(10)
             .map { (id, sykmelding) ->
                 """
             <div>
@@ -147,34 +140,3 @@ class SykmeldingController(
             }
     }
 }
-
-@Service
-class SykmeldingService(
-) {
-    private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
-
-    private val sykmeldingCache: MutableList<SykmeldingMedUtfall> = mutableListOf()
-
-    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
-    fun consume(cr: ConsumerRecord<String, String>?) {
-        if (cr != null) {
-            logger.info("konsumerte. ${cr.value()}")
-            logger.info("Consumed message from Kafka: ${cr.value()}")
-            sykmeldingCache.add(objectMapper.readValue(cr.value()))
-        }
-
-    }
-
-    fun getAllSykmeldinger(): MutableList<SykmeldingMedUtfall> {
-        logger.info("ALLE SYKMELINDGE $sykmeldingCache")
-        return sykmeldingCache
-    }
-}
-
-val objectMapper: ObjectMapper =
-    ObjectMapper().apply {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    }

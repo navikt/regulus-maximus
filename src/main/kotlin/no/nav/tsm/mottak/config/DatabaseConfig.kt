@@ -1,25 +1,28 @@
 package no.nav.tsm.mottak.config
 
-import org.springframework.beans.factory.annotation.Value
+import org.flywaydb.core.Flyway
+import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.flyway.FlywayProperties
+import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.jdbc.datasource.DriverManagerDataSource
-import javax.sql.DataSource
 
 @Configuration
-class DatabaseConfig(
-    @Value("\${spring.datasource.url}") private val jdbcUrl: String,
-    @Value("\${spring.datasource.username}") private val dbUser: String,
-    @Value("\${spring.datasource.password}") private val dbPassword: String
-) {
-    @Bean
-    fun dataSource(): DataSource {
-        val dataSource = DriverManagerDataSource()
-        dataSource.setUrl(jdbcUrl)
-        dataSource.setUsername(dbUser)
-        dataSource.setPassword(dbPassword)
-        dataSource.setDriverClassName("org.postgresql.Driver")
-        return dataSource
-    }
+@EnableConfigurationProperties(R2dbcProperties::class, FlywayProperties::class)
+class DatabaseConfig {
+    private val logger = LoggerFactory.getLogger(DatabaseConfig::class.java)
 
+    @Bean(initMethod = "migrate")
+    fun flyway(flywayProperties: FlywayProperties, r2dbcProperties: R2dbcProperties): Flyway {
+        return Flyway.configure()
+            .dataSource(
+                flywayProperties.url,
+                r2dbcProperties.username,
+                r2dbcProperties.password
+            )
+            .locations(*flywayProperties.locations.toTypedArray())
+            .baselineOnMigrate(true)
+            .load()
+    }
 }

@@ -19,7 +19,7 @@ val logback_version = "1.4.14"
 val logback_encoder_version = "7.2"
 val prometheus_version = "1.6.3"
 val exposed_version= "0.41.1"
-val flyway_version= "10.6.0"
+val flyway_version= "10.18.2"
 val postgres_version= "42.7.2"
 val koin_version= "3.5.3"
 val jackson_version= "2.16.1"
@@ -32,6 +32,7 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.postgresql:r2dbc-postgresql")
@@ -50,7 +51,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql")
 
-    compileOnly("org.flywaydb:flyway-core:$flyway_version")
+    implementation("org.flywaydb:flyway-core:$flyway_version")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
