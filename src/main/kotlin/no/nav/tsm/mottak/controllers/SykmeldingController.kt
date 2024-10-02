@@ -3,20 +3,19 @@ package no.nav.tsm.mottak.controller
 import no.nav.tsm.mottak.service.SykmeldingService
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
+import no.nav.tsm.mottak.controllers.model.sykmeldingMedBehandlingsutfall
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import java.util.*
+import java.util.UUID
+import kotlin.collections.List
 
-@Profile("local") // kun i lokal utvikling
+@Profile("local")
 @RestController
 class SykmeldingController(
-    private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
+    private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
 ) {
 
@@ -25,8 +24,8 @@ class SykmeldingController(
 
 
     @GetMapping("/")
-    fun indexPage(): Mono<String> {
-        return Mono.just(createHTML().html {
+    suspend fun indexPage(): String {
+        return createHTML().html {
             head {
                 title("Regulus Maximus: Dev Tools")
 
@@ -74,11 +73,11 @@ class SykmeldingController(
                     }
                 }
             }
-        })
+        }
     }
 
     @GetMapping("/styles.css")
-    fun serveStyles(): Mono<String> {
+    suspend fun serveStyles(): String {
         val globalCss = """
             html { font-family: sans-serif; }
             body { margin: 0; }
@@ -92,22 +91,22 @@ class SykmeldingController(
             }
         """.trimIndent()
 
-        return Mono.just(globalCss)
+        return globalCss
     }
 
     @GetMapping("/htmx/list-example")
-    fun listExample(): Flux<String> {
+    suspend fun listExample(): List<String> {
         logger.info("Fetching sykmeldinger from cache")
 
         val lastTenSykmeldinger = sykmeldingService.getLatestSykmeldinger()
 
 
-        return lastTenSykmeldinger.take(10)
-            .map { (id, sykmelding) ->
+        return lastTenSykmeldinger
+            .map { sykmelding ->
                 """
             <div>
-                <p>Sykmelding ID: ${id.sykmeldingId}</p>
-                <p>Utfall: ${sykmelding}</p>
+                <p>Sykmelding ID: ${sykmelding.sykmeldingId}</p>
+                <p>Utfall: ${sykmelding.validation}</p>
                 <br/>
             </div>
             """.trimIndent()
@@ -115,28 +114,18 @@ class SykmeldingController(
     }
 
     @PostMapping("/htmx/post-sykmelding")
-    fun postSykmelding(): Mono<String> {
-        logger.info("Sending sykmelding...")
-        val sykmeldingId = UUID.randomUUID().toString()
-        val sykmelding = SykmeldingInput(sykmeldingId)
-        val sykmeldingMedUtfall = SykmeldingMedUtfall(sykmelding, utfall = "Venter på behandling")
+    suspend fun postSykmelding(): String {
+        val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
+        logger.info("Sending sykmelding med id... ${sykmeldingId} ")
 
-        logger.info("Sykmelding ID: $sykmeldingId | Utfall: ${sykmeldingMedUtfall.utfall}")
 
-        return Mono.fromCallable {
-            kafkaTemplate.send(topic, sykmeldingId, sykmeldingMedUtfall).get()
-        }
-            .thenReturn(
-                """
+        kafkaTemplate.send(topic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
+        return """
             <div>
                 <p>Sykmelding ID: ${sykmeldingId}</p>
-                <p>Utfall: ${sykmeldingMedUtfall.utfall}</p>
+                <p>Utfall: ${sykmeldingMedBehandlingsutfall.validation.status}</p>
                 <br/>
             </div>
             """.trimIndent()
-            )
-            .onErrorResume { error ->
-                Mono.just("Failed to post sykmelding: ${error.message}")
-            }
     }
 }

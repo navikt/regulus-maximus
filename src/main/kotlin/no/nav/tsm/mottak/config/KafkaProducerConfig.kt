@@ -1,6 +1,6 @@
 package no.nav.tsm.mottak.config
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean
@@ -14,7 +14,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 class KafkaProducerConfig( private val kafkaConfigProperties: KafkaConfigProperties) {
 
     @Bean
-    fun producerFactory(): ProducerFactory<String, SykmeldingMedUtfall> {
+    fun producerFactory(): ProducerFactory<String, SykmeldingMedBehandlingsutfall> {
         val configProps: MutableMap<String, Any> = HashMap()
         configProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafkaConfigProperties.bootstrapServers
         configProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -23,7 +23,7 @@ class KafkaProducerConfig( private val kafkaConfigProperties: KafkaConfigPropert
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, SykmeldingMedUtfall> {
+    fun kafkaTemplate(): KafkaTemplate<String, SykmeldingMedBehandlingsutfall> {
         return KafkaTemplate(producerFactory())
     }
 }

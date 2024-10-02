@@ -1,35 +1,28 @@
 package no.nav.tsm.mottak.service
 
-import no.nav.tsm.mottak.controller.SykmeldingController
-import no.nav.tsm.mottak.db.SykmeldingEntity
+import kotlinx.coroutines.flow.toList
+import no.nav.tsm.mottak.db.SykmeldingBehandlingsutfall
+import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @Service
 class SykmeldingService(
-    private val sykmeldingRepository: SykmeldingRepository
+    private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingMapper: SykmeldingMapper,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
 
     @Transactional
-    fun saveSykmelding(sykmelding: SykmeldingMedUtfall): Mono<SykmeldingEntity> {
-        logger.info("lagrer sykmelding")
-        val entity = SykmeldingEntity(
-            sykmeldingId = sykmelding.sykmeldingInput.sykmeldingId,
-            utfall = sykmelding.utfall
-        )
-        logger.info("sykmeldingEntity $entity")
-        return sykmeldingRepository.save(entity)
+    suspend fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) : SykmeldingBehandlingsutfall {
+        return sykmeldingRepository.save(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 
-    fun getLatestSykmeldinger(): Flux<SykmeldingMedUtfall> {
-        return sykmeldingRepository.findTop10ByOrderByIdDesc()
-            .map { SykmeldingMedUtfall(SykmeldingInput(it.sykmeldingId), it.utfall) }
+    suspend fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
+        return sykmeldingRepository.findTop10ByOrderBySykmeldingIdDesc().toList()
+
     }
 }

@@ -13,9 +13,9 @@ import org.springframework.context.annotation.Configuration
 class DatabaseConfig {
     private val logger = LoggerFactory.getLogger(DatabaseConfig::class.java)
 
-    @Bean(initMethod = "migrate")
+    @Bean
     fun flyway(flywayProperties: FlywayProperties, r2dbcProperties: R2dbcProperties): Flyway {
-        return Flyway.configure()
+        val flyway = Flyway.configure()
             .dataSource(
                 flywayProperties.url,
                 r2dbcProperties.username,
@@ -24,5 +24,8 @@ class DatabaseConfig {
             .locations(*flywayProperties.locations.toTypedArray())
             .baselineOnMigrate(true)
             .load()
+
+        flyway.migrate()
+        return flyway
     }
 }

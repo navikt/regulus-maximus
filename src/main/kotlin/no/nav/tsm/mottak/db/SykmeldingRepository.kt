@@ -1,14 +1,13 @@
 package no.nav.tsm.mottak.db
 
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import kotlinx.coroutines.flow.Flow
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
-import reactor.core.publisher.Flux
+
 
 @Repository
-interface SykmeldingRepository : ReactiveCrudRepository<SykmeldingEntity, Long> {
+interface SykmeldingRepository : CoroutineCrudRepository<SykmeldingBehandlingsutfall, String> {
 
-    fun findTop10ByOrderByIdDesc(): Flux<SykmeldingEntity>
+    fun findTop10ByOrderBySykmeldingIdDesc(): Flow<SykmeldingBehandlingsutfall>
 
-    fun findTop10ByOrderByIdDesc(sykmeldingEntity: SykmeldingEntity)
 }
