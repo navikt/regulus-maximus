@@ -13,6 +13,7 @@ spring:
     topics:
       mottatt-sykmelding: tsm.mottak-sykmelding
       sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
+      tsm-sykmelding: tsm.sykmelding
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
