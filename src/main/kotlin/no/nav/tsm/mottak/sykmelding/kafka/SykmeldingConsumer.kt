@@ -36,7 +36,7 @@ class SykmeldingConsumer(
             }
 
         } catch (e: Throwable) {
-            logger.error("feil", e)
+            logger.error("Kunne ikke lese melding fra topic ", e)
             throw e
         }
 

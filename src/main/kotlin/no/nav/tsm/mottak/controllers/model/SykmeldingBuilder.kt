@@ -2,7 +2,6 @@ package no.nav.tsm.mottak.controllers.model
 
 import no.nav.tsm.mottak.sykmelding.kafka.model.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
