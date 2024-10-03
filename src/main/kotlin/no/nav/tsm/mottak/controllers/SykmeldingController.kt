@@ -1,4 +1,4 @@
-package no.nav.tsm.mottak.controller
+package no.nav.tsm.mottak.controllers
 
 import no.nav.tsm.mottak.service.SykmeldingService
 import kotlinx.html.*
