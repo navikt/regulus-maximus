@@ -36,7 +36,7 @@ class SykmeldingConsumer(
                 processMessages()
             }
         } finally {
-            logger.info("unsubscribing and closing kafka consumer")
+            logger.info("Unsubscribing and closing kafka consumer")
             kafkaConsumer.unsubscribe()
             kafkaConsumer.close()
         }
