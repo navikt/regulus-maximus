@@ -17,7 +17,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
       - name: build artifact
-        run: ./gradlew shadowJar
+        run: ./gradlew bootjar
       - name: Push docker image to GAR
         uses: nais/docker-build-push@v0
         id: docker-build-push

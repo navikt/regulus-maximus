@@ -1,23 +1,25 @@
-ktor:
-  environment: local
-  application:
-    modules:
-      - no.nav.tsm.mottak.ApplicationKt.module
-  deployment:
-    port: 8080
-  database:
-    dbUser: $DB_USERNAME
-    dbPassword: $DB_PASSWORD
-    dbHost: $DB_HOST
-    dbPort: $DB_PORT
-    dbName: $DB_DATABASE
+spring:
+  r2dbc:
+    url: "r2dbc:postgresql://${DB_HOST}/my_database"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  datasource:
+    url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?reWriteBatchedInserts=true"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
   kafka:
-    config:
-      bootstrap.servers: $KAFKA_BROKERS
-      security.protocol: "SSL"
-      ssl.truststore.location: $KAFKA_TRUSTSTORE_PATH
-      ssl.truststore.password: $KAFKA_CREDSTORE_PASSWORD
-      ssl.truststore.type: "jks"
-      ssl.keystore.location: $KAFKA_KEYSTORE_PATH
-      ssl.keystore.password: $KAFKA_CREDSTORE_PASSWORD
-      ssl.keystore.type: "PKCS12"
+    bootstrap-servers: localhost:9092
+    group-id: regulus-maximus
+    topics:
+      mottatt-sykmelding: tsm.mottak-sykmelding
+      sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
+    consumer:
+      max-poll-records: 1
+      auto-offset-reset: none
+      enable-auto-commit: false
