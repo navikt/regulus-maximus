@@ -25,8 +25,6 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @Value("\${spring.kafka.topics.tsm-sykmelding}")
-    lateinit var tsmSykmeldingTopic: String
 
     @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
     fun consume(cr: ConsumerRecord<String, String>?) {
@@ -39,7 +37,7 @@ class SykmeldingConsumer(
                     sykmeldingService.saveSykmelding(sykmelding)
                 }
 
-                kafkaTemplate.send(tsmSykmeldingTopic, SykmeldingMedBehandlingsutfall(sykmelding = sykmelding.sykmelding, validation = sykmelding.validation, kilde = sykmelding.kilde))
+                kafkaTemplate.send(kafkaConfigProperties.topics.mottattSykmelding, SykmeldingMedBehandlingsutfall(sykmelding = sykmelding.sykmelding, validation = sykmelding.validation, kilde = sykmelding.kilde))
             }
         } catch (e: Throwable) {
             logger.error("Kunne ikke lese melding fra topic ", e)
