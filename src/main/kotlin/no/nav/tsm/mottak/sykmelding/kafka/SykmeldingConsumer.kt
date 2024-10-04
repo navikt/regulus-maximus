@@ -1,83 +1,61 @@
 package no.nav.tsm.mottak.sykmelding.kafka
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
-import no.nav.tsm.mottak.example.ExampleService
-import no.nav.tsm.mottak.example.ExposedExample
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingInput
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedUtfall
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import kotlinx.coroutines.runBlocking
+import no.nav.tsm.mottak.config.KafkaConfigProperties
+import no.nav.tsm.mottak.service.SykmeldingService
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
+import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.header.internals.RecordHeaders
 import org.slf4j.LoggerFactory
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.stereotype.Service
 
+@Service
 class SykmeldingConsumer(
-    private val kafkaConsumer: KafkaConsumer<String, SykmeldingInput>,
-    private val sykmeldingInputTopic: String,
-    private val sykmeldingOutputTopic: String,
-    private val kafkaProducer: KafkaProducer<String, SykmeldingMedUtfall>,
+    private val kafkaConfigProperties: KafkaConfigProperties,
+    //private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
+    private val sykmeldingService: SykmeldingService,
 ) {
+    private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
-    }
-
-    suspend fun consumeSykmelding() = withContext(Dispatchers.IO) {
-        subscribeToKafkaTopics()
+    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
+    fun consume(cr: ConsumerRecord<String, String>?) {
         try {
-            while (isActive) {
-                processMessages()
+            if (cr != null) {
+                val sykmelding = objectMapper.readValue(cr.value(), SykmeldingMedBehandlingsutfall::class.java)
+                logger.info("Received message from topic: ${cr.value()}")
+                runBlocking {
+                    sykmeldingService.saveSykmelding(sykmelding)
+                }
             }
-        } finally {
-            logger.info("unsubscribing and closing kafka consumer")
-            kafkaConsumer.unsubscribe()
-            kafkaConsumer.close()
+
+        } catch (e: Throwable) {
+            logger.error("Kunne ikke lese melding fra topic ", e)
+            throw e
         }
-    }
 
-    private suspend fun processMessages() {
-        try {
-            val records = kafkaConsumer.poll(1.seconds.toJavaDuration())
-            records.forEach { record ->
-                processRecord(record)
-            }
-        } catch (ex: Exception) {
-            println("Error processing messages: ${ex.message}")
-            kafkaConsumer.unsubscribe()
-            delay(1.seconds)
-            subscribeToKafkaTopics()
-        }
-    }
+        // her skal videre funksjonalitet ligge
+        /* try {
+             kafkaTemplate.send("tsm.sykmelding", SykmeldingMedUtfall(sykmeldingInput = sykmelding.sykmeldingInput, utfall = sykmelding.utfall))
+         } catch (ex: Exception) {
+             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
+         }*/
 
-
-    private suspend fun processRecord(record: ConsumerRecord<String, SykmeldingInput>) {
-        logger.info("Received message from topic: ${record.topic()}")
-        withContext(Dispatchers.IO) {
-            kafkaProducer.send(
-                ProducerRecord(
-                    sykmeldingOutputTopic,
-                    UUID.randomUUID().toString(),
-                    finnBehandlingsutfall(record.value()),
-                )
-            ).get()
-        }
-    }
-
-    private fun finnBehandlingsutfall(sykmeldingInput: SykmeldingInput): SykmeldingMedUtfall {
-        return SykmeldingMedUtfall(
-            sykmeldingInput,
-            "OK"
-        )
-    }
-
-    private fun subscribeToKafkaTopics() {
-        kafkaConsumer.subscribe(listOf(sykmeldingInputTopic))
     }
 }
+
+
+val objectMapper: ObjectMapper =
+    ObjectMapper().apply {
+        registerKotlinModule()
+        registerModule(SykmeldingModule())
+        registerModule(JavaTimeModule())
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    }
