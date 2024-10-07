@@ -1,11 +1,33 @@
 <configuration>
-    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="stdout"
+              class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider" />
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <rootCauseFirst>true</rootCauseFirst>
+            </throwableConverter>
         </encoder>
     </appender>
-
-    <root level="INFO">
-        <appender-ref ref="stdout_json"/>
+    <springProfile name="dev">
+        <logger name="no.nav.tsm" level="trace"/>
+    </springProfile>
+    <springProfile name="local | test">
+        <appender name="stdout"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %X{Nav-CallId} [%thread] %-5level %logger{70} - %msg%n</Pattern>
+            </layout>
+        </appender>
+        <logger name="no.nav.tsm" level="trace"/>
+    </springProfile>
+    <root level="info">
+        <appender-ref ref="stdout"/>
     </root>
+    <springProfile name="prod">
+        <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+            <Name>CONFIDENTIAL_FILTER</Name>
+            <Marker>CONFIDENTIAL</Marker>
+            <OnMatch>DENY</OnMatch>
+        </turboFilter>
+        <logger name="no.nav.tsm" level="info"/>
+    </springProfile>
 </configuration>
