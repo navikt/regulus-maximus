@@ -11,6 +11,14 @@ version = "0.0.2"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/navikt/boot-cluster-conditionals")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR") ?: "x-access-token"
+            password = System.getenv("GITHUB_TOKEN") ?: githubPassword
+        }
+    }
 }
 
 val ktor_version = "2.3.7"
@@ -58,6 +66,8 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("no.nav.boot:boot-conditionals:5.1.2")
+
 }
 
 tasks {
