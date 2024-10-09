@@ -1,6 +1,5 @@
 package no.nav.tsm.mottak
 
-import no.nav.tsm.mottak.config.KafkaConfigProperties
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
@@ -14,7 +13,6 @@ import org.springframework.kafka.annotation.EnableKafka
 @EnableKafka
 @EnableR2dbcRepositories
 @EnableR2dbcAuditing
-@EnableConfigurationProperties(KafkaConfigProperties::class)
 class Application
 
 fun main(args: Array<String>) {
