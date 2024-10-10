@@ -14,6 +14,7 @@ enum class SykmeldingKilde {
 data class Sykmelding(
     val id: String,
     val metadata: SykmeldingMetadata,
+    val generatedDate: OffsetDateTime,
     val pasient: Person,
     val behandler: Behandler,
     val arbeidsgiver: ArbeidsgiverInfo,
@@ -32,7 +33,6 @@ data class SykmeldingMetadata(
     val partnerreferanse: String?,
     val avsenderSystem: AvsenderSystem,
     val mottattDato: OffsetDateTime,
-    val genDate: OffsetDateTime, // Todo endre navn?
     val behandletTidspunkt: OffsetDateTime,
 )
 

@@ -14,7 +14,6 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
             partnerreferanse = null,
             avsenderSystem = AvsenderSystem("", ""),
             mottattDato = OffsetDateTime.now(),
-            genDate = OffsetDateTime.now(),
             behandletTidspunkt = OffsetDateTime.now(),
         ),
         pasient = Person(ident = "", navn = null),
@@ -30,7 +29,8 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
         bistandNav = null,
         tilbakedatering = null,
         aktivitet = listOf(AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, MedisinskArsakType.ANNET), null, fom = 1.januar(2023), tom = 31.januar(2023))),
-        utdypendeOpplysninger = emptyMap()
+        utdypendeOpplysninger = emptyMap(),
+        generatedDate = OffsetDateTime.now()
         ),
     validation = ValidationResult(
         status = RuleType.OK,

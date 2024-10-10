@@ -10,4 +10,6 @@ interface SykmeldingRepository : CoroutineCrudRepository<SykmeldingBehandlingsut
 
     fun findTop10ByOrderBySykmeldingIdDesc(): Flow<SykmeldingBehandlingsutfall>
 
+    fun findTop10ByOrderByGeneratedDateDesc(): Flow<SykmeldingBehandlingsutfall>
+
 }
