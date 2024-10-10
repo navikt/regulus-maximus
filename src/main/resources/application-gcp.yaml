@@ -1,0 +1,25 @@
+spring:
+  r2dbc:
+    url: "r2dbc:postgresql://${db.host}/my_database"
+    username: ${db.username}
+    password: ${db.password}
+  flyway:
+    url: ${spring.datasource.url}
+  datasource:
+    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}?reWriteBatchedInserts=true"
+    username: ${db.username}
+    password: ${db.password}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+  kafka:
+    bootstrap-servers: ${kafka.brokers}
+    ssl:
+      trust-store-location: file:${kafka.truststore.path}
+      trust-store-type: JKS
+      trust-store-password: ${kafka.credstore.password}
+      key-store-location: file:${kafka.keystore.path}
+      key-store-type: PKCS12
+      key-store-password: ${kafka.credstore.password}
+    consumer:
+      enable-auto-commit: false
