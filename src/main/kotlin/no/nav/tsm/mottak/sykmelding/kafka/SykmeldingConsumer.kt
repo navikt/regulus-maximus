@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import kotlinx.coroutines.runBlocking
-import no.nav.tsm.mottak.config.KafkaConfigProperties
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingConsumer(
-    private val kafkaConfigProperties: KafkaConfigProperties,
     //private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
     private val sykmeldingService: SykmeldingService,
 ) {
