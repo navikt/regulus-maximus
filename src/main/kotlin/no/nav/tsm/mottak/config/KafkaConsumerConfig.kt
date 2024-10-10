@@ -13,10 +13,10 @@ import java.util.*
 class KafkaConsumerConfig {
 
     @Bean
-    fun containerFactory(p: KafkaProperties) =
+    fun containerFactory(props: KafkaProperties) =
         ConcurrentKafkaListenerContainerFactory<UUID, SykmeldingMedBehandlingsutfall>().apply {
             containerProperties.isObservationEnabled = true
-            consumerFactory = DefaultKafkaConsumerFactory(p.buildConsumerProperties(null).apply {
+            consumerFactory = DefaultKafkaConsumerFactory(props.buildConsumerProperties(null).apply {
                 put(TRUSTED_PACKAGES, "no.nav.tsm.mottak.sykmelding.kafka.model")
             })
         }
