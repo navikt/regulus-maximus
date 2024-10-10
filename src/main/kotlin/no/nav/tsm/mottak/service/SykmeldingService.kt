@@ -20,7 +20,7 @@ class SykmeldingService(
     }
 
     suspend fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
-        return sykmeldingRepository.findTop10ByOrderBySykmeldingIdDesc().toList()
+        return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc().toList()
 
     }
 }

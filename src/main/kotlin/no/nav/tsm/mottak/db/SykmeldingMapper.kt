@@ -17,6 +17,7 @@ class SykmeldingMapper {
             pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.ident,
             fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
             tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
+            generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.generatedDate,
             sykmelding = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding)),
             metadata = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding.metadata)),
             kilde = sykmeldingMedBehandlingsutfall.kilde.name,
