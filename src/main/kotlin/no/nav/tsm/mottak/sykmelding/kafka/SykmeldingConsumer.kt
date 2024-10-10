@@ -24,15 +24,13 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
-    fun consume(cr: ConsumerRecord<String, String>?) {
+    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}", containerFactory = "containerFactory")
+    suspend fun consume(cr: ConsumerRecord<String, String>?) {
         try {
             if (cr != null) {
                 val sykmelding = objectMapper.readValue(cr.value(), SykmeldingMedBehandlingsutfall::class.java)
                 logger.info("Received message from topic: ${cr.value()}")
-                runBlocking {
-                    sykmeldingService.saveSykmelding(sykmelding)
-                }
+                sykmeldingService.saveSykmelding(sykmelding)
             }
 
         } catch (e: Throwable) {

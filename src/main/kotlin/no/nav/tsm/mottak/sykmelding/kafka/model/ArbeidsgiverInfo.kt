@@ -1,11 +1,22 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
 import java.time.LocalDate
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 
 enum class ARBEIDSGIVER_TYPE {
     EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE, INGEN_ARBEIDSGIVER,
 }
 
+@JsonSubTypes(
+    Type(EnArbeidsgiver::class, name = "EN_ARBEIDSGIVER"),
+    Type(FlereArbeidsgivere::class, name = "FLERE_ARBEIDSGIVERE"),
+    Type(IngenArbeidsgiver::class, name = "INGEN_ARBEIDSGIVER"),
+)
+@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface ArbeidsgiverInfo{
     val type: ARBEIDSGIVER_TYPE
 }
