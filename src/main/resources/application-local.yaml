@@ -9,14 +9,7 @@ spring:
     locations: classpath:db/migration
   kafka:
     bootstrap-servers: localhost:9092
-    group-id: regulus-maximus
-    topics:
-      mottatt-sykmelding: tsm.mottak-sykmelding
-      sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
     consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      max-poll-records: 1
       auto-offset-reset: none
       enable-auto-commit: true
   sql:
