@@ -1,7 +1,7 @@
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.8.0"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.spring") version "2.0.21"
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
 }
@@ -18,15 +18,15 @@ repositories {
 }
 
 val ktor_version = "2.3.7"
-val kotlin_version = "1.9.22"
-val logback_version = "1.4.14"
-val logback_encoder_version = "7.2"
-val prometheus_version = "1.6.3"
+val kotlin_version = "2.0.21"
+val logback_version = "1.5.9"
+val logback_encoder_version = "8.0"
+val prometheus_version = "1.13.5"
 val exposed_version= "0.41.1"
-val flyway_version= "10.18.2"
-val postgres_version= "42.7.2"
+val flyway_version= "10.19.0"
+val postgres_version= "42.7.4"
 val koin_version= "3.5.3"
-val jackson_version= "2.16.1"
+val jackson_version= "2.18.0"
 val conditional_version = "5.1.2"
 
 dependencies {
@@ -52,7 +52,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
     implementation("org.apache.kafka:kafka-clients:3.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0")
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql")
