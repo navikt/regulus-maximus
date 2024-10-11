@@ -11,6 +11,10 @@ version = "0.0.2"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+    }
 }
 
 val ktor_version = "2.3.7"
@@ -23,6 +27,7 @@ val flyway_version= "10.18.2"
 val postgres_version= "42.7.2"
 val koin_version= "3.5.3"
 val jackson_version= "2.16.1"
+val conditional_version = "5.1.2"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -58,6 +63,8 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("no.nav.boot:boot-conditionals:$conditional_version")
+
 }
 
 tasks {
