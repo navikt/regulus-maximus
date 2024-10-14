@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.db
 import io.r2dbc.postgresql.codec.Json
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.PersonId
 import org.springframework.data.relational.core.mapping.Table
 
@@ -16,5 +17,6 @@ data class SykmeldingBehandlingsutfall (
     val generatedDate: OffsetDateTime?,
     val sykmelding: Json,
     val metadata: Json,
-    val validation: Json
+    val validation: Json,
+    val meldingsinformasjon: Meldingsinformasjon
 )

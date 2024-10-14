@@ -21,6 +21,7 @@ class SykmeldingMapper {
             sykmelding = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding)),
             metadata = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding.metadata)),
             validation = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.validation)),
+            meldingsinformasjon = sykmeldingMedBehandlingsutfall.meldingsInformasjon
         )
     }
 }

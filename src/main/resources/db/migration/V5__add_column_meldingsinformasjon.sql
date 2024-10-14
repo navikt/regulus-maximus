@@ -1,0 +1,1 @@
+ALTER TABLE sykmelding_behandlingsutfall ADD COLUMN meldingsinformasjon VARCHAR NOT NULL;
