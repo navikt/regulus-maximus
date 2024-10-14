@@ -1,18 +1,17 @@
 spring:
-  r2dbc:
-    url: "r2dbc:postgresql://${DB_HOST}/my_database"
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
   flyway:
     enabled: true
     locations: classpath:db/migration
-  datasource:
-    url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?reWriteBatchedInserts=true"
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    hikari:
-      minimum-idle: 1
-      maximum-pool-size: 5
+  user: ${spring.r2dbc.username}
+  password: ${spring.r2dbc.password}
+  baseline-on-migrate: true
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+    application:
+      name: regulus-maximus
   kafka:
     bootstrap-servers: localhost:9092
     group-id: regulus-maximus
@@ -23,3 +22,8 @@ spring:
       max-poll-records: 1
       auto-offset-reset: none
       enable-auto-commit: false
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

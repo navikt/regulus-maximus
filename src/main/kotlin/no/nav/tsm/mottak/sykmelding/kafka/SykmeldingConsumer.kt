@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import kotlinx.coroutines.runBlocking
-import no.nav.tsm.mottak.config.KafkaConfigProperties
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
@@ -18,21 +16,18 @@ import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingConsumer(
-    private val kafkaConfigProperties: KafkaConfigProperties,
     //private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
     private val sykmeldingService: SykmeldingService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}")
-    fun consume(cr: ConsumerRecord<String, String>?) {
+    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}", containerFactory = "containerFactory")
+    suspend fun consume(cr: ConsumerRecord<String, String>?) {
         try {
             if (cr != null) {
                 val sykmelding = objectMapper.readValue(cr.value(), SykmeldingMedBehandlingsutfall::class.java)
                 logger.info("Received message from topic: ${cr.value()}")
-                runBlocking {
-                    sykmeldingService.saveSykmelding(sykmelding)
-                }
+                sykmeldingService.saveSykmelding(sykmelding)
             }
 
         } catch (e: Throwable) {
