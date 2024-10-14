@@ -1,6 +1,11 @@
 package no.nav.tsm.mottak.controllers.model
 
 import no.nav.tsm.mottak.sykmelding.kafka.model.*
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.OrgId
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.OrgIdType
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Organisasjon
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.OrganisasjonsType
+import no.nav.tsm.sykmelding.metadata.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -16,11 +21,14 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
             mottattDato = OffsetDateTime.now(),
             behandletTidspunkt = OffsetDateTime.now(),
         ),
-        pasient = Person(ident = "", navn = null),
+        pasient = Pasient(
+            listOf(PersonId("12345678901", type = PersonIdType.FNR)), null, null, null, null, null, listOf(Kontaktinfo(type = KontaktinfoType.TLF, value = "333333"))),
         behandler = Behandler(
-            person = Person(ident = "", navn = null),
-            adresse = Adresse(null, null, null, null, null),
-            kontaktInfo = emptyList()
+
+            kontaktInfo = listOf(Kontaktinfo(KontaktinfoType.TLF, "3335455")),
+            adresse = Adresse(AdresseType.FOLKEREGISTERADRESSE, null, null, null, null, null, null),
+            navn = Navn(fornavn= "AA", etternavn = "BB", mellomnavn = null),
+            ids = listOf(PersonId("1344556565", PersonIdType.FNR))
         ),
         arbeidsgiver = EnArbeidsgiver(null, null),
         medisinskVurdering = MedisinskVurdering(hovedDiagnose = null, biDiagnoser = null, svangerskap = false, yrkesskade = false, yrkesskadeDato = null, skjermetForPasient = false, syketilfelletStartDato = null, annenFraversArsak = null),
@@ -30,14 +38,17 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
         tilbakedatering = null,
         aktivitet = listOf(AktivitetIkkeMulig(medisinskArsak = MedisinskArsak(null, MedisinskArsakType.ANNET), null, fom = 1.januar(2023), tom = 31.januar(2023))),
         utdypendeOpplysninger = emptyMap(),
-        generatedDate = OffsetDateTime.now()
+        generatedDate = OffsetDateTime.now(),
+        signerendeBehandler = SignerendeBehandler(ids = listOf(PersonId(id = "12345678901", type= PersonIdType.FNR)), helsepersonellKategori = HelsepersonellKategori.LEGE)
         ),
     validation = ValidationResult(
         status = RuleType.OK,
         timestamp = OffsetDateTime.now(),
         rules = emptyList()
     ),
-    kilde = SykmeldingKilde.PAPIR
+    meldingsInformasjon =  Utenlandsk(msgInfo=MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
+        OrgId(id = "1", type = OrgIdType.ENH)
+    ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmelding(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
+    )
 )
-
 internal fun Int.januar(year: Int) = LocalDate.of(year, 1, this)

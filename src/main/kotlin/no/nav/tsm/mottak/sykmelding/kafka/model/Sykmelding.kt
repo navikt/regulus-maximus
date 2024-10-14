@@ -1,23 +1,25 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
+import no.nav.tsm.sykmelding.metadata.*
+import no.nav.tsm.sykmelding.metadata.Navn
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Organisasjon as Organisasjon
 
 data class SykmeldingMedBehandlingsutfall(
     val sykmelding: Sykmelding,
     val validation: ValidationResult,
-    val kilde: SykmeldingKilde,
+    val meldingsInformasjon: Meldingsinformasjon,
 )
-enum class SykmeldingKilde {
-    ELEKTRONISK, PAPIR, UTENLANDSK_PAPIR, UTENLANDS_NAV_NO, UTENLANDS_RINA
-}
+
 data class Sykmelding(
     val id: String,
     val metadata: SykmeldingMetadata,
     val generatedDate: OffsetDateTime,
-    val pasient: Person,
+    val pasient: Pasient,
     val behandler: Behandler,
     val arbeidsgiver: ArbeidsgiverInfo,
+    val signerendeBehandler: SignerendeBehandler,
     val medisinskVurdering: MedisinskVurdering,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
@@ -36,31 +38,16 @@ data class SykmeldingMetadata(
     val behandletTidspunkt: OffsetDateTime,
 )
 
-data class Navn(
-    val fornavn: String, val etternavn: String
-)
-
-data class Person(
-    val ident: String, val navn: Navn?
-)
-
-
-data class Adresse(
-    val gateAdresse: String?,
-    val postnummer: String?,
-    val land: String?,
-    val kommune: String?,
-    val postbox: String?,
-)
-
-data class Kontaktinfo( // TODO: sjekk hva det kan være
-    val type: String, val verdi: String
-)
-
 data class Behandler(
-    val person: Person,
-    val adresse: Adresse,
+    val navn: Navn,
+    val ids: List<PersonId>,
+    val adresse: Adresse?,
     val kontaktInfo: List<Kontaktinfo>
+)
+
+data class SignerendeBehandler(
+    val ids: List<PersonId>,
+    val helsepersonellKategori: HelsepersonellKategori,
 )
 
 data class BistandNav(
@@ -84,6 +71,7 @@ data class Tilbakedatering(
     val begrunnelse: String?,
 )
 data class AvsenderSystem(val navn: String, val versjon: String)
+
 
 
 

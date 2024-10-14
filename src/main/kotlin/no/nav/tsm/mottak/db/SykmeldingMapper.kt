@@ -14,13 +14,12 @@ class SykmeldingMapper {
     ): SykmeldingBehandlingsutfall {
         return SykmeldingBehandlingsutfall(
             sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id,
-            pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.ident,
+            pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.ids,
             fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
             tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
             generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.generatedDate,
             sykmelding = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding)),
             metadata = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding.metadata)),
-            kilde = sykmeldingMedBehandlingsutfall.kilde.name,
             validation = Json.of(objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.validation)),
         )
     }

@@ -1,0 +1,1 @@
+ALTER TABLE sykmelding_behandlingsutfall DROP COLUMN kilde;
