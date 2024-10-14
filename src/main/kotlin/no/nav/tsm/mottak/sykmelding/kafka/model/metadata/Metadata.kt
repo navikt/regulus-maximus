@@ -21,7 +21,6 @@ enum class MetadataType {
     Type(EDIEmottak::class, name = "EDI_EMOTTAK"),
 )
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
-
 sealed interface Meldingsinformasjon {
     val msgInfo: MeldingMetadata
     val sender: Organisasjon
@@ -43,10 +42,12 @@ data class Utenlandsk(
     override val msgInfo: MeldingMetadata,
     override val sender: Organisasjon,
     override val receiver: Organisasjon,
-    override val vedlegg: List<String>? = null,
-    override val type: MetadataType = MetadataType.UTENLANDSK_SYKMELDING,
     val utenlandskSykmelding: UtenlandskSykmelding
 ) : Meldingsinformasjon
+{
+    override val vedlegg = null
+    override val type: MetadataType = MetadataType.UTENLANDSK_SYKMELDING
+}
 
 
 data class UtenlandskSykmelding(

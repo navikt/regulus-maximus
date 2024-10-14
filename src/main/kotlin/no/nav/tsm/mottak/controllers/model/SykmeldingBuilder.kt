@@ -2,7 +2,6 @@ package no.nav.tsm.mottak.controllers.model
 
 import no.nav.tsm.mottak.sykmelding.kafka.model.*
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
-import no.nav.tsm.sykmelding.metadata.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -45,7 +44,7 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
     ),
     meldingsInformasjon =  Utenlandsk(msgInfo= MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
         OrgId(id = "1", type = OrgIdType.ENH)
-    ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), vedlegg = null, utenlandskSykmelding = UtenlandskSykmelding(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
+    ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmelding(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
     )
 )
 internal fun Int.januar(year: Int) = LocalDate.of(year, 1, this)
