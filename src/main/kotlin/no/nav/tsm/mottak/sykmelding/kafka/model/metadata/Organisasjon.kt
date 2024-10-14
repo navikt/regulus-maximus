@@ -1,8 +1,6 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
 
-import no.nav.tsm.sykmelding.metadata.Adresse
-import no.nav.tsm.sykmelding.metadata.Helsepersonell
-import no.nav.tsm.sykmelding.metadata.Kontaktinfo
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Helsepersonell
 
 enum class OrgIdType {
     ENH,

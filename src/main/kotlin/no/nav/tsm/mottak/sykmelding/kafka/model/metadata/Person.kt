@@ -1,5 +1,7 @@
-package no.nav.tsm.sykmelding.metadata
+package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
 
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Adresse
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Kontaktinfo
 import java.time.LocalDate
 
 enum class PersonIdType {
@@ -66,12 +68,12 @@ enum class HelsepersonellKategori {
     companion object {
         fun parse(v: String?): HelsepersonellKategori {
             return when(v) {
-                "HE" ->	HELSESEKRETAR
-                "KI" ->	KIROPRAKTOR
-                "LE" ->	LEGE
-                "MT" ->	MANUELLTERAPEUT
-                "TL" ->	TANNLEGE
-                "XX" ->  USPESIFISERT
+                "HE" -> HELSESEKRETAR
+                "KI" -> KIROPRAKTOR
+                "LE" -> LEGE
+                "MT" -> MANUELLTERAPEUT
+                "TL" -> TANNLEGE
+                "XX" -> USPESIFISERT
                 null -> IKKE_OPPGITT
                 else -> throw IllegalArgumentException("Ukjent helsepersonellkategori: $v")
             }

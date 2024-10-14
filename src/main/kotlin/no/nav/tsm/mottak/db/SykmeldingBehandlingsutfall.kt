@@ -1,6 +1,6 @@
 package no.nav.tsm.mottak.db
 import io.r2dbc.postgresql.codec.Json
-import no.nav.tsm.sykmelding.metadata.PersonId
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.PersonId
 import org.springframework.data.relational.core.mapping.Table
 
 

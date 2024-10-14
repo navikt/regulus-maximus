@@ -1,10 +1,8 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
-import no.nav.tsm.sykmelding.metadata.*
-import no.nav.tsm.sykmelding.metadata.Navn
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Organisasjon as Organisasjon
 
 data class SykmeldingMedBehandlingsutfall(
     val sykmelding: Sykmelding,

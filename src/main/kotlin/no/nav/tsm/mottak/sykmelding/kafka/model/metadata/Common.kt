@@ -1,4 +1,4 @@
-package no.nav.tsm.sykmelding.metadata
+package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
 
 enum class AdresseType {
     BOSTEDSADRESSE,

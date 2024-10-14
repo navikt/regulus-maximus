@@ -1,6 +1,10 @@
-package no.nav.tsm.sykmelding.metadata
+package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Organisasjon
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.time.OffsetDateTime
 
 enum class MetadataType {
@@ -9,6 +13,14 @@ enum class MetadataType {
     UTENLANDSK_SYKMELDING,
     PAPIRSYKMELDING_SYKMELDING,
 }
+
+@JsonSubTypes(
+    Type(Papirsykmelding::class, name = "PAPIRSYKMELDING"),
+    Type(Utenlandsk::class, name = "UTENLANDSK_SYKMELDING"),
+    Type(EmottakEnkel::class, name = "EMOTTAK_ENKEL"),
+    Type(EDIEmottak::class, name = "EDI_EMOTTAK"),
+)
+@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 
 sealed interface Meldingsinformasjon {
     val msgInfo: MeldingMetadata
@@ -27,20 +39,21 @@ data class Papirsykmelding(
     override val type = MetadataType.PAPIRSYKMELDING_SYKMELDING
 }
 
+data class Utenlandsk(
+    override val msgInfo: MeldingMetadata,
+    override val sender: Organisasjon,
+    override val receiver: Organisasjon,
+    override val vedlegg: List<String>? = null,
+    override val type: MetadataType = MetadataType.UTENLANDSK_SYKMELDING,
+    val utenlandskSykmelding: UtenlandskSykmelding
+) : Meldingsinformasjon
+
+
 data class UtenlandskSykmelding(
     val land: String,
     val folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean,
     val erAdresseUtland: Boolean?,
 )
-data class Utenlandsk(
-    override val msgInfo: MeldingMetadata,
-    override val sender: Organisasjon,
-    override val receiver: Organisasjon,
-    val utenlandskSykmelding: UtenlandskSykmelding
-) : Meldingsinformasjon {
-    override val vedlegg = null
-    override val type: MetadataType = MetadataType.UTENLANDSK_SYKMELDING
-}
 
 data class EmottakEnkel(
     override val msgInfo: MeldingMetadata,
