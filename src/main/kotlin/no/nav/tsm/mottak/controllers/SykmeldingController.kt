@@ -3,7 +3,7 @@ package no.nav.tsm.mottak.controllers
 import no.nav.tsm.mottak.service.SykmeldingService
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import no.nav.tsm.mottak.controllers.model.sykmeldingMedBehandlingsutfall
+import no.nav.tsm.mottak.controllers.model.createNewSykmelding
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -114,9 +114,9 @@ class SykmeldingController(
 
     @PostMapping("/htmx/post-sykmelding")
     suspend fun postSykmelding(): String {
+        val sykmeldingMedBehandlingsutfall = createNewSykmelding()
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
-
 
         kafkaTemplate.send(topic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
         return """

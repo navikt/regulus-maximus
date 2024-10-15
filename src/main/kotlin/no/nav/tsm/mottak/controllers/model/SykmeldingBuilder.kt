@@ -6,8 +6,9 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 
-val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
-    sykmelding = Sykmelding(
+fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
+{
+    return SykmeldingMedBehandlingsutfall(Sykmelding(
         id = UUID.randomUUID().toString(),
         metadata = SykmeldingMetadata(
             msgId = null,
@@ -36,7 +37,7 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
         utdypendeOpplysninger = emptyMap(),
         generatedDate = OffsetDateTime.now(),
         signerendeBehandler = SignerendeBehandler(ids = listOf(PersonId(id = "12345678901", type= PersonIdType.FNR)), helsepersonellKategori = HelsepersonellKategori.LEGE)
-        ),
+    ),
     validation = ValidationResult(
         status = RuleType.OK,
         timestamp = OffsetDateTime.now(),
@@ -46,5 +47,7 @@ val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
         OrgId(id = "1", type = OrgIdType.ENH)
     ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmelding(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
     )
-)
+    )
+}
+
 internal fun Int.januar(year: Int) = LocalDate.of(year, 1, this)
