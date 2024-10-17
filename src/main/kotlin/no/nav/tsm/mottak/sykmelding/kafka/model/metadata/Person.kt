@@ -15,13 +15,38 @@ enum class PersonIdType {
     DKF,
     SSN,
     FPN,
-    XXX
+    XXX,
+    DUF,
+    IKKE_OPPGITT,
+    UGYLDIG;
+
+    companion object {
+        fun parse(type: String?): PersonIdType {
+            return when (type) {
+                "FNR" -> FNR
+                "DNR" -> DNR
+                "HNR" -> HNR
+                "HPR" -> HPR
+                "HER" -> HER
+                "PNR" -> PNR
+                "SEF" -> SEF
+                "DKF" -> DKF
+                "SSN" -> SSN
+                "FPN" -> FPN
+                "DUF" -> DUF
+                "XXX" -> XXX
+                "" -> UGYLDIG
+                null -> return IKKE_OPPGITT
+                else -> throw IllegalArgumentException("PersonIdType $type not supported")
+            }
+        } }
 }
 enum class Kjonn {
     MANN,
     KVINNE,
     USPESIFISERT,
-    IKKE_OPPGITT;
+    IKKE_OPPGITT,
+    UGYLDIG;
 
     companion object {
         fun parse(v: String?) : Kjonn {
@@ -29,11 +54,17 @@ enum class Kjonn {
                 "1" -> MANN
                 "2" -> KVINNE
                 "9" -> USPESIFISERT
+                "K" -> UGYLDIG
+                "M" -> UGYLDIG
+                "0" -> UGYLDIG
+                "U" -> UGYLDIG
                 null -> IKKE_OPPGITT
                 else -> throw IllegalArgumentException("Ukjent kjønn: $v")
             }
         }
+
     }
+
 }
 
 data class Navn(
@@ -62,6 +93,15 @@ enum class HelsepersonellKategori {
     LEGE,
     MANUELLTERAPEUT,
     TANNLEGE,
+    FYSIOTERAPEUT,
+    SYKEPLEIER,
+    HJELPEPLEIER,
+    HELSEFAGARBEIDER,
+    UGYLDIG,
+    JORDMOR,
+    AUDIOGRAF,
+    NAPRAPAT,
+    AMBULANSEARBEIDER,
     USPESIFISERT,
     IKKE_OPPGITT;
 
@@ -73,7 +113,16 @@ enum class HelsepersonellKategori {
                 "LE" -> LEGE
                 "MT" -> MANUELLTERAPEUT
                 "TL" -> TANNLEGE
+                "FT" -> FYSIOTERAPEUT
+                "SP" -> SYKEPLEIER
+                "HP" -> HJELPEPLEIER
+                "HF" -> HELSEFAGARBEIDER
+                "JO" -> JORDMOR
+                "AU" -> AUDIOGRAF
+                "NP" -> NAPRAPAT
+                "AA" -> AMBULANSEARBEIDER
                 "XX" -> USPESIFISERT
+                "token" -> UGYLDIG
                 null -> IKKE_OPPGITT
                 else -> throw IllegalArgumentException("Ukjent helsepersonellkategori: $v")
             }

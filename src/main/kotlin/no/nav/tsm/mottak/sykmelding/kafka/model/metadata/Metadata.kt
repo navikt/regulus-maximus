@@ -9,15 +9,15 @@ import java.time.OffsetDateTime
 
 enum class MetadataType {
     EMOTTAK,
-    EMOTTAK_ENKEL,
+    ENKEL,
     UTENLANDSK_SYKMELDING,
-    PAPIRSYKMELDING_SYKMELDING,
+    PAPIRSYKMELDING,
 }
 
 @JsonSubTypes(
     Type(Papirsykmelding::class, name = "PAPIRSYKMELDING"),
     Type(Utenlandsk::class, name = "UTENLANDSK_SYKMELDING"),
-    Type(EmottakEnkel::class, name = "EMOTTAK_ENKEL"),
+    Type(EmottakEnkel::class, name = "ENKEL"),
     Type(EDIEmottak::class, name = "EDI_EMOTTAK"),
 )
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
@@ -35,7 +35,7 @@ data class Papirsykmelding(
     override val receiver: Organisasjon
 ) : Meldingsinformasjon {
     override val vedlegg = null
-    override val type = MetadataType.PAPIRSYKMELDING_SYKMELDING
+    override val type = MetadataType.PAPIRSYKMELDING
 }
 
 data class Utenlandsk(
@@ -62,7 +62,7 @@ data class EmottakEnkel(
     override val receiver: Organisasjon,
     override val vedlegg: List<String>?,
 ) : Meldingsinformasjon {
-    override val type = MetadataType.EMOTTAK_ENKEL
+    override val type = MetadataType.ENKEL
 }
 
 data class EDIEmottak(
@@ -111,4 +111,27 @@ data class MottakenhetBlokk(
     val ebRole: String,
     val ebService: String,
     val ebAction: String,
+)
+
+enum class AckType {
+    JA,
+    NEI,
+    KUN_VED_FEIL,
+    IKKE_OPPGITT,
+    UGYLDIG;
+    companion object {
+        fun parse(value: String?): AckType {
+            return when (value) {
+                null -> IKKE_OPPGITT
+                "J" -> JA
+                "N" -> NEI
+                "F" -> KUN_VED_FEIL
+                "" -> UGYLDIG
+                else -> throw IllegalArgumentException("Unrecognized ack type: $value")
+            }
+        }
+    }
+}
+data class Ack(
+    val ackType: AckType,
 )

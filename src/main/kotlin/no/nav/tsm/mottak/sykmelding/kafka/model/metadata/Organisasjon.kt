@@ -1,24 +1,45 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Helsepersonell
-
 enum class OrgIdType {
-    ENH,
-    RSH,
-    HER,
-    NPR,
-    SYS,
-    APO,
     AKO,
-    LIN,
+    APO,
+    AVD,
+    ENH,
+    HER,
     LAV,
-    LOK;
+    LIN,
+    LOK,
+    NPR,
+    RSH,
+    SYS,
+    UGYLDIG;
+
+    companion object {
+        fun parse(type: String): OrgIdType {
+            return when(type) {
+                "AKO" -> AKO
+                "APO" -> APO
+                "AVD" -> AVD
+                "ENH" -> ENH
+                "HER" -> HER
+                "LAV" -> LAV
+                "LIN" -> LIN
+                "LOK" -> LOK
+                "NPR" -> NPR
+                "RSH" -> RSH
+                "SYS" -> SYS
+                "her" -> UGYLDIG
+                else -> throw IllegalArgumentException("Unknown OrgIdType: $type")
+            }
+        }
+    }
 }
 
 enum class OrganisasjonsType {
     PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER,
     TANNLEGE_TANNHELSE,
-    IKKE_OPPGITT;
+    IKKE_OPPGITT,
+    UGYLDIG;
 
     companion object {
         fun parse(v: String?): OrganisasjonsType {
@@ -26,6 +47,8 @@ enum class OrganisasjonsType {
                 "4" -> PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER
                 "110" -> TANNLEGE_TANNHELSE
                 null -> IKKE_OPPGITT
+                "NXU:IT" -> UGYLDIG
+                "NXU:IT," -> UGYLDIG
                 else -> throw IllegalArgumentException("Ukjent organisasjonstype: $v")
             }
         }
@@ -54,3 +77,4 @@ data class UnderOrganisasjon(
     val kontaktinfo: List<Kontaktinfo>,
     val ids: List<OrgId>,
 )
+

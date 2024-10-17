@@ -10,7 +10,8 @@ enum class AdresseType {
     MIDLERTIDIG_ADRESSE,
     ARBEIDSADRESSE,
     UBRUKELIG_ADRESSE,
-    UKJENT;
+    UKJENT,
+    UGYLDIG;
 
     companion object {
         fun parse(v: String): AdresseType {
@@ -24,6 +25,10 @@ enum class AdresseType {
                 "RES" -> BESOKSADRESSE
                 "TMP" -> MIDLERTIDIG_ADRESSE
                 "WP" -> ARBEIDSADRESSE
+                "2" -> UGYLDIG
+                "token" -> UGYLDIG
+                "OTHER" -> UGYLDIG
+                null -> UKJENT
                 else -> throw IllegalArgumentException("Ukjent adressestype: $v")
             }
         }
@@ -56,7 +61,9 @@ enum class KontaktinfoType {
     ARBEIDSPLASS_SENTRALBORD,
     ARBEIDSPLASS_DIREKTENUMMER,
     ARBEIDSPLASS,
-    TLF;
+    TLF,
+    IKKE_OPPGITT,
+    UGYLDIG;
 
     companion object {
         fun parse(v: String): KontaktinfoType {
@@ -72,6 +79,11 @@ enum class KontaktinfoType {
                 "WC" -> ARBEIDSPLASS_SENTRALBORD
                 "WD" -> ARBEIDSPLASS_DIREKTENUMMER
                 "WP" -> ARBEIDSPLASS
+                null -> IKKE_OPPGITT
+                "Tel" -> UGYLDIG
+                "vTelecomToken1" -> UGYLDIG
+                "vTelecomToken2" -> UGYLDIG
+                "NONE" -> UGYLDIG
                 else -> throw IllegalArgumentException("Ukjent kontaktinfotype: $v")
             }
         }
