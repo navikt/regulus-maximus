@@ -1,31 +1,58 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.UtenlandskSykmeldingInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
 data class SykmeldingMedBehandlingsutfall(
     val sykmelding: Sykmelding,
     val validation: ValidationResult,
-    val kilde: SykmeldingKilde,
+    val meldingsInformasjon: Meldingsinformasjon,
 )
-enum class SykmeldingKilde {
-    ELEKTRONISK, PAPIR, UTENLANDSK_PAPIR, UTENLANDS_NAV_NO, UTENLANDS_RINA
+
+enum class SykmeldingType {
+    SYKMELDING,
+    UTENLANDSK_SYKMELDING
 }
+
+sealed interface ISykmelding {
+    val type: SykmeldingType
+    val id: String
+    val metadata: SykmeldingMetadata
+    val pasient: Pasient
+    val medisinskVurdering: MedisinskVurdering
+    val aktivitet: List<Aktivitet>
+}
+data class UtenlandskSykmelding(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    val utenlandskInfo: UtenlandskSykmeldingInfo
+) : ISykmelding {
+    override val type = SykmeldingType.UTENLANDSK_SYKMELDING
+}
+
 data class Sykmelding(
-    val id: String,
-    val metadata: SykmeldingMetadata,
-    val generatedDate: OffsetDateTime,
-    val pasient: Person,
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
     val behandler: Behandler,
     val arbeidsgiver: ArbeidsgiverInfo,
-    val medisinskVurdering: MedisinskVurdering,
+    val signerendeBehandler: SignerendeBehandler,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
     val bistandNav: BistandNav?,
     val tilbakedatering: Tilbakedatering?,
-    val aktivitet: List<Aktivitet>,
+    val generatedDate: OffsetDateTime,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-)
+) : ISykmelding {
+    override val type = SykmeldingType.SYKMELDING
+}
 
 data class SykmeldingMetadata(
     val msgId: String?,
@@ -36,31 +63,16 @@ data class SykmeldingMetadata(
     val behandletTidspunkt: OffsetDateTime,
 )
 
-data class Navn(
-    val fornavn: String, val etternavn: String
-)
-
-data class Person(
-    val ident: String, val navn: Navn?
-)
-
-
-data class Adresse(
-    val gateAdresse: String?,
-    val postnummer: String?,
-    val land: String?,
-    val kommune: String?,
-    val postbox: String?,
-)
-
-data class Kontaktinfo( // TODO: sjekk hva det kan være
-    val type: String, val verdi: String
-)
-
 data class Behandler(
-    val person: Person,
-    val adresse: Adresse,
+    val navn: Navn,
+    val ids: List<PersonId>,
+    val adresse: Adresse?,
     val kontaktInfo: List<Kontaktinfo>
+)
+
+data class SignerendeBehandler(
+    val ids: List<PersonId>,
+    val helsepersonellKategori: HelsepersonellKategori,
 )
 
 data class BistandNav(
@@ -84,6 +96,7 @@ data class Tilbakedatering(
     val begrunnelse: String?,
 )
 data class AvsenderSystem(val navn: String, val versjon: String)
+
 
 
 

@@ -9,12 +9,12 @@ import java.time.OffsetDateTime
 @Table("sykmelding_behandlingsutfall")
 data class SykmeldingBehandlingsutfall (
     val sykmeldingId: String,
-    val pasientIdent: String,
+    val pasientIdent: Json,
     val fom: LocalDate,
     val tom: LocalDate,
     val generatedDate: OffsetDateTime?,
     val sykmelding: Json,
     val metadata: Json,
-    val kilde: String,
-    val validation: Json
+    val validation: Json,
+    val meldingsinformasjon: Json
 )

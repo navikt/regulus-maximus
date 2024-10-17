@@ -18,6 +18,7 @@ spring:
     topics:
       mottatt-sykmelding: tsm.mottak-sykmelding
       sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
+      tsm-sykmelding: tsm.sykmelding
     consumer:
       max-poll-records: 1
       auto-offset-reset: none

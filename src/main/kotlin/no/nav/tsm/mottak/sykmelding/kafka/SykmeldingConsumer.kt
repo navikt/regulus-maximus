@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
+import no.nav.tsm.mottak.tsm.sykmelding.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingConsumer(
-    //private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
+    private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
     private val sykmeldingService: SykmeldingService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
@@ -28,6 +29,8 @@ class SykmeldingConsumer(
                 logger.info("Received message from topic: ${cr.value()}")
                 val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
                 sykmeldingService.saveSykmelding(sykmelding)
+
+                sendToTsmSykmelding(sykmelding)
             }
 
         } catch (e: Throwable) {
@@ -35,13 +38,18 @@ class SykmeldingConsumer(
             throw e
         }
 
-        // her skal videre funksjonalitet ligge
-        /* try {
-             kafkaTemplate.send("tsm.sykmelding", SykmeldingMedUtfall(sykmeldingInput = sykmelding.sykmeldingInput, utfall = sykmelding.utfall))
-         } catch (ex: Exception) {
-             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
-         }*/
 
+    }
+
+    private fun sendToTsmSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
+        try {
+            kafkaTemplate.send(
+                "\${spring.kafka.topics.tsm.sykmelding}",
+                SykmeldingMedUtfall(sykmelding = sykmelding.sykmelding)
+            )
+        } catch (ex: Exception) {
+            logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
+        }
     }
 }
 
