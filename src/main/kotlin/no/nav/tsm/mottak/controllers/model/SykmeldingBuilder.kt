@@ -45,7 +45,7 @@ fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
     ),
     meldingsInformasjon =  Utenlandsk(msgInfo= MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
         OrgId(id = "1", type = OrgIdType.ENH)
-    ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmelding(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
+    ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmeldingInfo(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
     )
     )
 }

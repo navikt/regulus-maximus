@@ -1,6 +1,7 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.UtenlandskSykmeldingInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -10,22 +11,48 @@ data class SykmeldingMedBehandlingsutfall(
     val meldingsInformasjon: Meldingsinformasjon,
 )
 
+enum class SykmeldingType {
+    SYKMELDING,
+    UTENLANDSK_SYKMELDING
+}
+
+sealed interface ISykmelding {
+    val type: SykmeldingType
+    val id: String
+    val metadata: SykmeldingMetadata
+    val pasient: Pasient
+    val medisinskVurdering: MedisinskVurdering
+    val aktivitet: List<Aktivitet>
+}
+data class UtenlandskSykmelding(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    val utenlandskInfo: UtenlandskSykmeldingInfo
+) : ISykmelding {
+    override val type = SykmeldingType.UTENLANDSK_SYKMELDING
+}
+
 data class Sykmelding(
-    val id: String,
-    val metadata: SykmeldingMetadata,
-    val generatedDate: OffsetDateTime,
-    val pasient: Pasient,
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
     val behandler: Behandler,
     val arbeidsgiver: ArbeidsgiverInfo,
     val signerendeBehandler: SignerendeBehandler,
-    val medisinskVurdering: MedisinskVurdering,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
     val bistandNav: BistandNav?,
     val tilbakedatering: Tilbakedatering?,
-    val aktivitet: List<Aktivitet>,
+    val generatedDate: OffsetDateTime,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-)
+) : ISykmelding {
+    override val type = SykmeldingType.SYKMELDING
+}
 
 data class SykmeldingMetadata(
     val msgId: String?,

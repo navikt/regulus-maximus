@@ -42,7 +42,7 @@ data class Utenlandsk(
     override val msgInfo: MeldingMetadata,
     override val sender: Organisasjon,
     override val receiver: Organisasjon,
-    val utenlandskSykmelding: UtenlandskSykmelding
+    val utenlandskSykmelding: UtenlandskSykmeldingInfo
 ) : Meldingsinformasjon
 {
     override val vedlegg = null
@@ -50,7 +50,7 @@ data class Utenlandsk(
 }
 
 
-data class UtenlandskSykmelding(
+data class UtenlandskSykmeldingInfo(
     val land: String,
     val folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean,
     val erAdresseUtland: Boolean?,
