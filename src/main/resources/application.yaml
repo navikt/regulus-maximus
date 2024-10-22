@@ -35,6 +35,8 @@ spring:
           json:
             trusted:
               packages: "*"
+        fetch.max.bytes: 1048576
+        max.partition.fetch.bytes: 1048576
       max-poll-records: 1
       auto-offset-reset: earliest
       enable-auto-commit: true
