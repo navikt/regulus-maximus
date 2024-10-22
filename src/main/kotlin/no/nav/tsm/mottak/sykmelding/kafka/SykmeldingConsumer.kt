@@ -11,6 +11,7 @@ import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
 import no.nav.tsm.mottak.tsm.sykmelding.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -19,32 +20,28 @@ import org.springframework.stereotype.Service
 class SykmeldingConsumer(
     private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
     private val sykmeldingService: SykmeldingService,
+    @Value("\${spring.kafka.topics.sykmeldinger-output}") private val sykmeldingOutputTopic: String
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}", containerFactory = "containerFactory")
-    suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>?) {
+    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus")
+    suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
         try {
-            if (cr != null) {
-                logger.info("Received message from topic: ${cr.value()}")
-                val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
-                sykmeldingService.saveSykmelding(sykmelding)
-
-                sendToTsmSykmelding(sykmelding)
-            }
+            val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
+            sykmeldingService.saveSykmelding(sykmelding)
+            sendToTsmSykmelding(sykmelding)
 
         } catch (e: Throwable) {
             logger.error("Kunne ikke lese melding fra topic ", e)
             throw e
         }
-
-
     }
 
     private fun sendToTsmSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
         try {
             kafkaTemplate.send(
-                "\${spring.kafka.topics.tsm.sykmelding}",
+                sykmeldingOutputTopic,
+                sykmelding.sykmelding.id,
                 SykmeldingMedUtfall(sykmelding = sykmelding.sykmelding)
             )
         } catch (ex: Exception) {

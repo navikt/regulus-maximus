@@ -6,7 +6,6 @@ import org.springframework.boot.runApplication
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
-import no.nav.boot.conditionals.Cluster.Companion.profiler
 import org.springframework.kafka.annotation.EnableKafka
 
 @SpringBootApplication
@@ -18,7 +17,5 @@ import org.springframework.kafka.annotation.EnableKafka
 class Application
 
 fun main(args: Array<String>) {
-    runApplication<Application>(*args) {
-        setAdditionalProfiles(*profiler())
-    }
+    runApplication<Application>(*args) {}
 }

@@ -18,7 +18,7 @@ class SykmeldingController(
     private val sykmeldingService: SykmeldingService,
 ) {
 
-    private val topic = "tsm.mottak-sykmelding"
+    private val topic = "tsm.sykmeldinger-raw"
     private val logger = LoggerFactory.getLogger(SykmeldingController::class.java)
 
 

@@ -78,13 +78,6 @@ data class EDIEmottak(
 
 enum class Meldingstype {
     SYKMELDING;
-
-    companion object {
-        fun parse(v: String): Meldingstype = when (v) {
-            "SYKMELD" -> SYKMELDING
-            else -> throw IllegalArgumentException("Ukjent meldingstype: $v")
-        }
-    }
 }
 
 
@@ -119,18 +112,6 @@ enum class AckType {
     KUN_VED_FEIL,
     IKKE_OPPGITT,
     UGYLDIG;
-    companion object {
-        fun parse(value: String?): AckType {
-            return when (value) {
-                null -> IKKE_OPPGITT
-                "J" -> JA
-                "N" -> NEI
-                "F" -> KUN_VED_FEIL
-                "" -> UGYLDIG
-                else -> throw IllegalArgumentException("Unrecognized ack type: $value")
-            }
-        }
-    }
 }
 data class Ack(
     val ackType: AckType,

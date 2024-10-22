@@ -15,8 +15,12 @@ class SykmeldingService(
 ) {
 
     @Transactional
-    suspend fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) : SykmeldingBehandlingsutfall {
-        return sykmeldingRepository.save(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
+    suspend fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
+
+        val existingSykmelding = sykmeldingRepository.findById(sykmelding.sykmelding.id)
+        sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
+
+
     }
 
     suspend fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
