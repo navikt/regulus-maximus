@@ -35,7 +35,7 @@ spring:
           json:
             trusted:
               packages: "*"
-      max-poll-records: 100
+      max-poll-records: 1
       auto-offset-reset: earliest
       enable-auto-commit: true
       key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
