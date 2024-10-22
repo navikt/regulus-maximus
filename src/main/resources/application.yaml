@@ -14,7 +14,7 @@ spring:
       name: regulus-maximus
   kafka:
     bootstrap-servers: localhost:9092
-    group-id: regulus-maximus
+    group-id: no.nav.tsm
     topics:
       mottatt-sykmelding: tsm.mottak-sykmelding
       sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
