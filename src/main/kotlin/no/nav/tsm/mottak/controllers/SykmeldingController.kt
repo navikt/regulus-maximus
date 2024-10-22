@@ -6,6 +6,7 @@ import kotlinx.html.stream.createHTML
 import no.nav.tsm.mottak.controllers.model.createNewSykmelding
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
@@ -16,9 +17,9 @@ import kotlin.collections.List
 class SykmeldingController(
     private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
+    @Value("\${spring.kafka.topics.sykmeldinger-input}") private val sykmeldingOutputTopic: String
 ) {
 
-    private val topic = "tsm.sykmeldinger-raw"
     private val logger = LoggerFactory.getLogger(SykmeldingController::class.java)
 
 
@@ -118,7 +119,7 @@ class SykmeldingController(
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
 
-        kafkaTemplate.send(topic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
+        kafkaTemplate.send(sykmeldingOutputTopic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
         return """
             <div>
                 <p>Sykmelding ID: ${sykmeldingId}</p>
