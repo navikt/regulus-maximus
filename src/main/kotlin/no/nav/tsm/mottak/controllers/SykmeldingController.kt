@@ -17,9 +17,10 @@ import kotlin.collections.List
 class SykmeldingController(
     private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
-    @Value("\${spring.kafka.topics.sykmeldinger-input}") private val sykmeldingOutputTopic: String
 ) {
 
+    @Value("\${spring.kafka.topics.sykmeldinger-input}")
+    private lateinit var topic: String
     private val logger = LoggerFactory.getLogger(SykmeldingController::class.java)
 
 
@@ -119,7 +120,7 @@ class SykmeldingController(
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
 
-        kafkaTemplate.send(sykmeldingOutputTopic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
+        kafkaTemplate.send(topic, sykmeldingId, sykmeldingMedBehandlingsutfall).get()
         return """
             <div>
                 <p>Sykmelding ID: ${sykmeldingId}</p>
