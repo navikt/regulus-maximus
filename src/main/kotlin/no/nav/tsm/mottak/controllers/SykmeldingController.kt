@@ -135,15 +135,4 @@ class SykmeldingController(
             </div>
             """.trimIndent()
     }
-
-    @GetMapping("/internal/is_alive")
-    fun isAlive(): ResponseEntity<String> {
-        return ResponseEntity("I am alive", HttpStatus.OK)
-    }
-
-    @GetMapping("/internal/is_ready")
-    fun isReady(): ResponseEntity<String> {
-        return ResponseEntity("I am ready", HttpStatus.OK)
-    }
-
 }
