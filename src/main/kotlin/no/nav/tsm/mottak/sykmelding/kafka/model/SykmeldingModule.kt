@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.tsm.mottak.sykmelding.kafka.model.*
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EDIEmottak
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EmottakEnkel
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon

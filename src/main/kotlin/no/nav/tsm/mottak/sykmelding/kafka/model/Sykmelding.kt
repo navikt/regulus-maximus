@@ -46,8 +46,8 @@ enum class SykmeldingType {
 }
 
 @JsonSubTypes(
-    JsonSubTypes.Type(UtenlandskSykmelding::class, name = "UTENLANDSK_SYKMELDING"),
     JsonSubTypes.Type(Sykmelding::class, name = "SYKMELDING"),
+    JsonSubTypes.Type(UtenlandskSykmelding::class, name = "UTENLANDSK_SYKMELDING"),
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = PROPERTY, property = "type")
 sealed interface ISykmelding {

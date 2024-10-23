@@ -26,11 +26,11 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus")
+    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus", containerFactory = "containerFactory")
     suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
         try {
             if (cr.value() != null) {
-                val sykmelding = cr.value()
+                val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
                 sykmeldingService.saveSykmelding(sykmelding)
                 // sendToTsmSykmelding(sykmelding)
             } else {

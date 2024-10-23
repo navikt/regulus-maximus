@@ -4,7 +4,6 @@ package no.nav.tsm.mottak.controllers.model
 import no.nav.tsm.mottak.sykmelding.kafka.model.*
 import no.nav.tsm.mottak.sykmelding.kafka.model.Pasient
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.OKRule
 import no.nav.tsm.mottak.sykmelding.kafka.model.validation.RuleType
 import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
 import java.time.LocalDate
@@ -15,7 +14,7 @@ fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
 {
     return SykmeldingMedBehandlingsutfall(
         sykmelding = Sykmelding(
-            id = "1",
+            id = UUID.randomUUID().toString(),
             metadata = SykmeldingMetadata(mottattDato = OffsetDateTime.now(), genDate = OffsetDateTime.now(), behandletTidspunkt = OffsetDateTime.now(), regelsettVersjon = null, avsenderSystem = AvsenderSystem(navn = "", versjon =""), strekkode = null),
             pasient = Pasient(navn = null, navKontor = null, navnFastlege = null, fnr = "12345678901", kontaktinfo = emptyList()),
             medisinskVurdering = MedisinskVurdering(hovedDiagnose = null, biDiagnoser = null, svangerskap = true, yrkesskade = null, skjermetForPasient = true, syketilfelletStartDato = null, annenFraversArsak = null),
