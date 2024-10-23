@@ -13,7 +13,11 @@ class SykmeldingMedUtfallSerializer : Serializer<SykmeldingMedBehandlingsutfall>
             registerModule(JavaTimeModule())
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
-    override fun serialize(topic: String, data: SykmeldingMedBehandlingsutfall): ByteArray {
-        return objectMapper.writeValueAsBytes(data)
+
+    override fun serialize(topic: String, data: SykmeldingMedBehandlingsutfall?): ByteArray? {
+        if (data != null) {
+            return objectMapper.writeValueAsBytes(data)
+        }
+        return null
     }
 }

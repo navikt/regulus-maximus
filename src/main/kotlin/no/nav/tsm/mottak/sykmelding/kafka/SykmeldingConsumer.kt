@@ -54,6 +54,7 @@ class SykmeldingConsumer(
             )
         } catch (ex: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
+            throw ex
         }
     }
 
@@ -66,6 +67,7 @@ class SykmeldingConsumer(
             ))
         } catch (ex: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
+            throw ex
         }
     }
 }

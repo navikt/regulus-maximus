@@ -31,7 +31,3 @@ spring:
     topics:
       sykmeldinger-input: tsm.sykmelding-raw
       sykmeldinger-output: tsm.tsm-sykmeldinger
-    consumer:
-      max-poll-records: 1
-      auto-offset-reset: earliest
-      enable-auto-commit: true
