@@ -42,7 +42,7 @@ fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
     validation = ValidationResult(
         status = RuleType.OK,
         timestamp = OffsetDateTime.now(),
-        rules = emptyList()
+        rules = listOf(OKRule(description = "Beskrivelse", timestamp = OffsetDateTime.now(), name = "Test"))
     ),
     metadata =  Utenlandsk(msgInfo= MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
         OrgId(id = "1", type = OrgIdType.ENH)

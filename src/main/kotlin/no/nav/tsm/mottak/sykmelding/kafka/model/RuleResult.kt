@@ -1,5 +1,10 @@
 package no.nav.tsm.mottak.sykmelding.kafka.model
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.time.OffsetDateTime
 
 
@@ -26,6 +31,12 @@ data class RuleOutcome(
     val timestamp: OffsetDateTime
 )
 
+@JsonSubTypes(
+    Type(OKRule::class, name = "OK"),
+    Type(InvalidRule::class, name = "INVALID"),
+    Type(PendingRule::class, name = "PENDING"),
+)
+@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface Rule {
     val type: RuleType
     val name: String
