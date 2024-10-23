@@ -102,29 +102,6 @@ enum class HelsepersonellKategori {
     AMBULANSEARBEIDER,
     IKKE_OPPGITT;
 
-    companion object {
-        fun parse(v: String?): HelsepersonellKategori {
-            return when(v) {
-                "HE" ->	HELSESEKRETAR
-                "KI" ->	KIROPRAKTOR
-                "LE" ->	LEGE
-                "MT" ->	MANUELLTERAPEUT
-                "TL" ->	TANNLEGE
-                "FT" -> FYSIOTERAPEUT
-                "SP" -> SYKEPLEIER
-                "HP" -> HJELPEPLEIER
-                "HF" -> HELSEFAGARBEIDER
-                "JO" -> JORDMOR
-                "AU" -> AUDIOGRAF
-                "NP" -> NAPRAPAT
-                "AA" -> AMBULANSEARBEIDER
-                "XX" ->  USPESIFISERT
-                "token" -> UGYLDIG
-                null -> IKKE_OPPGITT
-                else -> throw IllegalArgumentException("Ukjent helsepersonellkategori: $v")
-            }
-        }
-    }
 }
 
 enum class RolleTilPasient {
@@ -132,16 +109,6 @@ enum class RolleTilPasient {
     FASTLEGE,
     IKKE_OPPGITT;
 
-    companion object {
-        fun parse(v: String?): RolleTilPasient {
-           return when (v) {
-               "4" -> JOURNALANSVARLIG
-               "6" -> FASTLEGE
-               null -> IKKE_OPPGITT
-               else -> throw IllegalArgumentException("Ukjent rolle til pasient: $v")
-           }
-        }
-    }
 }
 
 data class Helsepersonell(
