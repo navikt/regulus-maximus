@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
 import kotlin.collections.List
@@ -136,13 +137,13 @@ class SykmeldingController(
     }
 
     @GetMapping("/internal/is_alive")
-    fun isAlive(): HttpStatusCode {
-        return HttpStatusCode.valueOf(200)
+    fun isAlive(): ResponseEntity<String> {
+        return ResponseEntity("I am alive", HttpStatus.OK)
     }
 
     @GetMapping("/internal/is_ready")
-    fun isReady(): HttpStatusCode {
-        return HttpStatusCode.valueOf(200)
+    fun isReady(): ResponseEntity<String> {
+        return ResponseEntity("I am ready", HttpStatus.OK)
     }
 
 }
