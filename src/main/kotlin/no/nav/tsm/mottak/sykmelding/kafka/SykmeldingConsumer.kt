@@ -4,13 +4,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
-import no.nav.tsm.mottak.tsm.sykmelding.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord

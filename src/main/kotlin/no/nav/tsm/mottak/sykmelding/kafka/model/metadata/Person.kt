@@ -18,27 +18,6 @@ enum class PersonIdType {
     IKKE_OPPGITT,
     UGYLDIG;
 
-    companion object {
-        fun parse(type: String?): PersonIdType {
-            return when (type) {
-                "FNR" -> FNR
-                "DNR" -> DNR
-                "HNR" -> HNR
-                "HPR" -> HPR
-                "HER" -> HER
-                "PNR" -> PNR
-                "SEF" -> SEF
-                "DKF" -> DKF
-                "SSN" -> SSN
-                "FPN" -> FPN
-                "DUF" -> DUF
-                "XXX" -> XXX
-                "" -> UGYLDIG
-                null -> return IKKE_OPPGITT
-                else -> throw IllegalArgumentException("PersonIdType $type not supported")
-            }
-        }
-    }
 }
 enum class Kjonn {
     MANN,
@@ -47,21 +26,6 @@ enum class Kjonn {
     IKKE_OPPGITT,
     UGYLDIG;
 
-    companion object {
-        fun parse(v: String?) : Kjonn {
-            return when (v) {
-                "1" -> MANN
-                "2" -> KVINNE
-                "9" -> USPESIFISERT
-                "K" -> UGYLDIG
-                "M" -> UGYLDIG
-                "0" -> UGYLDIG
-                "U" -> UGYLDIG
-                null -> IKKE_OPPGITT
-                else -> throw IllegalArgumentException("Ukjent kjønn: $v")
-            }
-        }
-    }
 }
 
 data class Navn(
