@@ -10,6 +10,8 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
 import kotlin.collections.List
@@ -132,4 +134,15 @@ class SykmeldingController(
             </div>
             """.trimIndent()
     }
+
+    @GetMapping("/internal/is_alive")
+    fun isAlive(): HttpStatusCode {
+        return HttpStatusCode.valueOf(200)
+    }
+
+    @GetMapping("/internal/is_ready")
+    fun isReady(): HttpStatusCode {
+        return HttpStatusCode.valueOf(200)
+    }
+
 }
