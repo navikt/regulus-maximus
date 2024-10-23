@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 data class SykmeldingMedBehandlingsutfall(
     val sykmelding: Sykmelding,
     val validation: ValidationResult,
-    val meldingsInformasjon: Meldingsinformasjon,
+    val metadata: Meldingsinformasjon,
 )
 
 enum class SykmeldingType {
@@ -24,6 +24,7 @@ sealed interface ISykmelding {
     val medisinskVurdering: MedisinskVurdering
     val aktivitet: List<Aktivitet>
 }
+
 data class UtenlandskSykmelding(
     override val id: String,
     override val metadata: SykmeldingMetadata,
@@ -61,13 +62,14 @@ data class SykmeldingMetadata(
     val avsenderSystem: AvsenderSystem,
     val mottattDato: OffsetDateTime,
     val behandletTidspunkt: OffsetDateTime,
+    val strekkode: String?
 )
 
 data class Behandler(
     val navn: Navn,
     val ids: List<PersonId>,
     val adresse: Adresse?,
-    val kontaktInfo: List<Kontaktinfo>
+    val kontaktinfo: List<Kontaktinfo>
 )
 
 data class SignerendeBehandler(

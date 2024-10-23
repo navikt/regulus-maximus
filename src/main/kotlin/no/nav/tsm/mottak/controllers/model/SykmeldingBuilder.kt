@@ -17,12 +17,13 @@ fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
             avsenderSystem = AvsenderSystem("", ""),
             mottattDato = OffsetDateTime.now(),
             behandletTidspunkt = OffsetDateTime.now(),
+            strekkode = null,
         ),
         pasient = Pasient(
             listOf(PersonId("12345678901", type = PersonIdType.FNR)), null, null, null, null, null, listOf(Kontaktinfo(type = KontaktinfoType.TLF, value = "333333"))),
         behandler = Behandler(
 
-            kontaktInfo = listOf(Kontaktinfo(KontaktinfoType.TLF, "3335455")),
+            kontaktinfo = listOf(Kontaktinfo(KontaktinfoType.TLF, "3335455")),
             adresse = Adresse(AdresseType.FOLKEREGISTERADRESSE, null, null, null, null, null, null),
             navn = Navn(fornavn= "AA", etternavn = "BB", mellomnavn = null),
             ids = listOf(PersonId("1344556565", PersonIdType.FNR))
@@ -43,7 +44,7 @@ fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
         timestamp = OffsetDateTime.now(),
         rules = emptyList()
     ),
-    meldingsInformasjon =  Utenlandsk(msgInfo= MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
+    metadata =  Utenlandsk(msgInfo= MeldingMetadata(type = Meldingstype.SYKMELDING, genDate = OffsetDateTime.now(), msgId = "111", migVersjon = null ), sender= Organisasjon(navn = "Hallo As", OrganisasjonsType.PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER, listOf(
         OrgId(id = "1", type = OrgIdType.ENH)
     ), null, null, null, null), receiver=Organisasjon(navn = "Heisann", OrganisasjonsType.IKKE_OPPGITT,  listOf(OrgId(id = "1", type = OrgIdType.ENH)), null, null, null, null), utenlandskSykmelding = UtenlandskSykmeldingInfo(land = "Sverige", folkeRegistertAdresseErBrakkeEllerTilsvarende = false, erAdresseUtland = true )
     )
