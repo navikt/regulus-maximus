@@ -31,12 +31,12 @@ class SykmeldingConsumer(
     suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
         try {
             if (cr.value() != null) {
-                val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
+                val sykmelding = cr.value()
                 sykmeldingService.saveSykmelding(sykmelding)
-                // sendToTsmSykmelding(sykmelding)
+                sendToTsmSykmelding(sykmelding)
             } else {
                 sykmeldingService.delete(cr.key())
-                //tombStone(cr.key())
+                tombStone(cr.key())
             }
         } catch (e: Throwable) {
             logger.error("Kunne ikke lese melding fra topic ", e)
