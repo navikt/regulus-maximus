@@ -12,15 +12,16 @@ import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
 import no.nav.tsm.mottak.tsm.sykmelding.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingConsumer(
-    private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
+    private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
     @Value("\${spring.kafka.topics.sykmeldinger-output}") private val sykmeldingOutputTopic: String
 ) {
@@ -46,9 +47,10 @@ class SykmeldingConsumer(
     private fun sendToTsmSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
         try {
             kafkaTemplate.send(
+                ProducerRecord(
                 sykmeldingOutputTopic,
                 sykmelding.sykmelding.id,
-                SykmeldingMedUtfall(sykmelding = sykmelding.sykmelding)
+                SykmeldingMedBehandlingsutfall(sykmelding = sykmelding.sykmelding, metadata = sykmelding.metadata, validation = sykmelding.validation))
             )
         } catch (ex: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
@@ -57,11 +59,11 @@ class SykmeldingConsumer(
 
     private fun tombStone(sykmeldingId: String) {
         try {
-            kafkaTemplate.send(
+            kafkaTemplate.send(ProducerRecord(
                 sykmeldingOutputTopic,
                 sykmeldingId,
                 null
-            )
+            ))
         } catch (ex: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
         }
