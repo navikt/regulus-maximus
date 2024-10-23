@@ -1,6 +1,6 @@
 spring:
   r2dbc:
-    url: "r2dbc:postgresql://${db.host}/my_database"
+    url: "r2dbc:postgresql://${db.host}/${db.database}"
     username: ${db.username}
     password: ${db.password}
   flyway:
