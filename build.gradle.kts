@@ -22,10 +22,8 @@ val kotlin_version = "2.0.21"
 val logback_version = "1.5.11"
 val logback_encoder_version = "8.0"
 val prometheus_version = "1.13.2"
-val exposed_version= "0.41.1"
 val flyway_version= "10.20.0"
 val postgres_version= "42.7.3"
-val koin_version= "3.5.3"
 val jackson_version= "2.17.2"
 
 dependencies {
@@ -36,13 +34,13 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.data:spring-data-r2dbc")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.postgresql:r2dbc-postgresql")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:$prometheus_version")
+    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")
     implementation("org.postgresql:postgresql:$postgres_version")
     implementation("net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}")

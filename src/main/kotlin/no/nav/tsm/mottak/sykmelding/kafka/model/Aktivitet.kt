@@ -17,7 +17,6 @@ enum class Aktivitetstype {
     Type(Gradert::class, name = "GRADERT"),
     Type(Reisetilskudd::class, name = "REISETILSKUDD"))
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
-
 sealed interface Aktivitet {
     val fom: LocalDate
     val tom: LocalDate

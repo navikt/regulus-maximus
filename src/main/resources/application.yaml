@@ -10,11 +10,6 @@ spring:
     password: ${spring.r2dbc.password}
     baseline-on-migrate: true
     url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
-    serialization:
-      write-dates-as-timestamps: false
   application:
     name: regulus-maximus
   kafka:
@@ -31,3 +26,15 @@ spring:
     topics:
       sykmeldinger-input: tsm.sykmelding-raw
       sykmeldinger-output: tsm.tsm-sykmeldinger
+
+management:
+  endpoint:
+    prometheus.enabled: true
+    health.probes.enabled: true
+    health.show-details: always
+  endpoints.web:
+    base-path: "/internal"
+    exposure.include: health, prometheus
+  health:
+    livenessstate.enabled: true
+    readinessState.enabled: true
