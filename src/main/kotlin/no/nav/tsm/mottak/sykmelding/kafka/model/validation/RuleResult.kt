@@ -1,12 +1,11 @@
-package no.nav.tsm.mottak.sykmelding.kafka.model
+package no.nav.tsm.mottak.sykmelding.kafka.model.validation
 
+import java.time.OffsetDateTime
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
-import java.time.OffsetDateTime
-
 
 data class ValidationResult(
     val status: RuleType,

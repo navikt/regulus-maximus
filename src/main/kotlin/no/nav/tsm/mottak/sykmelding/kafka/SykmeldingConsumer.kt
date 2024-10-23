@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
+import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
 import no.nav.tsm.mottak.tsm.sykmelding.SykmeldingMedUtfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -27,10 +29,14 @@ class SykmeldingConsumer(
     @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus")
     suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
         try {
-            val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
-            sykmeldingService.saveSykmelding(sykmelding)
-            sendToTsmSykmelding(sykmelding)
-
+            if (cr.value() != null) {
+                val sykmelding = cr.value()
+                sykmeldingService.saveSykmelding(sykmelding)
+                // sendToTsmSykmelding(sykmelding)
+            } else {
+                sykmeldingService.delete(cr.key())
+                //tombStone(cr.key())
+            }
         } catch (e: Throwable) {
             logger.error("Kunne ikke lese melding fra topic ", e)
             throw e
@@ -43,6 +49,18 @@ class SykmeldingConsumer(
                 sykmeldingOutputTopic,
                 sykmelding.sykmelding.id,
                 SykmeldingMedUtfall(sykmelding = sykmelding.sykmelding)
+            )
+        } catch (ex: Exception) {
+            logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
+        }
+    }
+
+    private fun tombStone(sykmeldingId: String) {
+        try {
+            kafkaTemplate.send(
+                sykmeldingOutputTopic,
+                sykmeldingId,
+                null
             )
         } catch (ex: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)

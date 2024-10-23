@@ -27,4 +27,9 @@ class SykmeldingService(
         return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc().toList()
 
     }
+
+    suspend fun delete(sykmeldingId: String) {
+      sykmeldingRepository.deleteById(sykmeldingId)
+
+    }
 }
