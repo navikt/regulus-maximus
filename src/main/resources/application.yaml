@@ -29,7 +29,7 @@ spring:
       key-store-type: PKCS12
       key-store-password: ${kafka.credstore.password}
     topics:
-      sykmeldinger-input: tsm.sykmeldinger-raw
+      sykmeldinger-input: tsm.sykmelding-raw
       sykmeldinger-output: tsm.tsm-sykmeldinger
     consumer:
       properties:
