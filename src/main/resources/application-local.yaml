@@ -9,9 +9,8 @@ spring:
     locations: classpath:db/migration
   kafka:
     bootstrap-servers: localhost:9092
-    consumer:
-      auto-offset-reset: none
-      enable-auto-commit: true
+    security:
+      protocol: plaintext
   sql:
     init:
       mode: always

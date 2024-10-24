@@ -1,29 +1,40 @@
 spring:
+  r2dbc:
+    url: "r2dbc:postgresql://${db.host}/${db.database}"
+    username: ${db.username}
+    password: ${db.password}
   flyway:
     enabled: true
     locations: classpath:db/migration
-  user: ${spring.r2dbc.username}
-  password: ${spring.r2dbc.password}
-  baseline-on-migrate: true
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
-    serialization:
-      write-dates-as-timestamps: false
-    application:
-      name: regulus-maximus
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
+    baseline-on-migrate: true
+    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
+  application:
+    name: regulus-maximus
   kafka:
-    bootstrap-servers: localhost:9092
-    group-id: regulus-maximus
+    bootstrap-servers: ${kafka.brokers}
+    security:
+      protocol: ssl
+    ssl:
+      trust-store-location: file:${kafka.truststore.path}
+      trust-store-type: JKS
+      trust-store-password: ${kafka.credstore.password}
+      key-store-location: file:${kafka.keystore.path}
+      key-store-type: PKCS12
+      key-store-password: ${kafka.credstore.password}
     topics:
-      mottatt-sykmelding: tsm.mottak-sykmelding
-      sykmelding-med-utfall: tsm.mottak-sykmelding-med-utfall
-    consumer:
-      max-poll-records: 1
-      auto-offset-reset: none
-      enable-auto-commit: false
-      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-    producer:
-      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      sykmeldinger-input: tsm.sykmelding-raw
+      sykmeldinger-output: tsm.tsm-sykmeldinger
+
+management:
+  endpoint:
+    prometheus.enabled: true
+    health.probes.enabled: true
+    health.show-details: always
+  endpoints.web:
+    base-path: "/internal"
+    exposure.include: health, prometheus
+  health:
+    livenessstate.enabled: true
+    readinessState.enabled: true
