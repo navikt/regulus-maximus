@@ -22,7 +22,6 @@ class SykmeldingModule : SimpleModule() {
      }
 }
 
-
 abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
     abstract fun getClass(type: String): KClass<out T>
 

@@ -1,21 +1,20 @@
 package no.nav.tsm.mottak.controllers
 
-import no.nav.tsm.mottak.service.SykmeldingService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.mottak.controllers.model.createNewSykmelding
+import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.ResponseEntity
-import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.web.bind.annotation.*
-import kotlin.collections.List
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Profile("local")
 @RestController
@@ -124,9 +123,9 @@ class SykmeldingController(
         val sykmeldingMedBehandlingsutfall = createNewSykmelding()
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
-
-        kafkaTemplate.send(
-            ProducerRecord(topic, sykmeldingId, sykmeldingMedBehandlingsutfall)).get()
+            kafkaTemplate.send(
+                ProducerRecord(topic, sykmeldingId, sykmeldingMedBehandlingsutfall)
+            )
         return """
             <div>
                 <p>Sykmelding ID: ${sykmeldingId}</p>

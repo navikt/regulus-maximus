@@ -16,7 +16,6 @@ import kotlin.reflect.KClass
 
 class SykmeldingModule : SimpleModule() {
     init {
-        addDeserializer(ISykmelding::class.java, SykmeldingDeserializer())
         addDeserializer(Aktivitet::class.java, AktivitetDeserializer())
         addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
@@ -36,14 +35,7 @@ abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
         return p.codec.treeToValue(node, clazz.java)
     }
 }
-class SykmeldingDeserializer : CustomDeserializer<ISykmelding>() {
-    override fun getClass(type: String): KClass<out ISykmelding> {
-        return when (SykmeldingType.valueOf(type)) {
-            SykmeldingType.SYKMELDING -> Sykmelding::class
-            SykmeldingType.UTENLANDSK_SYKMELDING -> UtenlandskSykmelding::class
-        }
-    }
-}
+
 class MeldingsinformasjonDeserializer : CustomDeserializer<Meldingsinformasjon>() {
     override fun getClass(type: String): KClass<out Meldingsinformasjon> {
         return when (MetadataType.valueOf(type)) {

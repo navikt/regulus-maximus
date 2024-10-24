@@ -36,7 +36,7 @@ class SykmeldingConsumer(
                 tombStone(cr.key())
             }
         } catch (e: Throwable) {
-            logger.error("Kunne ikke lese melding fra topic ", e)
+            logger.error("Failed to read message fra topic ", e)
             throw e
         }
     }
@@ -49,9 +49,9 @@ class SykmeldingConsumer(
                 sykmelding.sykmelding.id,
                 SykmeldingMedBehandlingsutfall(sykmelding = sykmelding.sykmelding, metadata = sykmelding.metadata, validation = sykmelding.validation))
             )
-        } catch (ex: Exception) {
-            logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
-            throw ex
+        } catch (toSykmeldingException: Exception) {
+            logger.error("Failed to publish sykmelding to tsm.sykmelding", toSykmeldingException)
+            throw toSykmeldingException
         }
     }
 
@@ -62,9 +62,9 @@ class SykmeldingConsumer(
                 sykmeldingId,
                 null
             ))
-        } catch (ex: Exception) {
-            logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
-            throw ex
+        } catch (toTombstoneException: Exception) {
+            logger.error("Failed to tombstone sykmelding to tsm.sykmelding", toTombstoneException)
+            throw toTombstoneException
         }
     }
 }
