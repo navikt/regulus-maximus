@@ -16,12 +16,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
 
 @Configuration
-class KafkaConsumerConfig() {
-
+class KafkaConsumerConfig {
 
     @Bean
     fun containerFactory(props: KafkaProperties): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
-        val consumerFactory = DefaultKafkaConsumerFactory<String, SykmeldingMedBehandlingsutfall>(
+        val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
