@@ -24,13 +24,20 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus", containerFactory = "containerFactory")
-    suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
+    @KafkaListener(
+        topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
+        groupId = "regulus-maximus",
+        containerFactory = "containerFactory",
+        batch = "true"
+    )
+    suspend fun consume(cr: ConsumerRecord<String, List<SykmeldingMedBehandlingsutfall>>) {
         try {
             if (cr.value() != null) {
-                val sykmelding = cr.value()
-                sykmeldingService.saveSykmelding(sykmelding)
-                sendToTsmSykmelding(sykmelding)
+                val sykmeldinger = cr.value()
+                sykmeldinger.forEach { sykmelding ->
+                    sykmeldingService.saveSykmelding(sykmelding)
+                    sendToTsmSykmelding(sykmelding)
+                }
             } else {
                 sykmeldingService.delete(cr.key())
                 tombStone(cr.key())
@@ -45,9 +52,14 @@ class SykmeldingConsumer(
         try {
             kafkaTemplate.send(
                 ProducerRecord(
-                sykmeldingOutputTopic,
-                sykmelding.sykmelding.id,
-                SykmeldingMedBehandlingsutfall(sykmelding = sykmelding.sykmelding, metadata = sykmelding.metadata, validation = sykmelding.validation))
+                    sykmeldingOutputTopic,
+                    sykmelding.sykmelding.id,
+                    SykmeldingMedBehandlingsutfall(
+                        sykmelding = sykmelding.sykmelding,
+                        metadata = sykmelding.metadata,
+                        validation = sykmelding.validation
+                    )
+                )
             )
         } catch (toSykmeldingException: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", toSykmeldingException)
@@ -57,11 +69,13 @@ class SykmeldingConsumer(
 
     private fun tombStone(sykmeldingId: String) {
         try {
-            kafkaTemplate.send(ProducerRecord(
-                sykmeldingOutputTopic,
-                sykmeldingId,
-                null
-            ))
+            kafkaTemplate.send(
+                ProducerRecord(
+                    sykmeldingOutputTopic,
+                    sykmeldingId,
+                    null
+                )
+            )
         } catch (toTombstoneException: Exception) {
             logger.error("Failed to tombstone sykmelding to tsm.sykmelding", toTombstoneException)
             throw toTombstoneException
