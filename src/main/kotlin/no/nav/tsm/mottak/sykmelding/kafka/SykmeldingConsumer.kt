@@ -30,17 +30,19 @@ class SykmeldingConsumer(
         containerFactory = "containerFactory",
         batch = "true"
     )
-    suspend fun consume(cr: ConsumerRecord<String, List<SykmeldingMedBehandlingsutfall>>) {
+    suspend fun consume(records: List<ConsumerRecord<String, SykmeldingMedBehandlingsutfall>>) {
         try {
-            if (cr.value() != null) {
-                val sykmeldinger = cr.value()
-                sykmeldinger.forEach { sykmelding ->
+            records.forEach { record ->
+                if (record.value() != null) {
+                    val sykmelding = record.value()
+
                     sykmeldingService.saveSykmelding(sykmelding)
                     sendToTsmSykmelding(sykmelding)
+
+                } else {
+                    sykmeldingService.delete(record.key())
+                    tombStone(record.key())
                 }
-            } else {
-                sykmeldingService.delete(cr.key())
-                tombStone(cr.key())
             }
         } catch (e: Throwable) {
             logger.error("Failed to read message fra topic ", e)
