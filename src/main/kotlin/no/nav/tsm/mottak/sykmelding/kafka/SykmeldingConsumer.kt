@@ -24,7 +24,7 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus", containerFactory = "containerFactory")
+    @KafkaListener(topics = ["\${spring.kafka.topics.sykmeldinger-input}"], groupId = "regulus-maximus", containerFactory = "containerFactory", batch = "true")
     suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>) {
         try {
             if (cr.value() != null) {
