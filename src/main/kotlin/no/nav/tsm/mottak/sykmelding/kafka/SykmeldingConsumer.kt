@@ -9,39 +9,79 @@ import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingConsumer(
-    //private val kafkaTemplate: KafkaTemplate<String, SykmeldingMedUtfall>,
+    private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
+    @Value("\${spring.kafka.topics.sykmeldinger-output}") private val sykmeldingOutputTopic: String
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-    @KafkaListener(topics = ["\${spring.kafka.topics.mottatt-sykmelding}"], groupId = "\${spring.kafka.group-id}", containerFactory = "containerFactory")
-    suspend fun consume(cr: ConsumerRecord<String, SykmeldingMedBehandlingsutfall>?) {
+    @KafkaListener(
+        topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
+        groupId = "regulus-maximus",
+        containerFactory = "containerFactory",
+        batch = "true"
+    )
+    suspend fun consume(records: List<ConsumerRecord<String, SykmeldingMedBehandlingsutfall>>) {
         try {
-            if (cr != null) {
-                logger.info("Received message from topic: ${cr.value()}")
-                val sykmelding = cr.value() as SykmeldingMedBehandlingsutfall
-                sykmeldingService.saveSykmelding(sykmelding)
-            }
+            records.forEach { record ->
+                if (record.value() != null) {
+                    val sykmelding = record.value()
 
+                    sykmeldingService.saveSykmelding(sykmelding)
+                    sendToTsmSykmelding(sykmelding)
+
+                } else {
+                    sykmeldingService.delete(record.key())
+                    tombStone(record.key())
+                }
+            }
         } catch (e: Throwable) {
-            logger.error("Kunne ikke lese melding fra topic ", e)
+            logger.error("Failed to read message fra topic ", e)
             throw e
         }
+    }
 
-        // her skal videre funksjonalitet ligge
-        /* try {
-             kafkaTemplate.send("tsm.sykmelding", SykmeldingMedUtfall(sykmeldingInput = sykmelding.sykmeldingInput, utfall = sykmelding.utfall))
-         } catch (ex: Exception) {
-             logger.error("Failed to publish sykmelding to tsm.sykmelding", ex)
-         }*/
+    private fun sendToTsmSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
+        try {
+            kafkaTemplate.send(
+                ProducerRecord(
+                    sykmeldingOutputTopic,
+                    sykmelding.sykmelding.id,
+                    SykmeldingMedBehandlingsutfall(
+                        sykmelding = sykmelding.sykmelding,
+                        metadata = sykmelding.metadata,
+                        validation = sykmelding.validation
+                    )
+                )
+            )
+        } catch (toSykmeldingException: Exception) {
+            logger.error("Failed to publish sykmelding to tsm.sykmelding", toSykmeldingException)
+            throw toSykmeldingException
+        }
+    }
 
+    private fun tombStone(sykmeldingId: String) {
+        try {
+            kafkaTemplate.send(
+                ProducerRecord(
+                    sykmeldingOutputTopic,
+                    sykmeldingId,
+                    null
+                )
+            )
+        } catch (toTombstoneException: Exception) {
+            logger.error("Failed to tombstone sykmelding to tsm.sykmelding", toTombstoneException)
+            throw toTombstoneException
+        }
     }
 }
 

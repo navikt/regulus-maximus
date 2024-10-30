@@ -3,13 +3,12 @@ package no.nav.tsm.mottak.sykmelding.kafka.model
 import java.time.LocalDate
 
 enum class DiagnoseSystem {
-    ICPC2, ICD10,
+    ICPC2, ICD10, ICPC2B
 }
 
 data class DiagnoseInfo(
     val system: DiagnoseSystem,
     val kode: String,
-    val tekst: String?, // Fjernes?
 )
 
 enum class MedisinskArsakType {
@@ -25,7 +24,7 @@ enum class AnnenFravarArsakType {
 }
 
 data class AnnenFraverArsak(
-    val beskrivelse: String?, val arsak: AnnenFravarArsakType // TODO: Sjekk om det bare er en av disse som kan være satt
+    val beskrivelse: String?, val arsak: List<AnnenFravarArsakType>?
 )
 
 data class MedisinskArsak(
@@ -44,8 +43,7 @@ data class MedisinskVurdering(
     val hovedDiagnose: DiagnoseInfo?,
     val biDiagnoser: List<DiagnoseInfo>?,
     val svangerskap: Boolean,
-    val yrkesskade: Boolean,
-    val yrkesskadeDato: LocalDate?, // Sjekke i spec om yrkesskadedato må være satt og kanksje egen klasse yrkessakde
+    val yrkesskade: Yrkesskade?,
     val skjermetForPasient: Boolean,
     val syketilfelletStartDato: LocalDate?,
     val annenFraversArsak: AnnenFraverArsak?,

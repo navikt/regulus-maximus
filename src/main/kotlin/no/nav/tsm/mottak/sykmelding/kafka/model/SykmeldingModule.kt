@@ -1,26 +1,29 @@
-package no.nav.tsm.mottak.sykmelding.kafka.util
+package no.nav.tsm.mottak.sykmelding.kafka.model
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.tsm.mottak.sykmelding.kafka.model.*
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EDIEmottak
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EmottakEnkel
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.MetadataType
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Papirsykmelding
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Utenlandsk
 import no.nav.tsm.mottak.sykmelding.kafka.model.validation.*
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.RuleType.*
-import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 
-@Component
 class SykmeldingModule : SimpleModule() {
-    override fun setupModule(context: SetupContext)
-    {
+    init {
         addDeserializer(Aktivitet::class.java, AktivitetDeserializer())
         addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
         addDeserializer(Rule::class.java, RuleDeserializer())
-     }
+        addDeserializer(Meldingsinformasjon::class.java, MeldingsinformasjonDeserializer())
+    }
 }
+
 
 abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
     abstract fun getClass(type: String): KClass<out T>
@@ -33,13 +36,24 @@ abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
     }
 }
 
+class MeldingsinformasjonDeserializer : CustomDeserializer<Meldingsinformasjon>() {
+    override fun getClass(type: String): KClass<out Meldingsinformasjon> {
+        return when (MetadataType.valueOf(type)) {
+            MetadataType.ENKEL -> EmottakEnkel::class
+            MetadataType.EMOTTAK -> EDIEmottak::class
+            MetadataType.UTENLANDSK_SYKMELDING -> Utenlandsk::class
+            MetadataType.PAPIRSYKMELDING -> Papirsykmelding::class
+        }
+    }
+}
+
 class RuleDeserializer : CustomDeserializer<Rule>() {
 
     override fun getClass(type: String): KClass<out Rule> {
         return when (RuleType.valueOf(type)) {
-            INVALID -> InvalidRule::class
-            PENDING -> PendingRule::class
-            OK -> OKRule::class
+            RuleType.INVALID -> InvalidRule::class
+            RuleType.PENDING -> PendingRule::class
+            RuleType.OK -> OKRule::class
         }
     }
 }
