@@ -16,8 +16,6 @@ class SykmeldingService(
 
     @Transactional
     suspend fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
-
-        val existingSykmelding = sykmeldingRepository.findById(sykmelding.sykmelding.id)
         sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 

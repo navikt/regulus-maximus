@@ -62,7 +62,7 @@ class SykmeldingConsumer(
                         validation = sykmelding.validation
                     )
                 )
-            )
+            ).get()
         } catch (toSykmeldingException: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", toSykmeldingException)
             throw toSykmeldingException
