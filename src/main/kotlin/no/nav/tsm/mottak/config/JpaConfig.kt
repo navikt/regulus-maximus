@@ -10,8 +10,10 @@ import jakarta.persistence.EntityManagerFactory
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 @Configuration
+@EnableJpaRepositories
 @EnableTransactionManagement
 class JpaConfig {
 
@@ -22,8 +24,8 @@ class JpaConfig {
     fun entityManagerFactory(builder: EntityManagerFactoryBuilder): LocalContainerEntityManagerFactoryBean {
         return builder
             .dataSource(dataSourceProperties.initializeDataSourceBuilder().build())
-            .packages("no.nav.tsm.mottak.db") // Adjust the package to your entities
-            .persistenceUnit("yourPersistenceUnit") // Optional, specify if you have multiple
+            .packages("no.nav.tsm.mottak.db")
+            .persistenceUnit("yourPersistenceUnit")
             .build()
     }
 

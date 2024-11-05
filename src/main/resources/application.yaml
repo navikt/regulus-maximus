@@ -5,11 +5,10 @@ spring:
     password: ${db.password}
   flyway:
     enabled: true
+    user: my_user
+    password: my_password
     locations: classpath:db/migration
-    user: ${db.username}
-    password: ${db.password}
     baseline-on-migrate: true
-    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
   application:
     name: regulus-maximus
   kafka:

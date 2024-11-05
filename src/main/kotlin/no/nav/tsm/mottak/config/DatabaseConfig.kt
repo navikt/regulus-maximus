@@ -16,8 +16,8 @@ class DatabaseConfig {
         val flyway = Flyway.configure()
             .dataSource(
                 flywayProperties.url,
-                jdbcProperties.toString(),
-                jdbcProperties.toString()
+                flywayProperties.user,
+                flywayProperties.password
             )
             .locations(*flywayProperties.locations.toTypedArray())
             .baselineOnMigrate(true)
