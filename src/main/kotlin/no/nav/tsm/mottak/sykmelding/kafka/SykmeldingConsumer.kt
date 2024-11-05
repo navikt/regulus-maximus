@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import kotlinx.coroutines.runBlocking
 import no.nav.tsm.mottak.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
@@ -28,20 +29,18 @@ class SykmeldingConsumer(
         topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
         groupId = "regulus-maximus",
         containerFactory = "containerFactory",
-        batch = "true"
     )
-    suspend fun consume(records: List<ConsumerRecord<String, SykmeldingMedBehandlingsutfall>>) {
+    fun consume(records: List<ConsumerRecord<String, SykmeldingMedBehandlingsutfall>>) {
         try {
             records.forEach { record ->
                 if (record.value() != null) {
                     val sykmelding = record.value()
-
                     sykmeldingService.saveSykmelding(sykmelding)
                     sendToTsmSykmelding(sykmelding)
-
                 } else {
                     sykmeldingService.delete(record.key())
                     tombStone(record.key())
+
                 }
             }
         } catch (e: Throwable) {

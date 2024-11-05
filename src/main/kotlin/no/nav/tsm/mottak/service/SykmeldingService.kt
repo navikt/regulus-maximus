@@ -15,7 +15,7 @@ class SykmeldingService(
 ) {
 
     @Transactional
-    suspend fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
+    fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
         sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 
@@ -23,7 +23,7 @@ class SykmeldingService(
         return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc().toList()
     }
 
-    suspend fun delete(sykmeldingId: String) {
+    fun delete(sykmeldingId: String) {
         sykmeldingRepository.deleteById(sykmeldingId)
     }
 }

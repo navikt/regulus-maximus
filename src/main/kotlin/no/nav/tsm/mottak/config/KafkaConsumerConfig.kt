@@ -14,12 +14,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
-
 @Configuration
 class KafkaConsumerConfig {
 
     @Bean
-    fun containerFactory(props: KafkaProperties): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
+    fun containerFactory(props: KafkaProperties, errorHandler: ConsumerErrorHandler): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
         val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")

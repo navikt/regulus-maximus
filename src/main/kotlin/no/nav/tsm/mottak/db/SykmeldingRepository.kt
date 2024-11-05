@@ -3,6 +3,7 @@ package no.nav.tsm.mottak.db
 import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -11,7 +12,7 @@ import java.time.OffsetDateTime
 
 
 @Repository
-interface SykmeldingRepository : CoroutineCrudRepository<SykmeldingBehandlingsutfall, String> {
+interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, String> {
 
     suspend fun findTop10ByOrderBySykmeldingIdDesc(): Flow<SykmeldingBehandlingsutfall>
 
@@ -35,5 +36,5 @@ interface SykmeldingRepository : CoroutineCrudRepository<SykmeldingBehandlingsut
             validation = EXCLUDED.validation,
             meldingsinformasjon = EXCLUDED.meldingsinformasjon
     """)
-    suspend fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingBehandlingsutfall)
+    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingBehandlingsutfall)
 }
