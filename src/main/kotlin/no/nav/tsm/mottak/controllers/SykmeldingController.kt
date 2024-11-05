@@ -1,7 +1,5 @@
 package no.nav.tsm.mottak.controllers
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.mottak.controllers.model.createNewSykmelding

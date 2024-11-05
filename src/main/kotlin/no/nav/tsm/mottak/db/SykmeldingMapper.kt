@@ -4,7 +4,6 @@ import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import org.springframework.stereotype.Component
 
-
 @Component
 class SykmeldingMapper {
 

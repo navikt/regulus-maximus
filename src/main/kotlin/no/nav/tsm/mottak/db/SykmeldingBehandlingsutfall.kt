@@ -11,11 +11,13 @@ import java.time.OffsetDateTime
 @Table(name = "sykmelding_behandlingsutfall")
 @Entity
 data class SykmeldingBehandlingsutfall(
+    @Column(name = "sykmelding_id")
     @Id val sykmeldingId: String,
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "jsonb", name = "pasient_ident")
     val pasientIdent: String,
     val fom: LocalDate,
     val tom: LocalDate,
+    @Column(name = "generated_date")
     val generatedDate: OffsetDateTime?,
     @Column(columnDefinition = "jsonb")
     val sykmelding: String,

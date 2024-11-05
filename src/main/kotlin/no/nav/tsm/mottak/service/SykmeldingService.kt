@@ -1,7 +1,7 @@
 package no.nav.tsm.mottak.service
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import no.nav.tsm.mottak.db.SykmeldingBehandlingsutfall
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
@@ -17,16 +17,14 @@ class SykmeldingService(
 
     @Transactional
     fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
-        sykmeldingRepository.save(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
+        sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 
     suspend fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
-        return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc().toList()
+        return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc()
     }
 
     fun delete(sykmeldingId: String) {
-        runBlocking {
             sykmeldingRepository.deleteById(sykmeldingId)
-        }
     }
 }
