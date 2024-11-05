@@ -3,6 +3,7 @@ package no.nav.tsm.mottak.config
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
@@ -16,6 +17,8 @@ class ConsumerErrorHandler : DefaultErrorHandler(
     },
 ) {
 
+    private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
+
     override fun handleRemaining(
         thrownException: Exception,
         records: MutableList<ConsumerRecord<*, *>>,
@@ -23,12 +26,13 @@ class ConsumerErrorHandler : DefaultErrorHandler(
         container: MessageListenerContainer,
     ) {
         records.forEach { record ->
-            logger.error(
+            log.error(
                 "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+                thrownException
             )
         }
         if (records.isEmpty()) {
-            logger.error("Feil i listener uten noen records")
+            log.error("Feil i listener uten noen records", thrownException)
         }
 
         super.handleRemaining(thrownException, records, consumer, container)
@@ -41,13 +45,14 @@ class ConsumerErrorHandler : DefaultErrorHandler(
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        data.forEach { record ->
-            logger.error(
-                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}"
-            )
-        }
         if (data.isEmpty) {
-            logger.error("Feil i listener uten noen records")
+            log.error("Feil i listener uten noen records", thrownException)
+        }
+        data.forEach { record ->
+            log.error(
+                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+                thrownException
+            )
         }
         super.handleBatch(thrownException, data, consumer, container, invokeListener)
     }
