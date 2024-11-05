@@ -1,21 +1,40 @@
 package no.nav.tsm.mottak.db
-import io.r2dbc.postgresql.codec.Json
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
 
-
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+import jakarta.persistence.Id
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-@Table("sykmelding_behandlingsutfall")
-data class SykmeldingBehandlingsutfall (
+
+@Table(name = "sykmelding_behandlingsutfall")
+@Entity
+data class SykmeldingBehandlingsutfall(
     @Id val sykmeldingId: String,
-    val pasientIdent: Json,
+    @Column(columnDefinition = "jsonb")
+    val pasientIdent: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val generatedDate: OffsetDateTime?,
-    val sykmelding: Json,
-    val metadata: Json,
-    val validation: Json,
-    val meldingsinformasjon: Json
-)
+    @Column(columnDefinition = "jsonb")
+    val sykmelding: String,
+    @Column(columnDefinition = "jsonb")
+    val metadata: String,
+    @Column(columnDefinition = "jsonb")
+    val validation: String,
+    @Column(columnDefinition = "jsonb")
+    val meldingsinformasjon: String
+) {
+    constructor() : this(
+        sykmeldingId = "",
+        pasientIdent = "",
+        fom = LocalDate.now(),
+        tom = LocalDate.now(),
+        generatedDate = null,
+        sykmelding = "",
+        metadata = "",
+        validation = "",
+        meldingsinformasjon = ""
+    )
+}

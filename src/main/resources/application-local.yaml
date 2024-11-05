@@ -1,6 +1,6 @@
 spring:
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/my_database
+  datasource:
+    url: jdbc:postgresql://localhost:5432/my_database
     username: my_user
     password: my_password
   flyway:

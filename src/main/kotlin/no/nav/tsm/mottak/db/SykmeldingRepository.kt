@@ -1,15 +1,10 @@
 package no.nav.tsm.mottak.db
 
-import io.r2dbc.postgresql.codec.Json
 import kotlinx.coroutines.flow.Flow
-import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
-import java.time.OffsetDateTime
-
 
 @Repository
 interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, String> {
@@ -18,8 +13,7 @@ interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, Str
 
     suspend fun findTop10ByOrderByGeneratedDateDesc(): Flow<SykmeldingBehandlingsutfall>
 
-    @Query("""
-        INSERT INTO sykmelding_behandlingsutfall (
+    @Query("""INSERT INTO sykmelding_behandlingsutfall (
             sykmelding_id, pasient_ident, fom, tom, generated_date, sykmelding, metadata, validation, meldingsinformasjon
         ) VALUES (
             :#{#sykmelding.sykmeldingId}, :#{#sykmelding.pasientIdent}, :#{#sykmelding.fom}, 

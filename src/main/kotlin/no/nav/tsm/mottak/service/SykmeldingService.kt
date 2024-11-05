@@ -1,6 +1,7 @@
 package no.nav.tsm.mottak.service
 
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import no.nav.tsm.mottak.db.SykmeldingBehandlingsutfall
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
@@ -24,6 +25,8 @@ class SykmeldingService(
     }
 
     fun delete(sykmeldingId: String) {
-        sykmeldingRepository.deleteById(sykmeldingId)
+        runBlocking {
+            sykmeldingRepository.deleteById(sykmeldingId)
+        }
     }
 }
