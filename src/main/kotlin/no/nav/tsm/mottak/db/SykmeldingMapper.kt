@@ -16,7 +16,7 @@ class SykmeldingMapper {
             fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
             tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
             generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.metadata.genDate,
-            sykmelding = objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding),
+            sykmelding =  objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding),
             metadata = objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.sykmelding.metadata),
             validation = objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.validation),
             meldingsinformasjon = objectMapper.writeValueAsString(sykmeldingMedBehandlingsutfall.metadata),

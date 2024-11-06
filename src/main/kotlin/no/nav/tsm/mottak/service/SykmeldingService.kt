@@ -1,7 +1,5 @@
 package no.nav.tsm.mottak.service
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
 import no.nav.tsm.mottak.db.SykmeldingBehandlingsutfall
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
@@ -17,6 +15,7 @@ class SykmeldingService(
 
     @Transactional
     fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
+        val hei = sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding)
         sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 

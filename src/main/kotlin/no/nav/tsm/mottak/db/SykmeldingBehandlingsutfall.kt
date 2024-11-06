@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.Id
+import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -13,7 +14,7 @@ import java.time.OffsetDateTime
 data class SykmeldingBehandlingsutfall(
     @Column(name = "sykmelding_id")
     @Id val sykmeldingId: String,
-    @Column(columnDefinition = "jsonb", name = "pasient_ident")
+    @Column(name = "pasient_ident")
     val pasientIdent: String,
     val fom: LocalDate,
     val tom: LocalDate,
@@ -25,7 +26,6 @@ data class SykmeldingBehandlingsutfall(
     val metadata: String,
     @Column(columnDefinition = "jsonb")
     val validation: String,
-    @Column(columnDefinition = "jsonb")
     val meldingsinformasjon: String
 ) {
     constructor() : this(
