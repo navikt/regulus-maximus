@@ -12,9 +12,11 @@ enum class MetadataType {
     EMOTTAK,
     UTENLANDSK_SYKMELDING,
     PAPIRSYKMELDING,
+    EGENMELDT
 }
 
 @JsonSubTypes(
+    Type(EDIEmottak::class, name = "EGENMELDT"),
     Type(Papirsykmelding::class, name = "PAPIRSYKMELDING"),
     Type(Utenlandsk::class, name = "UTENLANDSK_SYKMELDING"),
     Type(EmottakEnkel::class, name = "ENKEL"),
@@ -51,6 +53,13 @@ data class EmottakEnkel(
     override val vedlegg: List<String>?,
 ) : Meldingsinformasjon {
     override val type = MetadataType.ENKEL
+}
+
+data class Egenmeldt(
+    val msgInfo: MeldingMetadata,
+) : Meldingsinformasjon {
+    override val type: MetadataType = MetadataType.EGENMELDT
+    override val vedlegg: List<String> = emptyList()
 }
 
 enum class AckType {
