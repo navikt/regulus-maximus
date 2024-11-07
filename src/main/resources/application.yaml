@@ -9,6 +9,7 @@ spring:
     password: my_password
     locations: classpath:db/migration
     baseline-on-migrate: true
+    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
   application:
     name: regulus-maximus
   kafka:
