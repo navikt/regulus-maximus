@@ -25,7 +25,6 @@ data class SykmeldingBehandlingsutfall(
     @Column(columnDefinition = "jsonb")
     val metadata: String,
     @Column(columnDefinition = "jsonb")
-    @Convert(converter = JpaConverter::class)
     val validation: String,
     val meldingsinformasjon: String
 ) {
