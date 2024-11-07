@@ -5,8 +5,8 @@ spring:
     password: ${db.password}
   flyway:
     enabled: true
-    user: my_user
-    password: my_password
+    user: ${db.username}
+    password: ${db.password}
     locations: classpath:db/migration
     baseline-on-migrate: true
     url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"

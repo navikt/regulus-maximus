@@ -6,6 +6,8 @@ spring:
   flyway:
     url: jdbc:postgresql://localhost:5432/my_database
     enabled: true
+    user: my_user
+    password: my_password
     locations: classpath:db/migration
   kafka:
     bootstrap-servers: localhost:9092
