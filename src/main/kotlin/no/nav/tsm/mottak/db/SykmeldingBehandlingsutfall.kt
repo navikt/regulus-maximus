@@ -1,10 +1,10 @@
 package no.nav.tsm.mottak.db
 
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.Id
-import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -25,6 +25,7 @@ data class SykmeldingBehandlingsutfall(
     @Column(columnDefinition = "jsonb")
     val metadata: String,
     @Column(columnDefinition = "jsonb")
+    @Convert(converter = JpaConverter::class)
     val validation: String,
     val meldingsinformasjon: String
 ) {
