@@ -15,11 +15,10 @@ class SykmeldingService(
 
     @Transactional
     fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
-        val hei = sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding)
         sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 
-    suspend fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
+    fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
         return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc()
     }
 

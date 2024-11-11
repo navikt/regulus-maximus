@@ -27,7 +27,7 @@ class SykmeldingController(
 
 
     @GetMapping("/")
-    suspend fun indexPage(): String {
+    fun indexPage(): String {
         return createHTML().html {
             head {
                 title("Regulus Maximus: Dev Tools")
@@ -80,7 +80,7 @@ class SykmeldingController(
     }
 
     @GetMapping("/styles.css")
-    suspend fun serveStyles(): String {
+    fun serveStyles(): String {
         val globalCss = """
             html { font-family: sans-serif; }
             body { margin: 0; }
@@ -98,7 +98,7 @@ class SykmeldingController(
     }
 
     @GetMapping("/htmx/list-example")
-    suspend fun listExample(): List<String> {
+    fun listExample(): List<String> {
         logger.info("Fetching sykmeldinger from cache")
 
         val lastTenSykmeldinger = sykmeldingService.getLatestSykmeldinger()
@@ -117,7 +117,7 @@ class SykmeldingController(
     }
 
     @PostMapping("/htmx/post-sykmelding")
-    suspend fun postSykmelding(): String {
+    fun postSykmelding(): String {
         val sykmeldingMedBehandlingsutfall = createNewSykmelding()
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
