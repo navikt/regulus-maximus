@@ -1,1 +1,0 @@
-ALTER TABLE sykmelding_behandlingsutfall ALTER COLUMN generated_date TYPE timestamp WITH TIME ZONE;
