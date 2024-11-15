@@ -64,6 +64,9 @@ enum class HelsepersonellKategori {
     AUDIOGRAF,
     NAPRAPAT,
     AMBULANSEARBEIDER,
+    PSYKOLOG,
+    FOTTERAPEUT,
+    TANNHELSESEKRETAR,
     IKKE_OPPGITT;
 
 }
