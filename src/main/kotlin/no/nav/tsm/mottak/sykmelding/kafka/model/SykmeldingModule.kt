@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EDIEmottak
+import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Egenmeldt
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EmottakEnkel
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon
 import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.MetadataType
@@ -43,6 +44,7 @@ class MeldingsinformasjonDeserializer : CustomDeserializer<Meldingsinformasjon>(
             MetadataType.EMOTTAK -> EDIEmottak::class
             MetadataType.UTENLANDSK_SYKMELDING -> Utenlandsk::class
             MetadataType.PAPIRSYKMELDING -> Papirsykmelding::class
+            MetadataType.EGENMELDT -> Egenmeldt::class
         }
     }
 }
