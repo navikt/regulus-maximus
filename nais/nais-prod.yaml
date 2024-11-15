@@ -52,4 +52,4 @@ spec:
   secureLogs:
     enabled: false
   kafka:
-    pool: nav-dev
+    pool: nav-prod
