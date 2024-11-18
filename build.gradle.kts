@@ -1,8 +1,8 @@
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.8.0"
-    id("org.springframework.boot") version "3.3.4"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.spring") version "2.0.21"
+    id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -20,12 +20,12 @@ repositories {
 
 val ktor_version = "2.3.7"
 val kotlin_version = "2.0.21"
-val logback_version = "1.5.11"
+val logback_version = "1.5.12"
 val logback_encoder_version = "8.0"
 val prometheus_version = "1.13.2"
-val flyway_version= "10.20.0"
-val postgres_version= "42.7.3"
-val jackson_version= "2.17.2"
+val flyway_version= "10.21.0"
+val postgres_version= "42.7.4"
+val jackson_version= "2.18.1"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -45,7 +45,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
-    implementation("org.apache.kafka:kafka-clients:3.8.0")
+    implementation("org.apache.kafka:kafka-clients:3.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0")
 
     implementation("org.postgresql:postgresql")
