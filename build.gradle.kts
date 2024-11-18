@@ -64,11 +64,7 @@ tasks {
         archiveClassifier.set("")
         isZip64 = true
         manifest {
-            attributes(
-                mapOf(
-                    "Main-Class" to "no.nav.tsm.mottak.Application.kt",
-                ),
-            )
+            attributes["Main-Class"] = "no.nav.tsm.mottak.ApplicationKt"
         }
     }
 
