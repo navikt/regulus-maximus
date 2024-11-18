@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.spring") version "1.8.0"
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "no.nav.tsm.mottak"
@@ -57,7 +58,18 @@ dependencies {
 }
 
 tasks {
+
+    shadowJar {
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        isZip64 = true
+        manifest {
+            attributes["Main-Class"] = "no.nav.tsm.mottak.ApplicationKt"
+        }
+    }
+
     bootJar {
         archiveFileName = "app.jar"
     }
+
 }
