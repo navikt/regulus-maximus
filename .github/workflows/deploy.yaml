@@ -1,11 +1,8 @@
 name: Build and deploy
-on:
-  push:
-    branches:
-      - main
+on: push
 jobs:
-  build_and_deploy:
-    name: Build,push and deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,11 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java 21
-        uses: nais/docker-build-push@v0
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: nais/nais-prod.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
       - name: build artifact
         run: ./gradlew shadowJar
       - name: Push docker image to GAR
@@ -30,4 +26,32 @@ jobs:
           team: tsm
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-
+  deploy-prod:
+    name: Deploy to prod
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: nais/nais-prod.yaml
+          VAR: image=${{ needs.build.outputs.image }}
+  deploy-dev:
+    name: Deploy to dev
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: nais/nais-dev.yaml
+          VAR: image=${{ needs.build.outputs.image }}
