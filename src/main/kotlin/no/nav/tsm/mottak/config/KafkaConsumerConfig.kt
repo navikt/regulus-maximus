@@ -34,7 +34,7 @@ class KafkaConsumerConfig {
         return factory
     }
 
-   /* @Bean
+   @Bean
     fun producerFactory(props: KafkaProperties): KafkaProducer<String, SykmeldingMedBehandlingsutfall> {
         val producer =
             KafkaProducer(props.buildProducerProperties(null).apply{
@@ -42,6 +42,6 @@ class KafkaConsumerConfig {
                 put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
             }, StringSerializer(), SykmeldingMedUtfallSerializer())
         return producer
-    }*/
+    }
 
 }
