@@ -14,18 +14,20 @@ jobs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Java 21
+      - name: Build and push image
         uses: nais/docker-build-push@v0
+        id: docker-build-push
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais/nais-prod.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ steps.docker-build-push.outputs.image }}
+          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
+          DEPLOY_SERVER: deploy.nav.cloud.nais.io:443
       - name: build artifact
         run: ./gradlew shadowJar
       - name: Push docker image to GAR
         if: ${{ github.actor != 'dependabot[bot]' }}
-        uses: nais/docker-build-push@v0
-        id: docker-build-push
+        uses: nais/deploy/actions/deploy@v2
         with:
           team: tsm
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
