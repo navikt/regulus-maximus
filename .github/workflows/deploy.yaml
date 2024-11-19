@@ -103,7 +103,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: nais-dev.yaml
+          RESOURCE: nais/nais-dev.yaml
           VAR: image=${{ needs.build.outputs.image }},commit=${{ github.sha }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
   deploy-prod:
@@ -116,5 +116,5 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: nais-prod.yaml
+          RESOURCE: nais/nais-prod.yaml
           VAR: image=${{ needs.build.outputs.image }},commit=${{ github.sha }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
