@@ -68,18 +68,8 @@ jobs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: navikt/teamsykmelding-github-actions-workflows/actions/gradle-cached-21@main
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: corepack enable
-      - run: yarn --immutable
         env:
           NPM_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-        working-directory: web
-      - run: yarn build
-        working-directory: web
-      - run: yarn copy
-        working-directory: web
       - name: Build jar
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
@@ -113,7 +103,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: naiserator-dev.yaml
+          RESOURCE: nais-dev.yaml
           VAR: image=${{ needs.build.outputs.image }},commit=${{ github.sha }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
   deploy-prod:
@@ -126,5 +116,5 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: naiserator-prod.yaml
+          RESOURCE: nais-prod.yaml
           VAR: image=${{ needs.build.outputs.image }},commit=${{ github.sha }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
