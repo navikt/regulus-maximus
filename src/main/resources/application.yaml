@@ -26,7 +26,11 @@ spring:
     topics:
       sykmeldinger-input: tsm.sykmelding-raw
       sykmeldinger-output: tsm.tsm-sykmeldinger
-
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
+      acks: all
+      retries: 3  # Add other producer properties as needed
 management:
   endpoint:
     prometheus.enabled: true
