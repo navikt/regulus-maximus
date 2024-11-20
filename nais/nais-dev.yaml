@@ -46,7 +46,7 @@ spec:
       cpu: 50m
       memory: 1Gi
   secureLogs:
-    enabled: true
+    enabled: false
   kafka:
     pool: nav-dev
 
