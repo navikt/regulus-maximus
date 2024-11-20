@@ -1,5 +1,5 @@
 <configuration>
-    <springProfile name="!(local | test)">
+    <!--springProfile name="!(local | test)">
         <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/secure-logs/secure.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
@@ -12,7 +12,7 @@
             </triggeringPolicy>
             <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
         </appender>
-    </springProfile>
+    </springProfile-->
 
     <appender name="stdout"
               class="ch.qos.logback.core.ConsoleAppender">
