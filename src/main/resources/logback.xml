@@ -3,18 +3,15 @@
         <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/secure-logs/secure.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-                <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
+                <fileNamePattern>/secure-logs/secure.log</fileNamePattern>
                 <minIndex>1</minIndex>
-                <maxIndex>2</maxIndex>
+                <maxIndex>1</maxIndex>
             </rollingPolicy>
             <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
                 <maxFileSize>50MB</maxFileSize>
             </triggeringPolicy>
             <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
         </appender>
-        <logger name="securelog" level="INFO" additivity="false">
-            <appender-ref ref="secure_log" />
-        </logger>
     </springProfile>
 
     <appender name="stdout"
