@@ -6,18 +6,6 @@ metadata:
   labels:
     team: tsm
     system: mottak
-spring:
-  datasource:
-    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
-    username: ${db.username}
-    password: ${db.password}
-  flyway:
-    enabled: true
-    user: ${db.username}
-    password: ${db.password}
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
 spec:
   gcp:
     sqlInstances:
