@@ -5,8 +5,6 @@ spring:
     password: ${db.password}
   flyway:
     enabled: true
-    user: ${db.username}
-    password: ${db.password}
     locations: classpath:db/migration
     baseline-on-migrate: true
     url: "${DB_JDBC_URL}"
