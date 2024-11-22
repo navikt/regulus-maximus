@@ -9,7 +9,7 @@ spring:
     password: ${db.password}
     locations: classpath:db/migration
     baseline-on-migrate: true
-    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
+    url: "${DB_JDBC_URL}"
   application:
     name: regulus-maximus
   kafka:
@@ -26,7 +26,11 @@ spring:
     topics:
       sykmeldinger-input: tsm.sykmelding-raw
       sykmeldinger-output: tsm.tsm-sykmeldinger
-
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
+      acks: all
+      retries: 3  # Add other producer properties as needed
 management:
   endpoint:
     prometheus.enabled: true

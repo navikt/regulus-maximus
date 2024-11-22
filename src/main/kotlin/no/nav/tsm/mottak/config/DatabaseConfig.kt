@@ -6,9 +6,6 @@ import org.springframework.boot.autoconfigure.jdbc.JdbcProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.convert.CustomConversions
-import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
-import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 
 @Configuration
 @EnableConfigurationProperties(JdbcProperties::class, FlywayProperties::class)
