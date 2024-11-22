@@ -54,5 +54,5 @@ spec:
   kafka:
     pool: nav-prod
   env:
-    name: DB_JDBC_URL
-    value: "jdbc:postgresql://${DB_HOST}:5432/regulus-maximus-db"
+    - name: DB_JDBC_URL
+      value: "jdbc:postgresql://${DB_HOST}:5432/regulus-maximus-db"
