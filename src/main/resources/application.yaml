@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: "jdbc:postgresql://${db.host}:${db.port}/${db.database}"
+    url: "${DB_JDBC_URL}"
     username: ${db.username}
     password: ${db.password}
   flyway:
