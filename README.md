@@ -6,7 +6,7 @@
 2. Start the development server in IntelliJ with "program argument" `--spring.profiles.active=local`
 3. check out http://localhost:8080/ 
 
-
+# noop
 
 ### Verifying Kafka
 You can verify that Kafka has started and list the existing topics by running the following commands:
