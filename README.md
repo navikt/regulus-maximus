@@ -8,7 +8,7 @@
 
 ### Verifying Kafka
 You can verify that Kafka has started and list the existing topics by running the following commands:
-
+Testupdate
 ```bash
 # Exec into Kafka container
 docker exec -it my_kafka_broker bash
