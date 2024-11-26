@@ -3,6 +3,9 @@ spring:
     url: "${DB_JDBC_URL}"
     username: ${db.username}
     password: ${db.password}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 1
   flyway:
     enabled: true
     user: ${db.username}
