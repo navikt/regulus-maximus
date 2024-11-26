@@ -4,7 +4,7 @@ spring:
     username: ${db.username}
     password: ${db.password}
   flyway:
-    enabled: true
+    enabled: false
     user: ${db.username}
     password: ${db.password}
     locations: classpath:db/migration
