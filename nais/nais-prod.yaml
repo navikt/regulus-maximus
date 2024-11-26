@@ -11,7 +11,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: regulus-maximus-instance
-        cascadingDelete: true
+        cascadingDelete: false
         databases:
           - name: regulus-maximus
             envVarPrefix: DB
@@ -28,7 +28,12 @@ spec:
   image: {{ image }}
   replicas:
     min: 1
-    max: 1
+    max: 10
+    scalingStrategy:
+      kafka:
+        topic: tsm.sykmeldinger-input
+        consumerGroup: regulus-maximus
+        threshold: 50
     cpuThresholdPercentage: 90
   port: 8080
   liveness:

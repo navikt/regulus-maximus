@@ -30,7 +30,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
       acks: all
-      retries: 3  # Add other producer properties as needed
+      retries: 3
 management:
   endpoint:
     prometheus.enabled: true
