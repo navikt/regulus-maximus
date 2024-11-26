@@ -15,11 +15,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
-@Configuration
+//@Configuration
 @EnableConfigurationProperties
 class KafkaConsumerConfig {
 
-    @Bean
+   //7 @Bean
     fun containerFactory(props: KafkaProperties, errorHandler: ConsumerErrorHandler): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
         val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
@@ -34,7 +34,7 @@ class KafkaConsumerConfig {
         return factory
     }
 
-   @Bean
+  // @Bean
     fun producerFactory(props: KafkaProperties): KafkaProducer<String, SykmeldingMedBehandlingsutfall> {
         val producer =
             KafkaProducer(props.buildProducerProperties(null).apply{

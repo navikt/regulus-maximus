@@ -7,10 +7,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-@Configuration
-@EnableConfigurationProperties(JdbcProperties::class, FlywayProperties::class)
+//@Configuration
+//@EnableConfigurationProperties(JdbcProperties::class, FlywayProperties::class)
 class DatabaseConfig {
-    @Bean
+    //@Bean
     fun flyway(flywayProperties: FlywayProperties, jdbcProperties: JdbcProperties): Flyway {
         val flyway = Flyway.configure()
             .dataSource(

@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
-@Repository
+//@Repository
 interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, String> {
 
     fun findTop10ByOrderByGeneratedDateDesc(): List<SykmeldingBehandlingsutfall>
