@@ -7,8 +7,8 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 import org.springframework.kafka.annotation.EnableKafka
 
 @SpringBootApplication
-//@EnableKafka
-//@EnableJdbcRepositories
+@EnableKafka
+@EnableJdbcRepositories
 @ConfigurationPropertiesScan
 class Application
 

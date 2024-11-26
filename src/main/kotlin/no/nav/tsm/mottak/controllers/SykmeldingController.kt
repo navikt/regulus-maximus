@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("local")
 @RestController
 class SykmeldingController(
-   // private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
+    private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
 ) {
 
@@ -121,9 +121,9 @@ class SykmeldingController(
         val sykmeldingMedBehandlingsutfall = createNewSykmelding()
         val sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id
         logger.info("Sending sykmelding med id... ${sykmeldingId} ")
-           /* kafkaTemplate.send(
+           kafkaTemplate.send(
                 ProducerRecord(topic, sykmeldingId, sykmeldingMedBehandlingsutfall)
-            )*/
+            )
         return """
             <div>
                 <p>Sykmelding ID: ${sykmeldingId}</p>

@@ -15,12 +15,15 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
-//@Configuration
+@Configuration
 @EnableConfigurationProperties
 class KafkaConsumerConfig {
 
-   //7 @Bean
-    fun containerFactory(props: KafkaProperties, errorHandler: ConsumerErrorHandler): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
+    @Bean
+    fun containerFactory(
+        props: KafkaProperties,
+        errorHandler: ConsumerErrorHandler
+    ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
         val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
@@ -34,11 +37,13 @@ class KafkaConsumerConfig {
         return factory
     }
 
-  // @Bean
+    @Bean
     fun producerFactory(props: KafkaProperties): KafkaProducer<String, SykmeldingMedBehandlingsutfall> {
         val producer =
-            KafkaProducer(props.buildProducerProperties(null).apply{
+            KafkaProducer(props.buildProducerProperties(null).apply {
                 put(ProducerConfig.ACKS_CONFIG, "all")
+                put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip")
+                // put(ProducerConfig.COMPRESSION_GZIP_LEVEL_CONFIG, "gzip")
                 put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
             }, StringSerializer(), SykmeldingMedUtfallSerializer())
         return producer

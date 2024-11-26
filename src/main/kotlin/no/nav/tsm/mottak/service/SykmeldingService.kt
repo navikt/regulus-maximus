@@ -9,21 +9,20 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingService(
-  //  private val sykmeldingRepository: SykmeldingRepository,
-   // private val sykmeldingMapper: SykmeldingMapper,
+    private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingMapper: SykmeldingMapper,
 ) {
 
     @Transactional
     fun saveSykmelding(sykmelding: SykmeldingMedBehandlingsutfall) {
-       // sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
+        sykmeldingRepository.upsertSykmelding(sykmeldingMapper.toSykmeldingBehandlingsutfall(sykmelding))
     }
 
     fun getLatestSykmeldinger(): List<SykmeldingBehandlingsutfall> {
-        return emptyList()
-        //return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc()
+        return sykmeldingRepository.findTop10ByOrderByGeneratedDateDesc()
     }
 
     fun delete(sykmeldingId: String) {
-          //  sykmeldingRepository.deleteById(sykmeldingId)
+        sykmeldingRepository.deleteById(sykmeldingId)
     }
 }

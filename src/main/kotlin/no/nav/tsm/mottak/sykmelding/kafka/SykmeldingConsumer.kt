@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
-// @Service
+@Service
 class SykmeldingConsumer(
     private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
     private val sykmeldingService: SykmeldingService,
@@ -24,12 +24,12 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-   /* @KafkaListener(
+    @KafkaListener(
         topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
         groupId = "regulus-maximus",
         containerFactory = "containerFactory",
         batch = "true"
-    )*/
+    )
     fun consume(records: List<ConsumerRecord<String, SykmeldingMedBehandlingsutfall>>) {
         try {
             records.forEach { record ->
