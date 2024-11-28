@@ -18,7 +18,6 @@ repositories {
     }
 }
 
-val ktor_version = "2.3.7"
 val kotlin_version = "2.0.21"
 val logback_version = "1.5.11"
 val logback_encoder_version = "8.0"
