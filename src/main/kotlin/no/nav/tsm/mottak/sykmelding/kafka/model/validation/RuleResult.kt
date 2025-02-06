@@ -40,13 +40,14 @@ sealed interface Rule {
     val type: RuleType
     val name: String
     val description: String
+    val timestamp: OffsetDateTime
     val validationType: ValidationType
 }
 
 data class InvalidRule(
     override val name: String,
     override val description: String,
-    val timestamp: OffsetDateTime,
+    override val timestamp: OffsetDateTime,
     override val validationType: ValidationType = ValidationType.AUTOMATIC
 ) : Rule {
     override val type = RuleType.INVALID
@@ -55,17 +56,17 @@ data class InvalidRule(
 
 data class PendingRule(
     override val name: String,
-    val timestamp: OffsetDateTime,
+    override val timestamp: OffsetDateTime,
     override val description: String,
+    override val validationType: ValidationType = ValidationType.AUTOMATIC
     ) : Rule {
-    override val validationType = ValidationType.MANUAL
     override val type = RuleType.PENDING
 }
 
 data class OKRule(
     override val name: String,
     override val description: String,
-    val timestamp: OffsetDateTime,
+    override val timestamp: OffsetDateTime,
     override val validationType: ValidationType = ValidationType.MANUAL
 ) : Rule {
     override val type = RuleType.OK

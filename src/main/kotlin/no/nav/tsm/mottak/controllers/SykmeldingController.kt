@@ -2,9 +2,9 @@ package no.nav.tsm.mottak.controllers
 
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
+import kotlinx.html.title
 import no.nav.tsm.mottak.controllers.model.createNewSykmelding
-import no.nav.tsm.mottak.service.SykmeldingService
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
+import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("local")
 @RestController
 class SykmeldingController(
-    private val kafkaTemplate: KafkaProducer<String, SykmeldingMedBehandlingsutfall>,
-    private val sykmeldingService: SykmeldingService,
+    private val kafkaTemplate: KafkaProducer<String, SykmeldingRecord>,
 ) {
 
     @Value("\${spring.kafka.topics.sykmeldinger-input}")
@@ -95,25 +94,6 @@ class SykmeldingController(
         """.trimIndent()
 
         return globalCss
-    }
-
-    @GetMapping("/htmx/list-example")
-    fun listExample(): List<String> {
-        logger.info("Fetching sykmeldinger from cache")
-
-        val lastTenSykmeldinger = sykmeldingService.getLatestSykmeldinger()
-
-
-        return lastTenSykmeldinger
-            .map { sykmelding ->
-                """
-            <div>
-                <p>Sykmelding ID: ${sykmelding.sykmeldingId}</p>
-                <p>Utfall: ${sykmelding.validation}</p>
-                <br/>
-            </div>
-            """.trimIndent()
-            }
     }
 
     @PostMapping("/htmx/post-sykmelding")

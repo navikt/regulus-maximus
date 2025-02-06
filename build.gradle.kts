@@ -57,7 +57,9 @@ dependencies {
 }
 
 tasks {
-
+    test {
+        useJUnitPlatform()
+    }
     shadowJar {
         archiveBaseName.set("app")
         archiveClassifier.set("")
@@ -66,7 +68,7 @@ tasks {
             attributes["Main-Class"] = "no.nav.tsm.mottak.ApplicationKt"
         }
     }
-    
+
     bootJar {
         archiveFileName = "app.jar"
     }

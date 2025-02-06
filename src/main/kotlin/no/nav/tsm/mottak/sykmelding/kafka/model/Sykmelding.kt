@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 
-data class SykmeldingMedBehandlingsutfall(
+data class SykmeldingRecord(
     val metadata: Meldingsinformasjon,
     val sykmelding: ISykmelding,
     val validation: ValidationResult,
@@ -130,8 +130,7 @@ data class SporsmalSvar(
     val sporsmal: String?, val svar: String, val restriksjoner: List<SvarRestriksjon>
 )
 
-enum class SvarRestriksjon(
-) {
+enum class SvarRestriksjon {
     SKJERMET_FOR_ARBEIDSGIVER, SKJERMET_FOR_PASIENT, SKJERMET_FOR_NAV,
 }
 

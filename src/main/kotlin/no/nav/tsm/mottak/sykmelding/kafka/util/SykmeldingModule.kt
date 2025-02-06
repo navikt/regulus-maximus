@@ -56,10 +56,10 @@ class IArbeidDeserializer : CustomDeserializer<IArbeid>() {
 
 class ArbeidsgiverInfoDeserializer : CustomDeserializer<ArbeidsgiverInfo>() {
     override fun getClass(type: String): KClass<out ArbeidsgiverInfo> {
-        return when (ARBEIDSGIVER_TYPE.valueOf(type)) {
-            ARBEIDSGIVER_TYPE.EN_ARBEIDSGIVER -> EnArbeidsgiver::class
-            ARBEIDSGIVER_TYPE.FLERE_ARBEIDSGIVERE -> FlereArbeidsgivere::class
-            ARBEIDSGIVER_TYPE.INGEN_ARBEIDSGIVER -> IngenArbeidsgiver::class
+        return when (ArbeidsgiverType.valueOf(type)) {
+            ArbeidsgiverType.EN_ARBEIDSGIVER -> EnArbeidsgiver::class
+            ArbeidsgiverType.FLERE_ARBEIDSGIVERE -> FlereArbeidsgivere::class
+            ArbeidsgiverType.INGEN_ARBEIDSGIVER -> IngenArbeidsgiver::class
         }
     }
 }

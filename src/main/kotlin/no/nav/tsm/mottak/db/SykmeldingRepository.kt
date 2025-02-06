@@ -7,9 +7,9 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, String> {
+interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
 
-    fun findTop10ByOrderByGeneratedDateDesc(): List<SykmeldingBehandlingsutfall>
+    fun findBySykmeldingId(sykmeldingId: String): SykmeldingDB?
 
     @Modifying
     @Query(
@@ -31,5 +31,7 @@ interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, Str
         validation = EXCLUDED.validation
     """
     )
-    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingBehandlingsutfall)
+    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingDB)
+
+    fun deleteBySykmeldingId(sykmeldingId: String): Int
 }

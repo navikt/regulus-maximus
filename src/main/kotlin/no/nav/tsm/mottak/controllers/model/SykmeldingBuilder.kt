@@ -10,9 +10,9 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 
-fun createNewSykmelding() : SykmeldingMedBehandlingsutfall
+fun createNewSykmelding() : SykmeldingRecord
 {
-    return SykmeldingMedBehandlingsutfall(
+    return SykmeldingRecord(
         sykmelding = Sykmelding(
             id = UUID.randomUUID().toString(),
             metadata = SykmeldingMetadata(mottattDato = OffsetDateTime.now(), genDate = OffsetDateTime.now(), behandletTidspunkt = OffsetDateTime.now(), regelsettVersjon = null, avsenderSystem = AvsenderSystem(navn = "", versjon =""), strekkode = null),

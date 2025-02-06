@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 
 
 @Table(name = "sykmelding")
-data class SykmeldingBehandlingsutfall(
+data class SykmeldingDB(
     val sykmeldingId: String,
     val pasientIdent: String,
     val fom: LocalDate,

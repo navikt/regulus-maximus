@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.time.LocalDate
 
-enum class ARBEIDSGIVER_TYPE {
+enum class ArbeidsgiverType {
     EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE, INGEN_ARBEIDSGIVER,
 }
 
@@ -17,14 +17,14 @@ enum class ARBEIDSGIVER_TYPE {
 )
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface ArbeidsgiverInfo{
-    val type: ARBEIDSGIVER_TYPE
+    val type: ArbeidsgiverType
 }
 
 data class EnArbeidsgiver(
     val meldingTilArbeidsgiver: String?,
     val tiltakArbeidsplassen: String?,
 ) : ArbeidsgiverInfo {
-    override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.EN_ARBEIDSGIVER
+    override val type: ArbeidsgiverType = ArbeidsgiverType.EN_ARBEIDSGIVER
 }
 
 data class FlereArbeidsgivere(
@@ -34,11 +34,11 @@ data class FlereArbeidsgivere(
     val meldingTilArbeidsgiver: String?,
     val tiltakArbeidsplassen: String?
 ) : ArbeidsgiverInfo {
-    override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.FLERE_ARBEIDSGIVERE
+    override val type: ArbeidsgiverType = ArbeidsgiverType.FLERE_ARBEIDSGIVERE
 }
 
 class IngenArbeidsgiver() : ArbeidsgiverInfo {
-    override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.INGEN_ARBEIDSGIVER
+    override val type: ArbeidsgiverType = ArbeidsgiverType.INGEN_ARBEIDSGIVER
     override fun equals(other: Any?) = other is IngenArbeidsgiver
     override fun hashCode() = type.hashCode()
     override fun toString() = "IngenArbeidsgiver(type=$type)"

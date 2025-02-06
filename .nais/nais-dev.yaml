@@ -9,7 +9,7 @@ metadata:
 spec:
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_17
         name: regulus-maximus-instance
         cascadingDelete: false
         databases:
@@ -53,4 +53,12 @@ spec:
     enabled: false
   kafka:
     pool: nav-dev
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
 
