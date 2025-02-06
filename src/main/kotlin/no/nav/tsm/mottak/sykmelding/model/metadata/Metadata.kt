@@ -1,31 +1,25 @@
-package no.nav.tsm.mottak.sykmelding.kafka.model.metadata
+package no.nav.tsm.mottak.sykmelding.model.metadata
 
 import java.time.OffsetDateTime
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 
 enum class MetadataType {
     ENKEL,
     EMOTTAK,
     UTENLANDSK_SYKMELDING,
     PAPIRSYKMELDING,
-    EGENMELDT
+    EGENMELDT,
 }
 
-@JsonSubTypes(
-    Type(EDIEmottak::class, name = "EGENMELDT"),
-    Type(Papirsykmelding::class, name = "PAPIRSYKMELDING"),
-    Type(Utenlandsk::class, name = "UTENLANDSK_SYKMELDING"),
-    Type(EmottakEnkel::class, name = "ENKEL"),
-    Type(EDIEmottak::class, name = "EMOTTAK"),
-)
-@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface Meldingsinformasjon {
     val type: MetadataType
     val vedlegg: List<String>?
+}
+
+data class Egenmeldt(
+    val msgInfo: MeldingMetadata,
+) : Meldingsinformasjon {
+    override val type: MetadataType = MetadataType.EGENMELDT
+    override val vedlegg: List<String> = emptyList()
 }
 
 data class Papirsykmelding(
@@ -55,13 +49,6 @@ data class EmottakEnkel(
     override val type = MetadataType.ENKEL
 }
 
-data class Egenmeldt(
-    val msgInfo: MeldingMetadata,
-) : Meldingsinformasjon {
-    override val type: MetadataType = MetadataType.EGENMELDT
-    override val vedlegg: List<String> = emptyList()
-}
-
 enum class AckType {
     JA,
     NEI,
@@ -69,6 +56,18 @@ enum class AckType {
     IKKE_OPPGITT,
     UGYLDIG;
 
+    companion object {
+        fun parse(value: String?): AckType {
+            return when (value) {
+                null -> IKKE_OPPGITT
+                "J" -> JA
+                "N" -> NEI
+                "F" -> KUN_VED_FEIL
+                "" -> UGYLDIG
+                else -> throw IllegalArgumentException("Unrecognized ack type: $value")
+            }
+        }
+    }
 }
 data class Ack(
     val ackType: AckType,
@@ -88,6 +87,13 @@ data class EDIEmottak(
 
 enum class Meldingstype {
     SYKMELDING;
+
+    companion object {
+        fun parse(v: String): Meldingstype = when (v) {
+            "SYKMELD" -> SYKMELDING
+            else -> throw IllegalArgumentException("Ukjent meldingstype: $v")
+        }
+    }
 }
 
 

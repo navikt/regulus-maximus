@@ -1,15 +1,12 @@
-package no.nav.tsm.mottak.sykmelding.kafka.model
+package no.nav.tsm.mottak.sykmelding.model
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Adresse
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.HelsepersonellKategori
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Kontaktinfo
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Navn
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.PersonId
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
+
+import no.nav.tsm.mottak.sykmelding.model.metadata.Adresse
+import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
+import no.nav.tsm.mottak.sykmelding.model.metadata.Kontaktinfo
+import no.nav.tsm.mottak.sykmelding.model.metadata.Meldingsinformasjon
+import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
+import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -45,11 +42,6 @@ enum class SykmeldingType {
     UTENLANDSK_SYKMELDING
 }
 
-@JsonSubTypes(
-    JsonSubTypes.Type(Sykmelding::class, name = "SYKMELDING"),
-    JsonSubTypes.Type(UtenlandskSykmelding::class, name = "UTENLANDSK_SYKMELDING"),
-)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = PROPERTY, property = "type")
 sealed interface ISykmelding {
     val type: SykmeldingType
     val id: String
@@ -125,14 +117,14 @@ data class UtenlandskInfo(
     val folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean,
     val erAdresseUtland: Boolean?,
 )
-
 data class SporsmalSvar(
-    val sporsmal: String?, val svar: String, val restriksjoner: List<SvarRestriksjon>
+    val sporsmal: String?,
+    val svar: String,
+    val restriksjoner: List<SvarRestriksjon>
 )
-
-enum class SvarRestriksjon {
-    SKJERMET_FOR_ARBEIDSGIVER, SKJERMET_FOR_PASIENT, SKJERMET_FOR_NAV,
+enum class SvarRestriksjon(
+) {
+    SKJERMET_FOR_ARBEIDSGIVER,
+    SKJERMET_FOR_PASIENT,
+    SKJERMET_FOR_NAV,
 }
-
-
-

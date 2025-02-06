@@ -1,8 +1,8 @@
 package no.nav.tsm.mottak.config
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingRecord
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -34,6 +34,7 @@ class KafkaConsumerConfig {
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
         factory.consumerFactory = consumerFactory
+        factory.setCommonErrorHandler(errorHandler)
         return factory
     }
 

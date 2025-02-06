@@ -1,11 +1,22 @@
 package no.nav.tsm.mottak.controllers.model
 
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.*
-import no.nav.tsm.mottak.sykmelding.kafka.model.Pasient
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.*
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.RuleType
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
+
+import no.nav.tsm.mottak.sykmelding.model.AktivitetIkkeMulig
+import no.nav.tsm.mottak.sykmelding.model.AvsenderSystem
+import no.nav.tsm.mottak.sykmelding.model.Behandler
+import no.nav.tsm.mottak.sykmelding.model.EnArbeidsgiver
+import no.nav.tsm.mottak.sykmelding.model.MedisinskVurdering
+import no.nav.tsm.mottak.sykmelding.model.Pasient
+import no.nav.tsm.mottak.sykmelding.model.RuleType
+import no.nav.tsm.mottak.sykmelding.model.SignerendeBehandler
+import no.nav.tsm.mottak.sykmelding.model.Sykmelding
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingMetadata
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
+import no.nav.tsm.mottak.sykmelding.model.ValidationResult
+import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
+import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
+import no.nav.tsm.mottak.sykmelding.model.metadata.Utenlandsk
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*

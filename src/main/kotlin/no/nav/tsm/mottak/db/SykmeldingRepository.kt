@@ -5,12 +5,14 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
 
     fun findBySykmeldingId(sykmeldingId: String): SykmeldingDB?
 
+    @Transactional
     @Modifying
     @Query(
         """
@@ -33,5 +35,9 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
     )
     fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingDB)
 
-    fun deleteBySykmeldingId(sykmeldingId: String): Int
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM sykmelding WHERE sykmelding_id = :sykmeldingId")
+    fun deleteBySykmeldingId(@Param("sykmeldingId") sykmeldingId: String): Boolean
+
 }

@@ -1,12 +1,12 @@
 package no.nav.tsm.mottak.db
 
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.InvalidRule
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.OKRule
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.PendingRule
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.RuleType
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationResult
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.ValidationType
+import no.nav.tsm.mottak.sykmelding.model.OKRule
+import no.nav.tsm.mottak.sykmelding.model.PendingRule
+import no.nav.tsm.mottak.sykmelding.model.InvalidRule
+import no.nav.tsm.mottak.sykmelding.model.RuleType
+import no.nav.tsm.mottak.sykmelding.model.ValidationResult
+import no.nav.tsm.mottak.sykmelding.model.ValidationType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.OffsetDateTime

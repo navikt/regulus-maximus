@@ -4,7 +4,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.html.title
 import no.nav.tsm.mottak.controllers.model.createNewSykmelding
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingRecord
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory

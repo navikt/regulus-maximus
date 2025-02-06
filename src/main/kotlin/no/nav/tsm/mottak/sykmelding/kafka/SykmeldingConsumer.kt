@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingRecord
-import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingModule
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingModule
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -27,12 +27,7 @@ class SykmeldingConsumer(
         batch = "false"
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
-        try {
-            sykmeldingService.updateSykmelding(record.key(), record.value())
-        } catch (e: Throwable) {
-            logger.error("Failed to read message fra topic ", e)
-            throw e
-        }
+        sykmeldingService.updateSykmelding(record.key(), record.value())
     }
 }
 

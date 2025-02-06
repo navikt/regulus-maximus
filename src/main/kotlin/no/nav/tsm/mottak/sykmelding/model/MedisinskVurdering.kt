@@ -1,9 +1,9 @@
-package no.nav.tsm.mottak.sykmelding.kafka.model
+package no.nav.tsm.mottak.sykmelding.model
 
 import java.time.LocalDate
 
 enum class DiagnoseSystem {
-    ICPC2, ICD10, ICPC2B
+    ICPC2, ICD10, ICPC2B, PHBU, UGYLDIG
 }
 
 data class DiagnoseInfo(

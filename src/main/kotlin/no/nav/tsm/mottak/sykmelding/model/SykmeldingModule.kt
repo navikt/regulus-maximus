@@ -1,22 +1,22 @@
-package no.nav.tsm.mottak.sykmelding.kafka.model
+package no.nav.tsm.mottak.sykmelding.model
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EDIEmottak
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Egenmeldt
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.EmottakEnkel
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Meldingsinformasjon
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.MetadataType
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Papirsykmelding
-import no.nav.tsm.mottak.sykmelding.kafka.model.metadata.Utenlandsk
-import no.nav.tsm.mottak.sykmelding.kafka.model.validation.*
+import no.nav.tsm.mottak.sykmelding.model.metadata.EDIEmottak
+import no.nav.tsm.mottak.sykmelding.model.metadata.Egenmeldt
+import no.nav.tsm.mottak.sykmelding.model.metadata.EmottakEnkel
+import no.nav.tsm.mottak.sykmelding.model.metadata.Meldingsinformasjon
+import no.nav.tsm.mottak.sykmelding.model.metadata.MetadataType
+import no.nav.tsm.mottak.sykmelding.model.metadata.Papirsykmelding
+import no.nav.tsm.mottak.sykmelding.model.metadata.Utenlandsk
 import kotlin.reflect.KClass
 
 class SykmeldingModule : SimpleModule() {
     init {
+        addDeserializer(ISykmelding::class.java, SykmeldingDeserializer())
         addDeserializer(Aktivitet::class.java, AktivitetDeserializer())
         addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
@@ -36,7 +36,14 @@ abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
         return p.codec.treeToValue(node, clazz.java)
     }
 }
-
+class SykmeldingDeserializer : CustomDeserializer<ISykmelding>() {
+    override fun getClass(type: String): KClass<out ISykmelding> {
+        return when (SykmeldingType.valueOf(type)) {
+            SykmeldingType.SYKMELDING -> Sykmelding::class
+            SykmeldingType.UTENLANDSK_SYKMELDING -> UtenlandskSykmelding::class
+        }
+    }
+}
 class MeldingsinformasjonDeserializer : CustomDeserializer<Meldingsinformasjon>() {
     override fun getClass(type: String): KClass<out Meldingsinformasjon> {
         return when (MetadataType.valueOf(type)) {
@@ -72,10 +79,10 @@ class IArbeidDeserializer : CustomDeserializer<IArbeid>() {
 
 class ArbeidsgiverInfoDeserializer : CustomDeserializer<ArbeidsgiverInfo>() {
     override fun getClass(type: String): KClass<out ArbeidsgiverInfo> {
-        return when (ArbeidsgiverType.valueOf(type)) {
-            ArbeidsgiverType.EN_ARBEIDSGIVER -> EnArbeidsgiver::class
-            ArbeidsgiverType.FLERE_ARBEIDSGIVERE -> FlereArbeidsgivere::class
-            ArbeidsgiverType.INGEN_ARBEIDSGIVER -> IngenArbeidsgiver::class
+        return when (ARBEIDSGIVER_TYPE.valueOf(type)) {
+            ARBEIDSGIVER_TYPE.EN_ARBEIDSGIVER -> EnArbeidsgiver::class
+            ARBEIDSGIVER_TYPE.FLERE_ARBEIDSGIVERE -> FlereArbeidsgivere::class
+            ARBEIDSGIVER_TYPE.INGEN_ARBEIDSGIVER -> IngenArbeidsgiver::class
         }
     }
 }

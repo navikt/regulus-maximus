@@ -2,7 +2,7 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingRecord
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
