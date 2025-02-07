@@ -2,6 +2,8 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
+import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
+import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val kafkaTemplate: KafkaProducer<String, SykmeldingRecord>,
+    private val pdlClient: PdlClient,
     @Value("\${spring.kafka.topics.sykmeldinger-output}") private val tsmSykmeldingTopic: String,
 ) {
 
@@ -27,6 +30,19 @@ class SykmeldingService(
             delete(sykmeldingId)
             tombStone(sykmeldingId)
             return
+        }
+        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
+        if(person == null) {
+            log.error("Person not found for fnr ${sykmelding.sykmelding.pasient.fnr}")
+            throw RuntimeException("Person not found for sykmelding with id $sykmeldingId")
+        }
+        val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
+        log.info("Received sykmelding with id $sykmeldingId, aktorId: $aktorId")
+
+        val currentIdent = person.identer.first { !it.historisk && it.ident == sykmelding.sykmelding.pasient.fnr }
+
+        if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
+            log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
         }
 
         val previousSykmelding =

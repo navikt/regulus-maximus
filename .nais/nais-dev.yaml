@@ -6,6 +6,8 @@ metadata:
   labels:
     team: tsm
     system: mottak
+  annotations:
+    texas.nais.io/enabled: "true"
 spec:
   gcp:
     sqlInstances:
@@ -53,6 +55,13 @@ spec:
     enabled: false
   kafka:
     pool: nav-dev
+  azure:
+    application:
+      enabled: true
+  accessPolicy:
+    outbound:
+      rules:
+        - application: tsm-pdl-cache
   observability:
     autoInstrumentation:
       enabled: true

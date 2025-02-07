@@ -40,3 +40,13 @@ management:
   health:
     livenessstate.enabled: true
     readinessState.enabled: true
+
+nais:
+  cluster: ${NAIS_CLUSTER_NAME}
+  texas:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+
+tsm:
+  pdl:
+    service: tsm.tsm-pdl-cache
+    url: http://tsm-pdl-cache
