@@ -4,6 +4,7 @@ import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
 import no.nav.tsm.mottak.pdl.PdlClient
+import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -61,6 +62,10 @@ class SykmeldingService(
             old = previousSykmelding.validation,
             new = sykmelding.validation
         )
+        val times =  mergedValidation.rules.map { it.timestamp }
+        if(times.size != times.distinct().size) {
+            throw SykmeldingMergeValidationException("Sykmelding rulevalidations with same timestamps but different rules ${sykmelding.sykmelding.id}")
+        }
         val mergedSykmelding = SykmeldingRecord(metadata, newSykmelding , mergedValidation)
         sykmeldingRepository.upsertSykmelding(SykmeldingMapper.toSykmeldingDB(mergedSykmelding))
         log.info("Merging sykmelding with id ${sykmelding.sykmelding.id}, old validation: ${previousSykmelding.validation}, new validation: ${sykmelding.validation} -> merged validation: $mergedValidation")
