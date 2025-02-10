@@ -25,6 +25,8 @@ spec:
             value: "on"
         pointInTimeRecovery: true
         tier: db-custom-2-5120
+    buckets:
+      - name: regulus-maximus-bucket-dev
   image: {{ image }}
   replicas:
     min: 1
