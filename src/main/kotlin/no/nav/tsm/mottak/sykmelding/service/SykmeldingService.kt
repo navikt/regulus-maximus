@@ -40,7 +40,7 @@ class SykmeldingService(
         val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
         log.info("Received sykmelding with id $sykmeldingId, aktorId: $aktorId")
 
-        val currentIdent = person.identer.first { !it.historisk && it.ident == sykmelding.sykmelding.pasient.fnr }
+        val currentIdent = person.identer.first { !it.historisk && it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT }
 
         if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
             log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
