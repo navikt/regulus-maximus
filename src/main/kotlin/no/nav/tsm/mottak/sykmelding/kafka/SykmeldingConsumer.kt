@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tsm.mottak.db.SykmeldingDBMappingException
 import no.nav.tsm.mottak.pdl.PersonNotFoundException
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingModule
@@ -38,8 +39,14 @@ class SykmeldingConsumer(
             } else {
                 throw e
             }
+        } catch (e: SykmeldingDBMappingException) {
+            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            if(clusterName == "dev-gcp") {
+                logger.warn("Failed to map sykmelding in dev-gcp, skipping sykmelding")
+            } else {
+                throw e
+            }
         }
-
     }
 }
 

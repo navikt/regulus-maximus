@@ -10,21 +10,27 @@ import no.nav.tsm.mottak.sykmelding.model.ValidationType
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import org.postgresql.util.PGobject
 
+class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(message, ex)
+
 object SykmeldingMapper {
 
     fun toSykmeldingDB(
         sykmeldingMedBehandlingsutfall: SykmeldingRecord
     ): SykmeldingDB {
-        return SykmeldingDB(
-            sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id,
-            pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.fnr,
-            fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
-            tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
-            generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.metadata.genDate,
-            sykmelding =  sykmeldingMedBehandlingsutfall.sykmelding.toPGobject(),
-            validation = sykmeldingMedBehandlingsutfall.validation.toPGobject(),
-            metadata = sykmeldingMedBehandlingsutfall.metadata.toPGobject(),
-        )
+        try {
+            return SykmeldingDB(
+                sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id,
+                pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.fnr,
+                fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
+                tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
+                generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.metadata.genDate,
+                sykmelding =  sykmeldingMedBehandlingsutfall.sykmelding.toPGobject(),
+                validation = sykmeldingMedBehandlingsutfall.validation.toPGobject(),
+                metadata = sykmeldingMedBehandlingsutfall.metadata.toPGobject(),
+            )
+        } catch (ex: Exception) {
+            throw SykmeldingDBMappingException("Failed to map sykmelding to SykmeldingDB: ${ex.message}", ex)
+        }
     }
 
     fun toSykmeldingRecord(sykmeldingDB: SykmeldingDB): SykmeldingRecord {
