@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
@@ -28,6 +29,12 @@ class PdlClient(
             .headers(headers)
             .build()
 
-        return restTemplate.exchange(requestEntity, Person::class.java).body ?: throw RuntimeException("Failed to get person")
+        try {
+            return restTemplate.exchange(requestEntity, Person::class.java).body ?: throw PersonNotFoundException("Failed to get person from PDL cache")
+        } catch (e: HttpClientErrorException.NotFound) {
+            throw PersonNotFoundException("Could not find person in pdl cache")
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to get person from PDL cache", e)
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tsm.mottak.pdl.PersonNotFoundException
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingModule
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class SykmeldingConsumer(
     private val sykmeldingService: SykmeldingService,
+    @Value("\${nais.cluster}") private val clusterName: String
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
@@ -27,7 +29,17 @@ class SykmeldingConsumer(
         batch = "false"
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
-        sykmeldingService.updateSykmelding(record.key(), record.value())
+        try {
+            sykmeldingService.updateSykmelding(record.key(), record.value())
+        } catch (e: PersonNotFoundException) {
+            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            if(clusterName == "dev-gcp") {
+                logger.warn("Person not found in dev-gcp, skipping sykmelding")
+            } else {
+                throw e
+            }
+        }
+
     }
 }
 
