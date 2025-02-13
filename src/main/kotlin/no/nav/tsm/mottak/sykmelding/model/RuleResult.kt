@@ -2,6 +2,13 @@ package no.nav.tsm.mottak.sykmelding.model
 
 import java.time.OffsetDateTime
 
+enum class TilbakedatertMerknad {
+    TILBAKEDATERING_UNDER_BEHANDLING,
+    TILBAKEDATERING_UGYLDIG_TILBAKEDATERING,
+    TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER,
+    TILBAKEDATERING_DELVIS_GODKJENT,
+    TILBAKEDATERING_TILBAKEDATERT_PAPIRSYKMELDING
+}
 
 data class ValidationResult(
     val status: RuleType,

@@ -9,6 +9,7 @@ import no.nav.tsm.mottak.sykmelding.model.ValidationResult
 import no.nav.tsm.mottak.sykmelding.model.ValidationType
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import org.postgresql.util.PGobject
+import java.time.OffsetDateTime
 
 class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(message, ex)
 
@@ -79,7 +80,7 @@ object SykmeldingMapper {
 
     private fun mergePendingWithEmpty(
         old: ValidationResult,
-        new: ValidationResult
+        new: ValidationResult,
     ): ValidationResult {
         val rule = old.rules.maxBy { it.timestamp }
         val newRule = when (new.status) {

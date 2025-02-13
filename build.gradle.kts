@@ -49,7 +49,10 @@ dependencies {
 
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:$flyway_version")
+    implementation("com.google.cloud:google-cloud-storage:2.48.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // https://mvnrepository.com/artifact/org.mockito.kotlin/mockito-kotlin
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")

@@ -5,12 +5,16 @@ import no.nav.tsm.mottak.sykmelding.model.OKRule
 import no.nav.tsm.mottak.sykmelding.model.PendingRule
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.RuleType
+import no.nav.tsm.mottak.sykmelding.model.TilbakedatertMerknad
 import no.nav.tsm.mottak.sykmelding.model.ValidationResult
 import no.nav.tsm.mottak.sykmelding.model.ValidationType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.io.File
+import java.nio.file.Files.lines
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SykmeldingMapperTest {
 
@@ -186,7 +190,7 @@ class SykmeldingMapperTest {
             timestamp = oldTimestamp,
             rules = listOf(
                 pending(
-                    name = "TILBAKEDATERING_UNDER_BEHANDLING",
+                    name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
                     timestamp = oldTimestamp,
                     description = "Tilbakedatert sykmelding til manuell behandling",
                     validationType = ValidationType.AUTOMATIC
@@ -204,7 +208,7 @@ class SykmeldingMapperTest {
             timestamp = new.timestamp,
             rules = listOf(
                 OKRule(
-                    name = "TILBAKEDATERING_UNDER_BEHANDLING",
+                    name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
                     description = "Tilbakedatert sykmelding til manuell behandling",
                     timestamp = new.timestamp,
                     validationType = ValidationType.MANUAL,
@@ -351,40 +355,40 @@ class SykmeldingMapperTest {
         val merged = SykmeldingMapper.mergeValidations(SykmeldingMapper.mergeValidations(first, second), invalid)
         assertEquals(expectedMerge, merged)
     }
-
-    private fun pending(
-        timestamp: OffsetDateTime = OffsetDateTime.now(),
-        validationType: ValidationType = ValidationType.AUTOMATIC,
-        name: String = "TILBAKEDATERING_UNDER_BEHANDLING",
-        description: String = "Tilbakedatert sykmelding til manuell behandling",
-    ) = PendingRule(
-        name = name,
-        timestamp = timestamp,
-        description = description,
-        validationType = validationType,
-    )
-
-    private fun ok(
-        timestamp: OffsetDateTime = OffsetDateTime.now(),
-        validationType: ValidationType = ValidationType.AUTOMATIC,
-        name: String = "TILBAKEDATERING_UNDER_BEHANDLING",
-        description: String = "Tilbakedatert sykmelding til manuell behandling",
-    ) = OKRule(
-        name = name,
-        timestamp = timestamp,
-        description = description,
-        validationType = validationType,
-    )
-
-    private fun invalid(
-        timestamp: OffsetDateTime = OffsetDateTime.now(),
-        validationType: ValidationType = ValidationType.AUTOMATIC,
-        name: String = "TILBAKEDATERING_UNDER_BEHANDLING",
-        description: String = "Tilbakedatert sykmelding til manuell behandling",
-    ) = InvalidRule(
-        name = name,
-        timestamp = timestamp,
-        description = description,
-        validationType = validationType,
-    )
 }
+
+fun pending(
+    timestamp: OffsetDateTime = OffsetDateTime.now(),
+    validationType: ValidationType = ValidationType.AUTOMATIC,
+    name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
+    description: String = "Tilbakedatert sykmelding til manuell behandling",
+) = PendingRule(
+    name = name,
+    timestamp = timestamp,
+    description = description,
+    validationType = validationType,
+)
+
+fun ok(
+    timestamp: OffsetDateTime = OffsetDateTime.now(),
+    validationType: ValidationType = ValidationType.AUTOMATIC,
+    name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
+    description: String = "Tilbakedatert sykmelding til manuell behandling",
+) = OKRule(
+    name = name,
+    timestamp = timestamp,
+    description = description,
+    validationType = validationType,
+)
+
+fun invalid(
+    timestamp: OffsetDateTime = OffsetDateTime.now(),
+    validationType: ValidationType = ValidationType.AUTOMATIC,
+    name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
+    description: String = "Tilbakedatert sykmelding til manuell behandling",
+) = InvalidRule(
+    name = name,
+    timestamp = timestamp,
+    description = description,
+    validationType = validationType,
+)

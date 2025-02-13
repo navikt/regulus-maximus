@@ -50,3 +50,7 @@ tsm:
   pdl:
     service: tsm.tsm-pdl-cache
     url: http://tsm-pdl-cache
+
+manuellbehandling:
+  bucket: ${BUCKET_NAME}
+  filename: ${BUCKET_FILE_NAME}
