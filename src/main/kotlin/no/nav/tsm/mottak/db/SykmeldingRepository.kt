@@ -5,12 +5,14 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
-interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, String> {
+interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
 
-    fun findTop10ByOrderByGeneratedDateDesc(): List<SykmeldingBehandlingsutfall>
+    fun findBySykmeldingId(sykmeldingId: String): SykmeldingDB?
 
+    @Transactional
     @Modifying
     @Query(
         """
@@ -31,5 +33,11 @@ interface SykmeldingRepository : CrudRepository<SykmeldingBehandlingsutfall, Str
         validation = EXCLUDED.validation
     """
     )
-    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingBehandlingsutfall)
+    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingDB)
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM sykmelding WHERE sykmelding_id = :sykmeldingId")
+    fun deleteBySykmeldingId(@Param("sykmeldingId") sykmeldingId: String): Boolean
+
 }

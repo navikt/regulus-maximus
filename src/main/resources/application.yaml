@@ -29,11 +29,6 @@ spring:
     topics:
       sykmeldinger-input: tsm.sykmeldinger-input
       sykmeldinger-output: tsm.tsm-sykmeldinger
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
-      acks: all
-      retries: 3
 management:
   endpoint:
     prometheus.enabled: true
@@ -45,3 +40,17 @@ management:
   health:
     livenessstate.enabled: true
     readinessState.enabled: true
+
+nais:
+  cluster: ${NAIS_CLUSTER_NAME}
+  texas:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+
+tsm:
+  pdl:
+    service: tsm.tsm-pdl-cache
+    url: http://tsm-pdl-cache
+
+manuellbehandling:
+  bucket: ${BUCKET_NAME}
+  filename: ${BUCKET_FILE_NAME}

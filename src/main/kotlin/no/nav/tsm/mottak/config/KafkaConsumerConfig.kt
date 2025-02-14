@@ -1,8 +1,8 @@
 package no.nav.tsm.mottak.config
 
-import no.nav.tsm.mottak.sykmelding.kafka.model.SykmeldingMedBehandlingsutfall
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
-import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingMedUtfallSerializer
+import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
+import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -23,29 +23,29 @@ class KafkaConsumerConfig {
     fun containerFactory(
         props: KafkaProperties,
         errorHandler: ConsumerErrorHandler
-    ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall> {
+    ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord> {
         val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
-            }, StringDeserializer(), SykmeldingDeserializer(SykmeldingMedBehandlingsutfall::class)
+            }, StringDeserializer(), SykmeldingDeserializer(SykmeldingRecord::class)
         )
 
-        val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingMedBehandlingsutfall>()
+        val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
         factory.consumerFactory = consumerFactory
+        factory.setCommonErrorHandler(errorHandler)
         return factory
     }
 
     @Bean
-    fun producerFactory(props: KafkaProperties): KafkaProducer<String, SykmeldingMedBehandlingsutfall> {
+    fun kafkaProducer(props: KafkaProperties): KafkaProducer<String, SykmeldingRecord> {
         val producer =
             KafkaProducer(props.buildProducerProperties(null).apply {
                 put(ProducerConfig.ACKS_CONFIG, "all")
                 put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip")
-                // put(ProducerConfig.COMPRESSION_GZIP_LEVEL_CONFIG, "gzip")
                 put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
-            }, StringSerializer(), SykmeldingMedUtfallSerializer())
+            }, StringSerializer(), SykmeldingRecordSerializer())
         return producer
     }
 

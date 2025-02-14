@@ -7,17 +7,31 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
-import org.springframework.util.backoff.ExponentialBackOff
+import org.springframework.util.backoff.FixedBackOff
+import org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS
 
 @Component
 class ConsumerErrorHandler : DefaultErrorHandler(
     null,
-    ExponentialBackOff(1000L, 1.5).also {
-        it.maxInterval = 60_000L * 10
-    },
+    FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS)
 ) {
-
+    companion object {
+        private const val BACKOFF_INTERVAL = 60_000L
+    }
     private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
+
+    override fun handleOne(
+        thrownException: java.lang.Exception,
+        record: ConsumerRecord<*, *>,
+        consumer: Consumer<*, *>,
+        container: MessageListenerContainer
+    ): Boolean {
+        log.error(
+            "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+            thrownException
+        )
+        return super.handleOne(thrownException, record, consumer, container)
+    }
 
     override fun handleRemaining(
         thrownException: Exception,
