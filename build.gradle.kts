@@ -25,6 +25,9 @@ val prometheus_version = "1.13.2"
 val flyway_version= "10.20.0"
 val postgres_version= "42.7.3"
 val jackson_version= "2.17.2"
+val mockitVersion = "3.2.0"
+val kafkaClientVersion = "3.8.0"
+val googleCloudStorageVersion = "2.48.1"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -44,15 +47,13 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
-    implementation("org.apache.kafka:kafka-clients:3.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0")
+    implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
 
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:$flyway_version")
-    implementation("com.google.cloud:google-cloud-storage:2.48.1")
+    implementation("com.google.cloud:google-cloud-storage:$googleCloudStorageVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    // https://mvnrepository.com/artifact/org.mockito.kotlin/mockito-kotlin
-    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")

@@ -5,7 +5,6 @@ import com.google.cloud.storage.Storage
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class ManuellbehandlingServiceTest {
 
