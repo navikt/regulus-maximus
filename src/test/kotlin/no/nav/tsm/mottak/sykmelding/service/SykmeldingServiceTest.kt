@@ -6,10 +6,6 @@ import no.nav.tsm.mottak.db.invalid
 import no.nav.tsm.mottak.db.ok
 import no.nav.tsm.mottak.db.pending
 import no.nav.tsm.mottak.manuell.ManuellbehandlingService
-import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
-import no.nav.tsm.mottak.pdl.Ident
-import no.nav.tsm.mottak.pdl.PdlClient
-import no.nav.tsm.mottak.pdl.Person
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.model.AktivitetIkkeMulig
 import no.nav.tsm.mottak.sykmelding.model.AvsenderSystem
@@ -50,19 +46,14 @@ import java.util.concurrent.CompletableFuture
 
 class SykmeldingServiceTest {
 
-    private val pdlClient = mock(PdlClient::class.java)
     private val sykmeldingRepository: SykmeldingRepository = mock()
     private val kafkaProducer : KafkaProducer<String, SykmeldingRecord> = mock()
     private val manuellbehandlingService: ManuellbehandlingService = mock()
     private val sykmeldingService = SykmeldingService(
-        sykmeldingRepository, kafkaProducer, pdlClient, manuellbehandlingService, "tsmSykmeldingTopic"
+        sykmeldingRepository, kafkaProducer, manuellbehandlingService, "tsmSykmeldingTopic"
     )
     init {
-        Mockito.`when`(pdlClient.getPerson(Mockito.anyString()))
-            .thenReturn(Person(null, null, listOf(
-                Ident("123", IDENT_GRUPPE.FOLKEREGISTERIDENT, false),
-                Ident("123", IDENT_GRUPPE.AKTORID, false)
-            )))
+
         val future: CompletableFuture<RecordMetadata> = mock()
         Mockito.`when`(future.get()).thenReturn(RecordMetadata(null, 0, 0, 0, 0, 0))
         Mockito.`when`(kafkaProducer.send(any())).thenReturn(future)
