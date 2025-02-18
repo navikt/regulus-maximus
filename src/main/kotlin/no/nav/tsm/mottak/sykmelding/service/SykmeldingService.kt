@@ -3,6 +3,8 @@ package no.nav.tsm.mottak.sykmelding.service
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.manuell.ManuellbehandlingService
+import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
+import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.OKRule
@@ -23,6 +25,7 @@ import java.time.OffsetDateTime
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val kafkaTemplate: KafkaProducer<String, SykmeldingRecord>,
+    private val pdlClient: PdlClient,
     private val manuellbehandlingService: ManuellbehandlingService,
     @Value("\${spring.kafka.topics.sykmeldinger-output}") private val tsmSykmeldingTopic: String,
 ) {
@@ -37,6 +40,14 @@ class SykmeldingService(
             delete(sykmeldingId)
             tombStone(sykmeldingId)
             return
+        }
+        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
+        val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
+
+        val currentIdent = person.identer.first { !it.historisk && it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT }
+
+        if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
+            log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
         }
 
         val newSykmeldingRecord = getManuellBehandlingRules(sykmelding)?.let {
