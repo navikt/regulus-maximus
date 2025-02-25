@@ -38,7 +38,7 @@ class SykmeldingService(
             tombStone(sykmeldingId)
             return
         }
-        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
+       /* val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
         val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
 
         val currentIdent = person.identer.first { !it.historisk && it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT }
@@ -46,7 +46,7 @@ class SykmeldingService(
         if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
             log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
         }
-
+*/
         val newSykmeldingRecord = getOldValidation(sykmeldingId)?.let { oldValidation ->
             mergeSykmeldingWithOldValidation(sykmelding, oldValidation).also {
                 log.info("Sykmelding with id $sykmeldingId has old validation $oldValidation, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
