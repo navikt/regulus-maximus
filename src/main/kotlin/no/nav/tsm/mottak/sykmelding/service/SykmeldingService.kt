@@ -1,10 +1,12 @@
 package no.nav.tsm.mottak.sykmelding.service
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.OKRule
 import no.nav.tsm.mottak.sykmelding.model.PendingRule
@@ -62,7 +64,11 @@ class SykmeldingService(
     }
 
     private fun getOldValidation(sykmeldingId: String): ValidationResult? {
-        return sykmeldingRepository.findBySykmeldingId(sykmeldingId)?.let { SykmeldingMapper.toSykmeldingRecord(it).validation }
+        return sykmeldingRepository.findBySykmeldingId(sykmeldingId)?.let {
+            val validation = it.validation.value
+            requireNotNull(validation)
+            objectMapper.readValue(validation)
+        }
     }
 
     private fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult) : SykmeldingRecord {

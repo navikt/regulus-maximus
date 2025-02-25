@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.sykmelding.service
 
+import no.nav.tsm.mottak.db.SykmeldingDB
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.db.invalid
@@ -10,6 +11,7 @@ import no.nav.tsm.mottak.pdl.Ident
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.pdl.Person
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.sykmelding.model.AktivitetIkkeMulig
 import no.nav.tsm.mottak.sykmelding.model.AvsenderSystem
 import no.nav.tsm.mottak.sykmelding.model.Behandler
@@ -43,8 +45,10 @@ import org.mockito.Mockito.mock
 import org.mockito.internal.verification.Times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.CompletableFuture
 
 class SykmeldingServiceTest {
@@ -136,6 +140,53 @@ class SykmeldingServiceTest {
         assertThrows<SykmeldingMergeValidationException> {
             sykmeldingService.updateSykmelding("1", sykmeldingRecord)
         }
+    }
+
+    @Test
+    fun `test pending, ok, ok (bug in syfosmmanuell)`() {
+        val pendingTimestamp =  OffsetDateTime.now(ZoneOffset.UTC).minusDays(1)
+        val firstOkTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(20)
+        val secondOkTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
+        val sykmeldingRecord = getSykmeldingRecord(
+            ValidationResult(
+                status = RuleType.OK,
+                timestamp = secondOkTimestamp,
+                rules = emptyList()
+            )
+        )
+        Mockito.`when`(sykmeldingRepository.findBySykmeldingId("1")).thenReturn(SykmeldingDB(
+            sykmeldingId = "1",
+            pasientIdent = "123",
+            fom = LocalDate.now(),
+            tom = LocalDate.now(),
+            generatedDate = OffsetDateTime.now(),
+            sykmelding = PGobject().apply { value = "" },
+            validation = PGobject().apply {
+                value = objectMapper.writeValueAsString(ValidationResult(
+                    status = RuleType.OK,
+                    timestamp = firstOkTimestamp,
+                    rules = listOf(
+                        ok(timestamp = firstOkTimestamp),
+                        pending(timestamp = pendingTimestamp)
+                    )
+                ))
+            },
+            metadata = PGobject().apply { value = "" },
+        ))
+
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+        Mockito.verify(kafkaProducer).send(argThat {
+            val validation = value().validation
+            val expectedValidation = ValidationResult(
+                status = RuleType.OK,
+                timestamp = secondOkTimestamp,
+                rules = listOf(
+                    ok(timestamp = secondOkTimestamp, validationType = ValidationType.MANUAL),
+                    pending(timestamp = pendingTimestamp)
+                )
+            )
+          validation == expectedValidation
+        })
     }
 }
 
