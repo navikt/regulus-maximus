@@ -71,16 +71,6 @@ object SykmeldingMapper {
                 )
             }
             else -> {
-                if(old.status == RuleType.OK && new.status == RuleType.OK && new.rules.isEmpty() && old.rules.any { it.type == RuleType.PENDING }) {
-                    val oldRules = old.rules.filter { it.type != RuleType.OK }
-                    val oldValidation = ValidationResult(
-                        status = oldRules.maxBy { it.timestamp }.type,
-                        timestamp = oldRules.maxBy { it.timestamp }.timestamp,
-                        rules = oldRules
-                    )
-                    logger.warn("Merging when old and new has OK but with differnt timestamps, old: $old, new: $new")
-                    return mergePendingWithEmpty(oldValidation, new)
-                }
                 if(new.status != old.status || new.timestamp != old.timestamp || !old.rules.containsAll(new.rules)) {
                     throw SykmeldingMergeValidationException("Cannot merge from ${old.status} to ${new.status}")
                 }

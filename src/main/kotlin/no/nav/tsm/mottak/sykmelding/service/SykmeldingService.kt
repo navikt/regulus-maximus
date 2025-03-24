@@ -9,17 +9,14 @@ import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationExceptio
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.OKRule
-import no.nav.tsm.mottak.sykmelding.model.PendingRule
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import no.nav.tsm.mottak.sykmelding.model.ValidationResult
-import no.nav.tsm.mottak.sykmelding.model.ValidationType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.OffsetDateTime
 
 @Service
 class SykmeldingService(
@@ -40,7 +37,7 @@ class SykmeldingService(
             tombStone(sykmeldingId)
             return
         }
-       /* val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
+        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
         val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
 
         val currentIdent = person.identer.first { !it.historisk && it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT }
@@ -48,7 +45,7 @@ class SykmeldingService(
         if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
             log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
         }
-*/
+
         val newSykmeldingRecord = getOldValidation(sykmeldingId)?.let { oldValidation ->
             mergeSykmeldingWithOldValidation(sykmelding, oldValidation).also {
                 log.info("Sykmelding with id $sykmeldingId has old validation $oldValidation, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
@@ -85,13 +82,6 @@ class SykmeldingService(
         }
         return SykmeldingRecord(metadata, newSykmelding , mergedValidation)
     }
-
-    private fun okRule(pendingRule: PendingRule, manualDoneTimestamp: OffsetDateTime) = OKRule(
-        timestamp = manualDoneTimestamp,
-        name = pendingRule.name,
-        description = pendingRule.description,
-        validationType = ValidationType.MANUAL
-    )
 
     private fun insertAndSendSykmelding(sykmelding: SykmeldingRecord) {
         sykmeldingRepository.upsertSykmelding(SykmeldingMapper.toSykmeldingDB(sykmelding))

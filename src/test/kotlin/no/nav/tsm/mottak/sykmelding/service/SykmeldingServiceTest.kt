@@ -174,19 +174,7 @@ class SykmeldingServiceTest {
             metadata = PGobject().apply { value = "" },
         ))
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
-        Mockito.verify(kafkaProducer).send(argThat {
-            val validation = value().validation
-            val expectedValidation = ValidationResult(
-                status = RuleType.OK,
-                timestamp = secondOkTimestamp,
-                rules = listOf(
-                    ok(timestamp = secondOkTimestamp, validationType = ValidationType.MANUAL),
-                    pending(timestamp = pendingTimestamp)
-                )
-            )
-          validation == expectedValidation
-        })
+        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding("1", sykmeldingRecord) }
     }
 }
 
