@@ -1,9 +1,0 @@
-{
-  "partitions": [
-    {
-      "topic": "tsm.mottak-sykmelding",
-      "partition": 0,
-      "offset": 4
-    }
-  ]
-}
