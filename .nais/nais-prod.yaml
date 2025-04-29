@@ -32,7 +32,7 @@ spec:
   image: {{ image }}
   replicas:
     min: 1
-    max: 3
+    max: 10
     scalingStrategy:
       kafka:
         consumerGroup: regulus-maximus
@@ -53,8 +53,8 @@ spec:
     limits:
       memory: 1Gi
     requests:
-      cpu: 50m
-      memory: 600Mi
+      cpu: 250m
+      memory: 512Mi
   secureLogs:
     enabled: false
   kafka:
@@ -74,3 +74,8 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+  env:
+    - name: BUCKET_NAME
+      value: regulus-maximus-bucket-prod
+    - name: BUCKET_FILE_NAME
+      value: syfosmmanuell_backenpublic_manuelloppgave.csv
