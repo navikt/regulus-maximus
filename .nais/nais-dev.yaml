@@ -27,6 +27,8 @@ spec:
             value: "on"
         pointInTimeRecovery: true
         tier: db-f1-micro
+    buckets:
+      - name: regulus-maximus-bucket-dev
   image: {{ image }}
   replicas:
     min: 1
