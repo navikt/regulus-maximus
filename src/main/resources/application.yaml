@@ -28,7 +28,7 @@ spring:
       key-store-password: ${kafka.credstore.password}
     topics:
       sykmeldinger-input: tsm.sykmeldinger-input
-      sykmeldinger-output: tsm.tsm-sykmeldinger
+      sykmeldinger-output: tsm.sykmeldinger
 management:
   endpoint:
     prometheus.enabled: true

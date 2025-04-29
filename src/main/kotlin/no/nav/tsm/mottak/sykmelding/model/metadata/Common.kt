@@ -12,27 +12,6 @@ enum class AdresseType {
     UBRUKELIG_ADRESSE,
     UKJENT,
     UGYLDIG;
-
-    companion object {
-        fun parse(v: String?): AdresseType {
-            return when (v) {
-                "BAD" -> UBRUKELIG_ADRESSE
-                "H" -> BOSTEDSADRESSE
-                "HP" -> FOLKEREGISTERADRESSE
-                "HV" -> FERIEADRESSE
-                "INV" -> FAKTURERINGSADRESSE
-                "PST" -> POSTADRESSE
-                "RES" -> BESOKSADRESSE
-                "TMP" -> MIDLERTIDIG_ADRESSE
-                "WP" -> ARBEIDSADRESSE
-                "2" -> UGYLDIG
-                "token" -> UGYLDIG
-                "OTHER" -> UGYLDIG
-                null -> UKJENT
-                else -> throw IllegalArgumentException("Ukjent adressestype: $v")
-            }
-        }
-    }
 }
 
 data class Adresse(
@@ -64,28 +43,4 @@ enum class KontaktinfoType {
     TLF,
     IKKE_OPPGITT,
     UGYLDIG;
-
-    companion object {
-        fun parse(v: String?): KontaktinfoType {
-            return when (v) {
-                "AS" -> TELEFONSVARER
-                "EC" -> NODNUMMER
-                "F" -> FAX_TELEFAKS
-                "H" -> HJEMME_ELLER_UKJENT
-                "HP" -> HOVEDTELEFON
-                "HV" -> FERIETELEFON
-                "MC" -> MOBILTELEFON
-                "PG" -> PERSONSOKER
-                "WC" -> ARBEIDSPLASS_SENTRALBORD
-                "WD" -> ARBEIDSPLASS_DIREKTENUMMER
-                "WP" -> ARBEIDSPLASS
-                null -> IKKE_OPPGITT
-                "Tel" -> UGYLDIG
-                "vTelecomToken1" -> UGYLDIG
-                "vTelecomToken2" -> UGYLDIG
-                "NONE" -> UGYLDIG
-                else -> throw IllegalArgumentException("Ukjent kontaktinfotype: $v")
-            }
-        }
-    }
 }

@@ -17,28 +17,6 @@ enum class PersonIdType {
     DUF,
     IKKE_OPPGITT,
     UGYLDIG;
-
-    companion object {
-        fun parse(type: String?): PersonIdType {
-            return when (type) {
-                "FNR" -> FNR
-                "DNR" -> DNR
-                "HNR" -> HNR
-                "HPR" -> HPR
-                "HER" -> HER
-                "PNR" -> PNR
-                "SEF" -> SEF
-                "DKF" -> DKF
-                "SSN" -> SSN
-                "FPN" -> FPN
-                "DUF" -> DUF
-                "XXX" -> XXX
-                "" -> UGYLDIG
-                null -> return IKKE_OPPGITT
-                else -> throw IllegalArgumentException("PersonIdType $type not supported")
-            }
-        }
-    }
 }
 enum class Kjonn {
     MANN,
@@ -46,22 +24,6 @@ enum class Kjonn {
     USPESIFISERT,
     IKKE_OPPGITT,
     UGYLDIG;
-
-    companion object {
-        fun parse(v: String?) : Kjonn {
-            return when (v) {
-                "1" -> MANN
-                "2" -> KVINNE
-                "9" -> USPESIFISERT
-                "K" -> UGYLDIG
-                "M" -> UGYLDIG
-                "0" -> UGYLDIG
-                "U" -> UGYLDIG
-                null -> IKKE_OPPGITT
-                else -> throw IllegalArgumentException("Ukjent kjønn: $v")
-            }
-        }
-    }
 }
 
 data class Navn(
@@ -104,34 +66,6 @@ enum class HelsepersonellKategori {
     TANNHELSESEKRETAR,
     UGYLDIG,
     IKKE_OPPGITT;
-
-    companion object {
-        fun parse(v: String?): HelsepersonellKategori {
-            return when(v) {
-                "HE" ->	HELSESEKRETAR
-                "KI" ->	KIROPRAKTOR
-                "LE" ->	LEGE
-                "MT" ->	MANUELLTERAPEUT
-                "TL" ->	TANNLEGE
-                "TH" -> TANNHELSESEKRETAR
-                "FT" -> FYSIOTERAPEUT
-                "SP" -> SYKEPLEIER
-                "HP" -> HJELPEPLEIER
-                "HF" -> HELSEFAGARBEIDER
-                "JO" -> JORDMOR
-                "AU" -> AUDIOGRAF
-                "NP" -> NAPRAPAT
-                "PS" -> PSYKOLOG
-                "FO" -> FOTTERAPEUT
-                "AA" -> AMBULANSEARBEIDER
-                "XX" ->  USPESIFISERT
-                "HS" -> UGYLDIG
-                "token" -> UGYLDIG
-                null -> IKKE_OPPGITT
-                else -> throw IllegalArgumentException("Ukjent helsepersonellkategori: $v")
-            }
-        }
-    }
 }
 
 enum class RolleTilPasient {
@@ -139,16 +73,6 @@ enum class RolleTilPasient {
     FASTLEGE,
     IKKE_OPPGITT;
 
-    companion object {
-        fun parse(v: String?): RolleTilPasient {
-           return when (v) {
-               "4" -> JOURNALANSVARLIG
-               "6" -> FASTLEGE
-               null -> IKKE_OPPGITT
-               else -> throw IllegalArgumentException("Ukjent rolle til pasient: $v")
-           }
-        }
-    }
 }
 
 data class Helsepersonell(

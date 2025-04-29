@@ -8,20 +8,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.tsm.mottak.sykmelding.model.metadata.EDIEmottak
 import no.nav.tsm.mottak.sykmelding.model.metadata.Egenmeldt
 import no.nav.tsm.mottak.sykmelding.model.metadata.EmottakEnkel
-import no.nav.tsm.mottak.sykmelding.model.metadata.Meldingsinformasjon
+import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.MetadataType
-import no.nav.tsm.mottak.sykmelding.model.metadata.Papirsykmelding
+import no.nav.tsm.mottak.sykmelding.model.metadata.Papir
 import no.nav.tsm.mottak.sykmelding.model.metadata.Utenlandsk
 import kotlin.reflect.KClass
 
+
 class SykmeldingModule : SimpleModule() {
     init {
-        addDeserializer(ISykmelding::class.java, SykmeldingDeserializer())
+        addDeserializer(Sykmelding::class.java, SykmeldingDeserializer())
         addDeserializer(Aktivitet::class.java, AktivitetDeserializer())
         addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
         addDeserializer(Rule::class.java, RuleDeserializer())
-        addDeserializer(Meldingsinformasjon::class.java, MeldingsinformasjonDeserializer())
+        addDeserializer(MessageMetadata::class.java, MeldingsinformasjonDeserializer())
     }
 }
 
@@ -36,21 +37,22 @@ abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
         return p.codec.treeToValue(node, clazz.java)
     }
 }
-class SykmeldingDeserializer : CustomDeserializer<ISykmelding>() {
-    override fun getClass(type: String): KClass<out ISykmelding> {
+class SykmeldingDeserializer : CustomDeserializer<Sykmelding>() {
+    override fun getClass(type: String): KClass<out Sykmelding> {
         return when (SykmeldingType.valueOf(type)) {
-            SykmeldingType.SYKMELDING -> Sykmelding::class
-            SykmeldingType.UTENLANDSK_SYKMELDING -> UtenlandskSykmelding::class
+            SykmeldingType.XML -> XmlSykmelding::class
+            SykmeldingType.PAPIR -> Papirsykmelding::class
+            SykmeldingType.UTENLANDSK -> UtenlandskSykmelding::class
         }
     }
 }
-class MeldingsinformasjonDeserializer : CustomDeserializer<Meldingsinformasjon>() {
-    override fun getClass(type: String): KClass<out Meldingsinformasjon> {
+class MeldingsinformasjonDeserializer : CustomDeserializer<MessageMetadata>() {
+    override fun getClass(type: String): KClass<out MessageMetadata> {
         return when (MetadataType.valueOf(type)) {
             MetadataType.ENKEL -> EmottakEnkel::class
             MetadataType.EMOTTAK -> EDIEmottak::class
             MetadataType.UTENLANDSK_SYKMELDING -> Utenlandsk::class
-            MetadataType.PAPIRSYKMELDING -> Papirsykmelding::class
+            MetadataType.PAPIRSYKMELDING -> Papir::class
             MetadataType.EGENMELDT -> Egenmeldt::class
         }
     }

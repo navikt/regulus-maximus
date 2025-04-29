@@ -88,7 +88,6 @@ object SykmeldingMapper {
         val newRule = when (new.status) {
             RuleType.OK -> OKRule(
                 name = rule.name,
-                description = rule.description,
                 timestamp = new.timestamp,
                 validationType = ValidationType.MANUAL
             )

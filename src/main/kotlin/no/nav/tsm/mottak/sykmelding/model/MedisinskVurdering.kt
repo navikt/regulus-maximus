@@ -28,11 +28,11 @@ data class AnnenFraverArsak(
 )
 
 data class MedisinskArsak(
-    val beskrivelse: String?, val arsak: MedisinskArsakType
+    val beskrivelse: String?, val arsak: List<MedisinskArsakType>
 )
 
 data class ArbeidsrelatertArsak(
-    val beskrivelse: String?, val arsak: ArbeidsrelatertArsakType
+    val beskrivelse: String?, val arsak: List<ArbeidsrelatertArsakType>
 )
 
 data class Yrkesskade(
