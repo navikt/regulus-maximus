@@ -9,6 +9,7 @@ enum class DiagnoseSystem {
 data class DiagnoseInfo(
     val system: DiagnoseSystem,
     val kode: String,
+    val tekst: String,
 )
 
 enum class MedisinskArsakType {

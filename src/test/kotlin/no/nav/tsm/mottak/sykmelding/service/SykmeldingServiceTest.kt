@@ -316,7 +316,7 @@ fun getSykmeldingRecord(validation: ValidationResult) : SykmeldingRecord {
                 strekkode = "123123123123",
             ),
             medisinskVurdering = MedisinskVurdering(
-                hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICD10, "T123"),
+                hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICD10, "T123", "tekst"),
                 biDiagnoser = emptyList(),
                 annenFraversArsak = null,
                 skjermetForPasient = false,
