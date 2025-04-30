@@ -4,6 +4,7 @@ import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationExceptio
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.OKRule
 import no.nav.tsm.mottak.sykmelding.model.PendingRule
+import no.nav.tsm.mottak.sykmelding.model.Reason
 import no.nav.tsm.mottak.sykmelding.model.RuleType
 import no.nav.tsm.mottak.sykmelding.model.TilbakedatertMerknad
 import no.nav.tsm.mottak.sykmelding.model.ValidationResult
@@ -206,7 +207,6 @@ class SykmeldingMapperTest {
             rules = listOf(
                 OKRule(
                     name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
-                    description = "Tilbakedatert sykmelding til manuell behandling",
                     timestamp = new.timestamp,
                     validationType = ValidationType.MANUAL,
                 ),
@@ -362,7 +362,7 @@ fun pending(
 ) = PendingRule(
     name = name,
     timestamp = timestamp,
-    description = description,
+    reason = Reason(description, description),
     validationType = validationType,
 )
 
@@ -374,7 +374,6 @@ fun ok(
 ) = OKRule(
     name = name,
     timestamp = timestamp,
-    description = description,
     validationType = validationType,
 )
 
@@ -386,6 +385,6 @@ fun invalid(
 ) = InvalidRule(
     name = name,
     timestamp = timestamp,
-    description = description,
+    reason = Reason(description, description),
     validationType = validationType,
 )

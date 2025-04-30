@@ -4,16 +4,15 @@ package no.nav.tsm.mottak.sykmelding.model
 import no.nav.tsm.mottak.sykmelding.model.metadata.Adresse
 import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
 import no.nav.tsm.mottak.sykmelding.model.metadata.Kontaktinfo
-import no.nav.tsm.mottak.sykmelding.model.metadata.Meldingsinformasjon
+import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-
 data class SykmeldingRecord(
-    val metadata: Meldingsinformasjon,
-    val sykmelding: ISykmelding,
+    val metadata: MessageMetadata,
+    val sykmelding: Sykmelding,
     val validation: ValidationResult,
 )
 
@@ -32,17 +31,18 @@ data class Behandler(
     val kontaktinfo: List<Kontaktinfo>,
 )
 
-data class SignerendeBehandler(
+data class Sykmelder(
     val ids: List<PersonId>,
     val helsepersonellKategori: HelsepersonellKategori,
 )
 
 enum class SykmeldingType {
-    SYKMELDING,
-    UTENLANDSK_SYKMELDING
+    XML,
+    PAPIR,
+    UTENLANDSK
 }
 
-sealed interface ISykmelding {
+sealed interface Sykmelding {
     val type: SykmeldingType
     val id: String
     val metadata: SykmeldingMetadata
@@ -58,28 +58,46 @@ data class UtenlandskSykmelding(
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
     val utenlandskInfo: UtenlandskInfo
-) : ISykmelding {
-    override val type = SykmeldingType.UTENLANDSK_SYKMELDING
+) : Sykmelding {
+    override val type = SykmeldingType.UTENLANDSK
 }
 
 
-data class Sykmelding(
+data class XmlSykmelding(
     override val id: String,
     override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
-    val behandler: Behandler,
     val arbeidsgiver: ArbeidsgiverInfo,
-    val signerendeBehandler: SignerendeBehandler,
+    val behandler: Behandler,
+    val sykmelder: Sykmelder,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
     val bistandNav: BistandNav?,
     val tilbakedatering: Tilbakedatering?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-) : ISykmelding {
-    override val type = SykmeldingType.SYKMELDING
+) : Sykmelding {
+    override val type = SykmeldingType.XML
 }
+data class Papirsykmelding(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    val arbeidsgiver: ArbeidsgiverInfo,
+    val behandler: Behandler,
+    val sykmelder: Sykmelder,
+    val prognose: Prognose?,
+    val tiltak: Tiltak?,
+    val bistandNav: BistandNav?,
+    val tilbakedatering: Tilbakedatering?,
+    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : Sykmelding {
+    override val type = SykmeldingType.PAPIR
+}
+
 
 data class AvsenderSystem(val navn: String, val versjon: String)
 data class SykmeldingMetadata(
@@ -97,7 +115,7 @@ data class BistandNav(
 )
 
 data class Tiltak(
-    val tiltakNAV: String?,
+    val tiltakNav: String?,
     val andreTiltak: String?,
 )
 
