@@ -37,6 +37,7 @@ data class Sykmelder(
 )
 
 enum class SykmeldingType {
+    DIGITAL,
     XML,
     PAPIR,
     UTENLANDSK
@@ -45,7 +46,7 @@ enum class SykmeldingType {
 sealed interface Sykmelding {
     val type: SykmeldingType
     val id: String
-    val metadata: SykmeldingMetadata
+    val metadata: SykmeldingMeta
     val pasient: Pasient
     val medisinskVurdering: MedisinskVurdering
     val aktivitet: List<Aktivitet>
@@ -62,6 +63,17 @@ data class UtenlandskSykmelding(
     override val type = SykmeldingType.UTENLANDSK
 }
 
+data class DigitalSykmelding(
+    override val id: String,
+    override val metadata: DigitalSykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    val behandler: Behandler,
+    val sykmelder: Sykmelder,
+): Sykmelding {
+    override val type = SykmeldingType.DIGITAL
+}
 
 data class XmlSykmelding(
     override val id: String,
@@ -100,14 +112,25 @@ data class Papirsykmelding(
 
 
 data class AvsenderSystem(val navn: String, val versjon: String)
+
+sealed interface SykmeldingMeta {
+    val mottattDato: OffsetDateTime
+    val genDate: OffsetDateTime
+}
+
 data class SykmeldingMetadata(
-    val mottattDato: OffsetDateTime,
-    val genDate: OffsetDateTime,
+    override val mottattDato: OffsetDateTime,
+    override val genDate: OffsetDateTime,
     val behandletTidspunkt: OffsetDateTime,
     val regelsettVersjon: String?,
     val avsenderSystem: AvsenderSystem,
     val strekkode: String?,
-)
+): SykmeldingMeta
+
+data class DigitalSykmeldingMetadata(
+    override val mottattDato: OffsetDateTime,
+    override val genDate: OffsetDateTime,
+): SykmeldingMeta
 
 data class BistandNav(
     val bistandUmiddelbart: Boolean,
