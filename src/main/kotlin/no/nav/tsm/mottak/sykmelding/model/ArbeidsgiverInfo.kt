@@ -11,6 +11,9 @@ sealed interface ArbeidsgiverInfo{
 }
 
 data class EnArbeidsgiver(
+    val navn: String?,
+    val yrkesbetegnelse: String?,
+    val stillingsprosent: Int?,
     val meldingTilArbeidsgiver: String?,
     val tiltakArbeidsplassen: String?,
 ) : ArbeidsgiverInfo {
