@@ -31,7 +31,7 @@ spec:
       - name: regulus-maximus-bucket-prod
   image: {{ image }}
   replicas:
-    min: 1
+    min: 10
     max: 10
     scalingStrategy:
       kafka:
