@@ -4,9 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.manuell.ManuellbehandlingService
-import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.mottak.sykmelding.kafka.PROCESSING_TARGET_HEADER
+import no.nav.tsm.mottak.sykmelding.kafka.TSM_PROCESSING_TARGET
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.sykmelding.model.InvalidRule
 import no.nav.tsm.mottak.sykmelding.model.OKRule
@@ -20,6 +21,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.actuate.logging.LoggersEndpoint
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
@@ -38,7 +40,7 @@ class SykmeldingService(
     }
 
     @Transactional
-    fun updateSykmelding(sykmeldingId: String, sykmelding: SykmeldingRecord?) {
+    fun updateSykmelding(sykmeldingId: String, sykmelding: SykmeldingRecord?, processingTarget: String?) {
         if (sykmelding == null) {
             delete(sykmeldingId)
             tombStone(sykmeldingId)
@@ -67,7 +69,7 @@ class SykmeldingService(
             throw SykmeldingMergeValidationException("Sykmelding with id $sykmeldingId has invalid rules, both ok and invalid")
         }
 
-        insertAndSendSykmelding(newSykmeldingRecord)
+        insertAndSendSykmelding(newSykmeldingRecord, processingTarget)
     }
 
     private fun getOldValidation(sykmeldingId: String): ValidationResult? {
@@ -140,9 +142,9 @@ class SykmeldingService(
         validationType = ValidationType.MANUAL
     )
 
-    private fun insertAndSendSykmelding(sykmelding: SykmeldingRecord) {
+    private fun insertAndSendSykmelding(sykmelding: SykmeldingRecord, processingTarget: String?) {
         sykmeldingRepository.upsertSykmelding(SykmeldingMapper.toSykmeldingDB(sykmelding))
-        sendToTsmSykmelding(sykmelding)
+        sendToTsmSykmelding(sykmelding, processingTarget)
     }
 
 
@@ -151,18 +153,23 @@ class SykmeldingService(
         log.info("Deleted $deleted sykmelding with id $sykmeldingId")
     }
 
-    private fun sendToTsmSykmelding(sykmelding: SykmeldingRecord) {
+    private fun sendToTsmSykmelding(sykmelding: SykmeldingRecord, processingTarget: String?) {
         try {
-            kafkaTemplate.send(
-                ProducerRecord(
-                    tsmSykmeldingTopic,
-                    sykmelding.sykmelding.id,
-                    SykmeldingRecord(
-                        sykmelding = sykmelding.sykmelding,
-                        metadata = sykmelding.metadata,
-                        validation = sykmelding.validation
-                    )
+            val producerRecord = ProducerRecord(
+                tsmSykmeldingTopic,
+                sykmelding.sykmelding.id,
+                SykmeldingRecord(
+                    sykmelding = sykmelding.sykmelding,
+                    metadata = sykmelding.metadata,
+                    validation = sykmelding.validation
                 )
+            )
+            if(processingTarget == TSM_PROCESSING_TARGET) {
+                log.info("$PROCESSING_TARGET_HEADER is $processingTarget")
+                producerRecord.headers().add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET.toByteArray(Charsets.UTF_8))
+            }
+            kafkaTemplate.send(
+                producerRecord
             ).get()
         } catch (exception: Exception) {
             log.error("Failed to publish sykmelding to tsm.sykmelding", exception)

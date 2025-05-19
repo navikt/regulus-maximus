@@ -85,7 +85,7 @@ class SykmeldingServiceTest {
 
 
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
             validation.status == RuleType.OK &&
@@ -102,7 +102,7 @@ class SykmeldingServiceTest {
                     invalid(),
                 )
             ))
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
                 validation.status == RuleType.INVALID &&
@@ -118,7 +118,7 @@ class SykmeldingServiceTest {
                 rules = listOf(pending())
             ))
 
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
                 validation.status == RuleType.PENDING &&
@@ -138,7 +138,7 @@ class SykmeldingServiceTest {
             val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
             val okTimestamp = OffsetDateTime.now()
             Mockito.`when`(manuellbehandlingService.getManuellBehandlingTimestamp(any())).thenReturn(okTimestamp)
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
 
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
@@ -163,7 +163,7 @@ class SykmeldingServiceTest {
         val invalidTimesamp = OffsetDateTime.now()
         Mockito.`when`(manuellbehandlingService.getManuellBehandlingTimestamp(any())).thenReturn(invalidTimesamp)
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
 
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -194,7 +194,7 @@ class SykmeldingServiceTest {
             rules = emptyList()
         ))) )
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
         Mockito.verify(sykmeldingRepository, Times(0)).findBySykmeldingId("1")
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -224,7 +224,7 @@ class SykmeldingServiceTest {
 
         Mockito.`when`(sykmeldingRepository.findBySykmeldingId("1")).thenReturn(null)
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
         Mockito.verify(sykmeldingRepository, Times(0)).findBySykmeldingId("1")
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -250,7 +250,7 @@ class SykmeldingServiceTest {
         )
 
         assertThrows<SykmeldingMergeValidationException> {
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
         }
     }
 
@@ -286,7 +286,7 @@ class SykmeldingServiceTest {
             metadata = PGobject().apply { value = "" },
         ))
 
-        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding("1", sykmeldingRecord) }
+        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding("1", sykmeldingRecord, null) }
     }
 }
 
