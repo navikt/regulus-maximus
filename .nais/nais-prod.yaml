@@ -27,12 +27,10 @@ spec:
             value: "on"
         pointInTimeRecovery: true
         tier: db-custom-1-3840
-    buckets:
-      - name: regulus-maximus-bucket-prod
   image: {{ image }}
   replicas:
-    min: 10
-    max: 10
+    min: 1
+    max: 3
     scalingStrategy:
       kafka:
         consumerGroup: regulus-maximus
@@ -74,8 +72,3 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  env:
-    - name: BUCKET_NAME
-      value: regulus-maximus-bucket-prod
-    - name: BUCKET_FILE_NAME
-      value: syfosmmanuell_backenpublic_manuelloppgave.csv

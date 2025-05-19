@@ -27,8 +27,6 @@ spec:
             value: "on"
         pointInTimeRecovery: true
         tier: db-f1-micro
-    buckets:
-      - name: regulus-maximus-bucket-dev
   image: {{ image }}
   replicas:
     min: 1
@@ -70,8 +68,3 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  env:
-    - name: BUCKET_NAME
-      value: regulus-maximus-bucket-dev
-    - name: BUCKET_FILE_NAME
-      value: manuellbehandling-dev.csv
