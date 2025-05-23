@@ -26,12 +26,12 @@ class SykmeldingConsumer(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
 
-  /* @KafkaListener(
+  @KafkaListener(
         topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
         groupId = "regulus-maximus-consumer",
         containerFactory = "containerFactory",
         batch = "false"
-    )*/
+    )
     fun consume(record: ConsumerRecord<String, ByteArray?>) {
         try {
             val sykmelding = record.value()?.let { objectMapper.readValue(it, SykmeldingRecord::class.java) }
