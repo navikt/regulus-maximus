@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service
 
 const val PROCESSING_TARGET_HEADER = "processing-target"
 const val TSM_PROCESSING_TARGET = "tsm"
+
 @Service
 class SykmeldingConsumer(
     private val sykmeldingService: SykmeldingService,
@@ -31,10 +32,11 @@ class SykmeldingConsumer(
         containerFactory = "containerFactory",
         batch = "false"
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
+    fun consume(record: ConsumerRecord<String, ByteArray?>) {
         try {
+            val sykmelding = record.value()?.let { objectMapper.readValue(it, SykmeldingRecord::class.java) }
             val tsmprocessingTarget = record.headers().lastHeader(PROCESSING_TARGET_HEADER)?.value()?.toString(Charsets.UTF_8)
-            sykmeldingService.updateSykmelding(record.key(), record.value(), tsmprocessingTarget)
+            sykmeldingService.updateSykmelding(record.key(), sykmelding, tsmprocessingTarget)
         } catch (e: PersonNotFoundException) {
             logger.error("Failed to process sykmelding with id ${record.key()}", e)
             if(clusterName == "dev-gcp") {

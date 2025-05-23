@@ -20,6 +20,7 @@ class ConsumerErrorHandler : DefaultErrorHandler(
     }
     private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
 
+
     override fun handleOne(
         thrownException: java.lang.Exception,
         record: ConsumerRecord<*, *>,

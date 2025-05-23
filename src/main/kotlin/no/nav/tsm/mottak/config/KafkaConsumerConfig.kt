@@ -1,11 +1,11 @@
 package no.nav.tsm.mottak.config
 
-import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
 import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -23,16 +23,16 @@ class KafkaConsumerConfig {
     fun containerFactory(
         props: KafkaProperties,
         errorHandler: ConsumerErrorHandler
-    ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord> {
+    ): ConcurrentKafkaListenerContainerFactory<String, ByteArray?> {
         val consumerFactory = DefaultKafkaConsumerFactory(
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
-            }, StringDeserializer(), SykmeldingDeserializer(SykmeldingRecord::class)
+            }, StringDeserializer(), ByteArrayDeserializer()
         )
 
-        val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
+        val factory = ConcurrentKafkaListenerContainerFactory<String, ByteArray?>()
         factory.consumerFactory = consumerFactory
         factory.setCommonErrorHandler(errorHandler)
         return factory
