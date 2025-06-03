@@ -31,12 +31,12 @@ spec:
       - name: regulus-maximus-bucket-prod
   image: {{ image }}
   replicas:
-    min: 10
-    max: 10
+    min: 1
+    max: 3
     scalingStrategy:
       kafka:
         consumerGroup: regulus-maximus
-        threshold: 100
+        threshold: 200
         topic: tsm.sykmeldinger-input
   port: 8080
   liveness:
@@ -53,7 +53,7 @@ spec:
     limits:
       memory: 1Gi
     requests:
-      cpu: 250m
+      cpu: 50m
       memory: 512Mi
   secureLogs:
     enabled: false
