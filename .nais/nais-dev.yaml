@@ -52,7 +52,7 @@ spec:
       cpu: 50m
       memory: 1Gi
   secureLogs:
-    enabled: false
+    enabled: true
   kafka:
     pool: nav-dev
   azure:
