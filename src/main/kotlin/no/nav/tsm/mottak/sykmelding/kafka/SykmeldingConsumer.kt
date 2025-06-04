@@ -1,8 +1,10 @@
 package no.nav.tsm.mottak.sykmelding.kafka
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.db.SykmeldingDBMappingException
@@ -25,6 +27,7 @@ class SykmeldingConsumer(
     @Value("\${nais.cluster}") private val clusterName: String
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
+
 
   @KafkaListener(
         topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
@@ -52,6 +55,14 @@ class SykmeldingConsumer(
                 throw e
             }
         }
+      catch (e: JsonMappingException) {
+          logger.error("Failed to process sykmelding with id ${record.key()}", e)
+          if(clusterName == "dev-gcp") {
+              logger.warn("Failed to map sykmelding in dev-gcp, skipping sykmelding")
+          } else {
+              throw e
+          }
+      }
     }
 }
 
