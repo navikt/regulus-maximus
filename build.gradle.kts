@@ -25,7 +25,7 @@ val flyway_version= "11.4.1"
 val postgres_version= "42.7.4"
 val jackson_version= "2.18.3"
 val mockitVersion = "5.4.0"
-val kafkaClientVersion = "3.8.0"
+val kafkaClientVersion = "3.9.1"
 val googleCloudStorageVersion = "2.48.1"
 
 dependencies {
