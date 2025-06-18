@@ -32,12 +32,7 @@ spec:
   image: {{ image }}
   replicas:
     min: 1
-    max: 3
-    scalingStrategy:
-      kafka:
-        consumerGroup: regulus-maximus
-        threshold: 200
-        topic: tsm.sykmeldinger-input
+    max: 10
   port: 8080
   liveness:
     path: /internal/health

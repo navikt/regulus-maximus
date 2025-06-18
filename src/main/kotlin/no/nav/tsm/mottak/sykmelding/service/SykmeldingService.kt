@@ -87,6 +87,11 @@ class SykmeldingService(
             return sykmelding
         }
 
+        if(processingTarget == null && oldValidation.timestamp >= sykmelding.validation.timestamp) {
+            log.info("Sykmelding with id ${sykmelding.sykmelding.id} has newer validation in DB $oldValidation, merging with new validation: ${sykmelding.validation}")
+            return SykmeldingRecord(metadata, newSykmelding , oldValidation)
+        }
+
         val mergedValidation = SykmeldingMapper.mergeValidations(
             old = oldValidation,
             new = sykmelding.validation
