@@ -58,7 +58,7 @@ class SykmeldingService(
             log.info("Sykmelding with id $sykmeldingId has been processed manually, overriding validation with $it")
             sykmelding.copy(validation = it)
         } ?: getOldValidation(sykmeldingId)?.let { oldValidation ->
-            mergeSykmeldingWithOldValidation(sykmelding, oldValidation).also {
+            mergeSykmeldingWithOldValidation(sykmelding, oldValidation, processingTarget).also {
                 log.info("Sykmelding with id $sykmeldingId has old validation $oldValidation, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
             }
         } ?: sykmelding
@@ -79,9 +79,13 @@ class SykmeldingService(
         }
     }
 
-    private fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult) : SykmeldingRecord {
+    fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult, processingTarget: String?) : SykmeldingRecord {
         val newSykmelding = sykmelding.sykmelding
         val metadata = sykmelding.metadata
+
+        if(sykmelding.validation == oldValidation) {
+            return sykmelding
+        }
 
         val mergedValidation = SykmeldingMapper.mergeValidations(
             old = oldValidation,
