@@ -1,9 +1,9 @@
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.8.0"
-    id("org.springframework.boot") version "3.4.4"
-    id("io.spring.dependency-management") version "1.1.6"
+    kotlin("jvm") version "2.1.21"
+    kotlin("plugin.spring") version "2.1.21"
+    id("org.springframework.boot") version "3.5.0"
+    id("io.spring.dependency-management") version "1.1.7"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -18,15 +18,15 @@ repositories {
     }
 }
 
-val kotlin_version = "2.0.21"
+val kotlin_version = "2.1.21"
 val logback_version = "1.5.18"
-val logback_encoder_version = "8.0"
-val flyway_version= "11.4.1"
-val postgres_version= "42.7.4"
-val jackson_version= "2.18.3"
+val logback_encoder_version = "8.1"
+val flyway_version= "11.9.1"
+val postgres_version= "42.7.7"
+val jackson_version= "2.19.1"
 val mockitVersion = "5.4.0"
-val kafkaClientVersion = "3.8.0"
-val googleCloudStorageVersion = "2.48.1"
+val kafkaClientVersion = "4.0.0"
+val googleCloudStorageVersion = "2.53.1"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
