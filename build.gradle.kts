@@ -28,6 +28,8 @@ val mockitVersion = "5.4.0"
 val kafkaClientVersion = "4.0.0"
 val googleCloudStorageVersion = "2.53.1"
 
+
+
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
