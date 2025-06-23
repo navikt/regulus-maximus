@@ -3,11 +3,11 @@ package no.nav.tsm.mottak.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
-import no.nav.tsm.mottak.sykmelding.model.OKRule
-import no.nav.tsm.mottak.sykmelding.model.RuleType
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
-import no.nav.tsm.mottak.sykmelding.model.ValidationResult
-import no.nav.tsm.mottak.sykmelding.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import org.postgresql.util.PGobject
 import org.slf4j.LoggerFactory
 

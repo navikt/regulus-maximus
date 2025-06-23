@@ -9,14 +9,14 @@ import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationExceptio
 import no.nav.tsm.mottak.sykmelding.kafka.PROCESSING_TARGET_HEADER
 import no.nav.tsm.mottak.sykmelding.kafka.TSM_PROCESSING_TARGET
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
-import no.nav.tsm.mottak.sykmelding.model.InvalidRule
-import no.nav.tsm.mottak.sykmelding.model.OKRule
-import no.nav.tsm.mottak.sykmelding.model.PendingRule
-import no.nav.tsm.mottak.sykmelding.model.Reason
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
-import no.nav.tsm.mottak.sykmelding.model.TilbakedatertMerknad
-import no.nav.tsm.mottak.sykmelding.model.ValidationResult
-import no.nav.tsm.mottak.sykmelding.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.PendingRule
+import no.nav.tsm.sykmelding.input.core.model.Reason
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -112,8 +112,9 @@ class SykmeldingService(
                     name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
                     timestamp = sykmelding.sykmelding.metadata.mottattDato,
                     reason = Reason(
-                        sykmeldt ="Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
-                        sykmelder = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert"),
+                        sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                        sykmelder = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert"
+                    ),
                     validationType = ValidationType.AUTOMATIC
                 )
 

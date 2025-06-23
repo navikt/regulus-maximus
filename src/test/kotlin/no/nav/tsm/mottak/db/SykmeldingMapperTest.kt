@@ -1,14 +1,14 @@
 package no.nav.tsm.mottak.db
 
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.model.InvalidRule
-import no.nav.tsm.mottak.sykmelding.model.OKRule
-import no.nav.tsm.mottak.sykmelding.model.PendingRule
-import no.nav.tsm.mottak.sykmelding.model.Reason
-import no.nav.tsm.mottak.sykmelding.model.RuleType
-import no.nav.tsm.mottak.sykmelding.model.TilbakedatertMerknad
-import no.nav.tsm.mottak.sykmelding.model.ValidationResult
-import no.nav.tsm.mottak.sykmelding.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.PendingRule
+import no.nav.tsm.sykmelding.input.core.model.Reason
+import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.OffsetDateTime

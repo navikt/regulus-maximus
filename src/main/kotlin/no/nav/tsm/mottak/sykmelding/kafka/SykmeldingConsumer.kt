@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.db.SykmeldingDBMappingException
 import no.nav.tsm.mottak.pdl.PersonNotFoundException
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingModule
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
