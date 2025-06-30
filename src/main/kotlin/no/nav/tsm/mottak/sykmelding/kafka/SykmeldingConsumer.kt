@@ -17,9 +17,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
-const val PROCESSING_TARGET_HEADER = "processing-target"
-const val TSM_PROCESSING_TARGET = "tsm"
-
 @Service
 class SykmeldingConsumer(
     private val sykmeldingService: SykmeldingService,
@@ -37,8 +34,7 @@ class SykmeldingConsumer(
     fun consume(record: ConsumerRecord<String, ByteArray?>) {
         try {
             val sykmelding = record.value()?.let { objectMapper.readValue(it, SykmeldingRecord::class.java) }
-            val tsmprocessingTarget = record.headers().lastHeader(PROCESSING_TARGET_HEADER)?.value()?.toString(Charsets.UTF_8)
-            sykmeldingService.updateSykmelding(record.key(), sykmelding, tsmprocessingTarget)
+            sykmeldingService.updateSykmelding(record.key(), sykmelding, record.headers())
         } catch (e: PersonNotFoundException) {
             logger.error("Failed to process sykmelding with id ${record.key()}", e)
             if(clusterName == "dev-gcp") {
