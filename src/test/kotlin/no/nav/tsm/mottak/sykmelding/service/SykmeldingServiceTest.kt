@@ -39,6 +39,7 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.Organisasjon
 import no.nav.tsm.sykmelding.input.core.model.metadata.OrganisasjonsType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.header.internals.RecordHeaders
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
@@ -85,7 +86,7 @@ class SykmeldingServiceTest {
 
 
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
             validation.status == RuleType.OK &&
@@ -102,7 +103,7 @@ class SykmeldingServiceTest {
                     invalid(),
                 )
             ))
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
                 validation.status == RuleType.INVALID &&
@@ -118,7 +119,7 @@ class SykmeldingServiceTest {
                 rules = listOf(pending())
             ))
 
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
                 validation.status == RuleType.PENDING &&
@@ -138,7 +139,7 @@ class SykmeldingServiceTest {
             val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
             val okTimestamp = OffsetDateTime.now()
             Mockito.`when`(manuellbehandlingService.getManuellBehandlingTimestamp(any())).thenReturn(okTimestamp)
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
 
             Mockito.verify(kafkaProducer).send(argThat {
                 val validation = value().validation
@@ -163,7 +164,7 @@ class SykmeldingServiceTest {
         val invalidTimesamp = OffsetDateTime.now()
         Mockito.`when`(manuellbehandlingService.getManuellBehandlingTimestamp(any())).thenReturn(invalidTimesamp)
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
 
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -194,7 +195,7 @@ class SykmeldingServiceTest {
             rules = emptyList()
         ))) )
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         Mockito.verify(sykmeldingRepository, Times(0)).findBySykmeldingId("1")
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -226,7 +227,7 @@ class SykmeldingServiceTest {
 
         Mockito.`when`(sykmeldingRepository.findBySykmeldingId("1")).thenReturn(null)
 
-        sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         Mockito.verify(sykmeldingRepository, Times(0)).findBySykmeldingId("1")
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -252,7 +253,7 @@ class SykmeldingServiceTest {
         )
 
         assertThrows<SykmeldingMergeValidationException> {
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, null)
+            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         }
     }
 
@@ -288,7 +289,11 @@ class SykmeldingServiceTest {
             metadata = PGobject().apply { value = "" },
         ))
 
-        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding("1", sykmeldingRecord, null) }
+        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding(
+            "1",
+            sykmeldingRecord,
+            RecordHeaders()
+        ) }
     }
 }
 

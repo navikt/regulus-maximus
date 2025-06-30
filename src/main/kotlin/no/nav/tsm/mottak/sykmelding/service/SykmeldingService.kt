@@ -6,8 +6,6 @@ import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.manuell.ManuellbehandlingService
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.PROCESSING_TARGET_HEADER
-import no.nav.tsm.mottak.sykmelding.kafka.TSM_PROCESSING_TARGET
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.OKRule
@@ -19,6 +17,7 @@ import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.Headers
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -39,10 +38,10 @@ class SykmeldingService(
     }
 
     @Transactional
-    fun updateSykmelding(sykmeldingId: String, sykmelding: SykmeldingRecord?, processingTarget: String?) {
+    fun updateSykmelding(sykmeldingId: String, sykmelding: SykmeldingRecord?, headers: Headers) {
         if (sykmelding == null) {
             delete(sykmeldingId)
-            tombStone(sykmeldingId)
+            tombstone(sykmeldingId, headers)
             return
         }
 //        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
@@ -58,7 +57,7 @@ class SykmeldingService(
             log.info("Sykmelding with id $sykmeldingId has been processed manually, overriding validation with $it")
             sykmelding.copy(validation = it)
         } ?: getOldValidation(sykmeldingId)?.let { oldValidation ->
-            mergeSykmeldingWithOldValidation(sykmelding, oldValidation, processingTarget).also {
+            mergeSykmeldingWithOldValidation(sykmelding, oldValidation).also {
                 log.info("Sykmelding with id $sykmeldingId has old validation $oldValidation, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
             }
         } ?: sykmelding
@@ -68,7 +67,8 @@ class SykmeldingService(
             throw SykmeldingMergeValidationException("Sykmelding with id $sykmeldingId has invalid rules, both ok and invalid")
         }
 
-        insertAndSendSykmelding(newSykmeldingRecord, processingTarget)
+        insertOrUpdateSykmelding(newSykmeldingRecord)
+        sendToTsmSykmelding(newSykmeldingRecord, headers)
     }
 
     private fun getOldValidation(sykmeldingId: String): ValidationResult? {
@@ -79,7 +79,7 @@ class SykmeldingService(
         }
     }
 
-    fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult, processingTarget: String?) : SykmeldingRecord {
+    fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult) : SykmeldingRecord {
         val newSykmelding = sykmelding.sykmelding
         val metadata = sykmelding.metadata
 
@@ -87,7 +87,7 @@ class SykmeldingService(
             return sykmelding
         }
 
-        if(processingTarget == null && oldValidation.timestamp >= sykmelding.validation.timestamp) {
+        if(oldValidation.timestamp >= sykmelding.validation.timestamp) {
             log.info("Sykmelding with id ${sykmelding.sykmelding.id} has newer validation in DB $oldValidation, merging with new validation: ${sykmelding.validation}")
             return SykmeldingRecord(metadata, newSykmelding , oldValidation)
         }
@@ -151,9 +151,8 @@ class SykmeldingService(
         validationType = ValidationType.MANUAL
     )
 
-    private fun insertAndSendSykmelding(sykmelding: SykmeldingRecord, processingTarget: String?) {
+    private fun insertOrUpdateSykmelding(sykmelding: SykmeldingRecord) {
         sykmeldingRepository.upsertSykmelding(SykmeldingMapper.toSykmeldingDB(sykmelding))
-        sendToTsmSykmelding(sykmelding, processingTarget)
     }
 
 
@@ -162,21 +161,19 @@ class SykmeldingService(
         log.info("Deleted $deleted sykmelding with id $sykmeldingId")
     }
 
-    private fun sendToTsmSykmelding(sykmelding: SykmeldingRecord, processingTarget: String?) {
+    private fun sendToTsmSykmelding(sykmelding: SykmeldingRecord, headers: Headers) {
         try {
             val producerRecord = ProducerRecord(
                 tsmSykmeldingTopic,
+                null,
                 sykmelding.sykmelding.id,
                 SykmeldingRecord(
                     sykmelding = sykmelding.sykmelding,
                     metadata = sykmelding.metadata,
                     validation = sykmelding.validation
-                )
+                ),
+                headers,
             )
-            if(processingTarget == TSM_PROCESSING_TARGET) {
-                log.info("$PROCESSING_TARGET_HEADER is $processingTarget")
-                producerRecord.headers().add(PROCESSING_TARGET_HEADER, TSM_PROCESSING_TARGET.toByteArray(Charsets.UTF_8))
-            }
             kafkaTemplate.send(
                 producerRecord
             ).get()
@@ -186,13 +183,15 @@ class SykmeldingService(
         }
     }
 
-    private fun tombStone(sykmeldingId: String) {
+    private fun tombstone(sykmeldingId: String, headers: Headers) {
         try {
             kafkaTemplate.send(
                 ProducerRecord(
                     tsmSykmeldingTopic,
+                    null,
                     sykmeldingId,
-                    null
+                    null,
+                    headers,
                 )
             ).get()
         } catch (exception: Exception) {
