@@ -1,7 +1,7 @@
 package no.nav.tsm.mottak.config
 
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig

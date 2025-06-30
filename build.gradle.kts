@@ -1,6 +1,6 @@
 
 plugins {
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "1.8.0"
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.6"
@@ -27,6 +27,7 @@ val jackson_version= "2.18.3"
 val mockitVersion = "5.4.0"
 val kafkaClientVersion = "3.9.1"
 val googleCloudStorageVersion = "2.48.1"
+val sykmelidngInputVersion = "11"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -47,6 +48,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
     implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
+    implementation("no.nav.tsm.sykmelding", "input", sykmelidngInputVersion)
 
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:$flyway_version")

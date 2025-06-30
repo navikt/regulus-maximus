@@ -13,30 +13,30 @@ import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.pdl.Person
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
-import no.nav.tsm.mottak.sykmelding.model.AktivitetIkkeMulig
-import no.nav.tsm.mottak.sykmelding.model.AvsenderSystem
-import no.nav.tsm.mottak.sykmelding.model.Behandler
-import no.nav.tsm.mottak.sykmelding.model.DiagnoseInfo
-import no.nav.tsm.mottak.sykmelding.model.DiagnoseSystem
-import no.nav.tsm.mottak.sykmelding.model.IngenArbeidsgiver
-import no.nav.tsm.mottak.sykmelding.model.MedisinskVurdering
-import no.nav.tsm.mottak.sykmelding.model.OKRule
-import no.nav.tsm.mottak.sykmelding.model.Pasient
-import no.nav.tsm.mottak.sykmelding.model.RuleType
-import no.nav.tsm.mottak.sykmelding.model.Sykmelder
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingMetadata
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
-import no.nav.tsm.mottak.sykmelding.model.TilbakedatertMerknad
-import no.nav.tsm.mottak.sykmelding.model.ValidationResult
-import no.nav.tsm.mottak.sykmelding.model.ValidationType
-import no.nav.tsm.mottak.sykmelding.model.XmlSykmelding
-import no.nav.tsm.mottak.sykmelding.model.metadata.EmottakEnkel
-import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
-import no.nav.tsm.mottak.sykmelding.model.metadata.Meldingstype
-import no.nav.tsm.mottak.sykmelding.model.metadata.MessageInfo
-import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
-import no.nav.tsm.mottak.sykmelding.model.metadata.Organisasjon
-import no.nav.tsm.mottak.sykmelding.model.metadata.OrganisasjonsType
+import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
+import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
+import no.nav.tsm.sykmelding.input.core.model.Behandler
+import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
+import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.Pasient
+import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.Sykmelder
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingMetadata
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
+import no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel
+import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
+import no.nav.tsm.sykmelding.input.core.model.metadata.Meldingstype
+import no.nav.tsm.sykmelding.input.core.model.metadata.MessageInfo
+import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
+import no.nav.tsm.sykmelding.input.core.model.metadata.Organisasjon
+import no.nav.tsm.sykmelding.input.core.model.metadata.OrganisasjonsType
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.Test
@@ -211,11 +211,13 @@ class SykmeldingServiceTest {
             ValidationResult(
                 status = RuleType.OK,
                 timestamp = OffsetDateTime.now(),
-                rules = listOf(OKRule(
-                    timestamp = OffsetDateTime.now(),
-                    name = TilbakedatertMerknad.TILBAKEDATERING_DELVIS_GODKJENT.name,
-                    validationType = ValidationType.MANUAL
-                ))
+                rules = listOf(
+                    OKRule(
+                        timestamp = OffsetDateTime.now(),
+                        name = TilbakedatertMerknad.TILBAKEDATERING_DELVIS_GODKJENT.name,
+                        validationType = ValidationType.MANUAL
+                    )
+                )
             )
         )
         val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
