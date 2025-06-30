@@ -27,7 +27,7 @@ val jackson_version= "2.18.3"
 val mockitVersion = "5.4.0"
 val kafkaClientVersion = "3.8.0"
 val googleCloudStorageVersion = "2.48.1"
-val sykmelidngInputVersion = "6"
+val sykmelidngInputVersion = "11"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
