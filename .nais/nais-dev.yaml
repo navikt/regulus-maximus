@@ -63,6 +63,8 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: tsm-pdl-cache
   observability:
     autoInstrumentation:

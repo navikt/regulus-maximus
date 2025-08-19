@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.config
 
+import no.nav.tsm.mottak.util.applog
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -18,7 +19,7 @@ class ConsumerErrorHandler : DefaultErrorHandler(
     companion object {
         private const val BACKOFF_INTERVAL = 60_000L
     }
-    private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
+    private val log = applog()
 
 
     override fun handleOne(

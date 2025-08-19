@@ -7,6 +7,8 @@ import no.nav.tsm.mottak.manuell.ManuellbehandlingService
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
+import no.nav.tsm.mottak.util.applog
+import no.nav.tsm.mottak.util.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
@@ -34,7 +36,8 @@ class SykmeldingService(
 ) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(SykmeldingService::class.java)
+        private val log = applog()
+        private val teamlog = teamLogger()
     }
 
     @Transactional
@@ -44,6 +47,7 @@ class SykmeldingService(
             tombstone(sykmeldingId, headers)
             return
         }
+
 //        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
 //        val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
 //
@@ -64,11 +68,13 @@ class SykmeldingService(
 
         if( newSykmeldingRecord.validation.rules.any { it is InvalidRule } && newSykmeldingRecord.validation.rules.any { it is OKRule }) {
             log.info("Sykmelding with id $sykmeldingId has invalid rules ${newSykmeldingRecord.validation}")
+
             throw SykmeldingMergeValidationException("Sykmelding with id $sykmeldingId has invalid rules, both ok and invalid")
         }
 
         insertOrUpdateSykmelding(newSykmeldingRecord)
         sendToTsmSykmelding(newSykmeldingRecord, headers)
+        teamlog.info("Sykmelding with id $sykmeldingId has been sent to tsm.sykmelding")
     }
 
     private fun getOldValidation(sykmeldingId: String): ValidationResult? {

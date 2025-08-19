@@ -1,37 +1,25 @@
 <configuration>
-    <!--springProfile name="!(local | test)">
-        <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/secure-logs/secure.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-                <fileNamePattern>/secure-logs/secure.log</fileNamePattern>
-                <minIndex>1</minIndex>
-                <maxIndex>1</maxIndex>
-            </rollingPolicy>
-            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                <maxFileSize>50MB</maxFileSize>
-            </triggeringPolicy>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-        </appender>
-    </springProfile-->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
-    <appender name="stdout"
-              class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                <rootCauseFirst>true</rootCauseFirst>
-            </throwableConverter>
+            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider" />
         </encoder>
     </appender>
-    <springProfile name="local | test">
-        <appender name="stdout"
-                  class="ch.qos.logback.core.ConsoleAppender">
-            <layout class="ch.qos.logback.classic.PatternLayout">
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %X{Nav-CallId} [%thread] %-5level %logger{70} - %msg%n</Pattern>
-            </layout>
-        </appender>
-        <logger name="no.nav.tsm" level="trace"/>
-    </springProfile>
-    <root level="info">
-        <appender-ref ref="stdout"/>
+
+    <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <includeContext>false</includeContext>
+        </encoder>
+    </appender>
+
+    <logger name="teamlog" level="INFO" additivity="false">
+        <appender-ref ref="team-logs"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="stdout_json" />
     </root>
 </configuration>

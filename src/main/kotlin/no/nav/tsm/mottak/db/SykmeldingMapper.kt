@@ -3,6 +3,7 @@ package no.nav.tsm.mottak.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
+import no.nav.tsm.mottak.util.applog
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -15,7 +16,7 @@ class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(m
 
 object SykmeldingMapper {
 
-    private val logger = LoggerFactory.getLogger(SykmeldingMapper::class.java)
+    private val logger = applog()
 
     fun toSykmeldingDB(
         sykmeldingMedBehandlingsutfall: SykmeldingRecord

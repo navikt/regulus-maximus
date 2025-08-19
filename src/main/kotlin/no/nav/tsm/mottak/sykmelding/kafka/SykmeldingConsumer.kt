@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.mottak.db.SykmeldingDBMappingException
 import no.nav.tsm.mottak.pdl.PersonNotFoundException
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
+import no.nav.tsm.mottak.util.applog
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -22,7 +23,7 @@ class SykmeldingConsumer(
     private val sykmeldingService: SykmeldingService,
     @Value("\${nais.cluster}") private val clusterName: String
 ) {
-    private val logger = LoggerFactory.getLogger(SykmeldingConsumer::class.java)
+    private val logger = applog()
 
 
   @KafkaListener(
