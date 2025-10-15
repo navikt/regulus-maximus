@@ -17,6 +17,8 @@ spec:
         databases:
           - name: regulus-maximus
             envVarPrefix: DB
+            users:
+              - name: bigquery
         diskAutoresize: true
         highAvailability: false
         diskType: SSD
