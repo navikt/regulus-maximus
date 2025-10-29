@@ -35,6 +35,10 @@ spec:
             value: "on"
         pointInTimeRecovery: true
         tier: db-custom-1-3840
+        autoBackupHour: 4
+        maintenance:
+          day: 1
+          hour: 5
     buckets:
       - name: regulus-maximus-bucket-prod
   image: {{ image }}
