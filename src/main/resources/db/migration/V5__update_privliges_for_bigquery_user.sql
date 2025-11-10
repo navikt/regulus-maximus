@@ -1,1 +1,0 @@
-GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC TO "bigquery-db-user";
