@@ -74,7 +74,6 @@ class SykmeldingService(
 
         insertOrUpdateSykmelding(newSykmeldingRecord)
         sendToTsmSykmelding(newSykmeldingRecord, headers)
-        teamlog.info("Sykmelding with id $sykmeldingId has been sent to tsm.sykmelding")
     }
 
     private fun getOldValidation(sykmeldingId: String): ValidationResult? {
