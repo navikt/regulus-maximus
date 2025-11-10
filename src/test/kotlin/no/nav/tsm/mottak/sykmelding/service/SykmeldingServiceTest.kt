@@ -41,6 +41,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.header.internals.RecordHeaders
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -289,7 +290,7 @@ class SykmeldingServiceTest {
             metadata = PGobject().apply { value = "" },
         ))
 
-        assertThrows<SykmeldingMergeValidationException> { sykmeldingService.updateSykmelding(
+        assertDoesNotThrow { sykmeldingService.updateSykmelding(
             "1",
             sykmeldingRecord,
             RecordHeaders()

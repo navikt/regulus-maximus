@@ -10,6 +10,7 @@ import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
@@ -46,7 +47,7 @@ class SykmeldingMapperTest {
             rules = emptyList()
         )
 
-        assertThrows<SykmeldingMergeValidationException> { SykmeldingMapper.mergeValidations(old, new) }
+        assertDoesNotThrow  { SykmeldingMapper.mergeValidations(old, new) }
     }
 
     @Test

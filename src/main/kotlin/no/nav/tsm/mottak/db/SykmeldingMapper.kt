@@ -73,7 +73,12 @@ object SykmeldingMapper {
             }
             else -> {
                 if(new.status != old.status || new.timestamp != old.timestamp || !old.rules.containsAll(new.rules)) {
-                    throw SykmeldingMergeValidationException("Cannot merge from ${old.status} to ${new.status}")
+                    if(new.status == RuleType.OK && old.status == RuleType.OK && old.rules.containsAll(new.rules)) {
+                        logger.warn("Ignoring validation result with status OK with different timestamps")
+                    }
+                    else {
+                        throw SykmeldingMergeValidationException("Cannot merge from ${old.status} to ${new.status}")
+                    }
                 }
                 old
             }
