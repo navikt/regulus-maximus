@@ -2,15 +2,14 @@ package no.nav.tsm.mottak.db
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.util.applog
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.postgresql.util.PGobject
-import org.slf4j.LoggerFactory
 
 class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(message, ex)
 
@@ -45,9 +44,9 @@ object SykmeldingMapper {
         requireNotNull(metadata)
         requireNotNull(validation)
         return SykmeldingRecord(
-            sykmelding = objectMapper.readValue(sykmelding),
-            metadata = objectMapper.readValue(metadata),
-            validation = objectMapper.readValue(validation),
+            sykmelding = sykmeldingObjectMapper.readValue(sykmelding),
+            metadata = sykmeldingObjectMapper.readValue(metadata),
+            validation = sykmeldingObjectMapper.readValue(validation),
         )
     }
 
@@ -109,7 +108,7 @@ object SykmeldingMapper {
 
 fun Any.toPGobject() : PGobject {
     return PGobject().also {
-        it.value = objectMapper.writeValueAsString(this)
+        it.value = sykmeldingObjectMapper.writeValueAsString(this)
         it.type = "json"
     }
 }

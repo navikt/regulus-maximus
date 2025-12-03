@@ -2,7 +2,7 @@
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -27,7 +27,7 @@ val jackson_version= "2.20.1"
 val mockitVersion = "6.1.0"
 val kafkaClientVersion = "4.1.0"
 val googleCloudStorageVersion = "2.60.0"
-val sykmelidngInputVersion = "16"
+val sykmelidngInputVersion = "21"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")

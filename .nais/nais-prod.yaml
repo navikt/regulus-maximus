@@ -83,8 +83,3 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  env:
-    - name: BUCKET_NAME
-      value: regulus-maximus-bucket-prod
-    - name: BUCKET_FILE_NAME
-      value: syfosmmanuell_backenpublic_manuelloppgave.csv
