@@ -41,7 +41,7 @@ class SykmeldingService(
 
         val newSykmeldingRecord = getOldSykmeldingRecord(sykmeldingId)?.let { oldSykmeldingRecord ->
             mergeSykmeldingWithOld(sykmelding, oldSykmeldingRecord).also {
-                log.info("Sykmelding with id $sykmeldingId has old validation $oldSykmeldingRecord, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
+                log.info("Sykmelding with id $sykmeldingId has old validation ${oldSykmeldingRecord.validation}, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
             }
         } ?: sykmelding
 
