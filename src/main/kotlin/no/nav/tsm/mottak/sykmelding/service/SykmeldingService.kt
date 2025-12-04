@@ -1,37 +1,28 @@
 package no.nav.tsm.mottak.sykmelding.service
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
-import no.nav.tsm.mottak.manuell.ManuellbehandlingService
-import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.objectMapper
 import no.nav.tsm.mottak.util.applog
+import no.nav.tsm.mottak.util.logData
 import no.nav.tsm.mottak.util.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.OKRule
-import no.nav.tsm.sykmelding.input.core.model.PendingRule
-import no.nav.tsm.sykmelding.input.core.model.Reason
+import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import no.nav.tsm.sykmelding.input.core.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.header.Headers
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.OffsetDateTime
 
 @Service
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val kafkaTemplate: KafkaProducer<String, SykmeldingRecord>,
-    private val pdlClient: PdlClient,
-    private val manuellbehandlingService: ManuellbehandlingService,
     @Value("\${spring.kafka.topics.sykmeldinger-output}") private val tsmSykmeldingTopic: String,
 ) {
 
@@ -48,21 +39,9 @@ class SykmeldingService(
             return
         }
 
-//        val person = pdlClient.getPerson(sykmelding.sykmelding.pasient.fnr)
-//        val aktorId = person.identer.first { it.gruppe == IDENT_GRUPPE.AKTORID && !it.historisk }.ident
-//
-//        val currentIdent = person.identer.first { !it.historisk && it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT }
-//
-//        if(currentIdent.ident != sykmelding.sykmelding.pasient.fnr) {
-//            log.warn("Sykmelding with id $sykmeldingId has differnt aktive ident for aktorId $aktorId")
-//        }
-
-        val newSykmeldingRecord = getManuellBehandlingRules(sykmelding)?.let {
-            log.info("Sykmelding with id $sykmeldingId has been processed manually, overriding validation with $it")
-            sykmelding.copy(validation = it)
-        } ?: getOldValidation(sykmeldingId)?.let { oldValidation ->
-            mergeSykmeldingWithOldValidation(sykmelding, oldValidation).also {
-                log.info("Sykmelding with id $sykmeldingId has old validation $oldValidation, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
+        val newSykmeldingRecord = getOldSykmeldingRecord(sykmeldingId)?.let { oldSykmeldingRecord ->
+            mergeSykmeldingWithOld(sykmelding, oldSykmeldingRecord).also {
+                log.info("Sykmelding with id $sykmeldingId has old validation $oldSykmeldingRecord, merging with new validation: ${sykmelding.validation}, merged ${it.validation}")
             }
         } ?: sykmelding
 
@@ -76,85 +55,92 @@ class SykmeldingService(
         sendToTsmSykmelding(newSykmeldingRecord, headers)
     }
 
-    private fun getOldValidation(sykmeldingId: String): ValidationResult? {
+    private fun getOldSykmeldingRecord(sykmeldingId: String): SykmeldingRecord? {
         return sykmeldingRepository.findBySykmeldingId(sykmeldingId)?.let {
-            val validation = it.validation.value
-            requireNotNull(validation)
-            objectMapper.readValue(validation)
+            SykmeldingMapper.toSykmeldingRecord(it)
         }
     }
 
-    fun mergeSykmeldingWithOldValidation(sykmelding: SykmeldingRecord, oldValidation: ValidationResult) : SykmeldingRecord {
-        val newSykmelding = sykmelding.sykmelding
-        val metadata = sykmelding.metadata
-
-        if(sykmelding.validation == oldValidation) {
-            return sykmelding
+    fun mergeValidation(sykmeldingId: String, new: ValidationResult, old: ValidationResult) : ValidationResult {
+        if(new == old) {
+            return new
         }
 
-        if(oldValidation.timestamp >= sykmelding.validation.timestamp) {
-            log.info("Sykmelding with id ${sykmelding.sykmelding.id} has newer validation in DB $oldValidation, merging with new validation: ${sykmelding.validation}")
-            return SykmeldingRecord(metadata, newSykmelding , oldValidation)
+        if(old.timestamp >= new.timestamp) {
+            log.info("Sykmelding with id $sykmeldingId has newer validation in DB $old, merging with new validation: $new")
+            return old
         }
 
         val mergedValidation = SykmeldingMapper.mergeValidations(
-            old = oldValidation,
-            new = sykmelding.validation
+            old = old,
+            new = new
         )
+        val times =  mergedValidation.rules.map { it.timestamp }
+        if(times.size != times.distinct().size) {
+            throw SykmeldingMergeValidationException("Sykmelding rulevalidations with same timestamps but different rules $sykmeldingId")
+        }
+        return mergedValidation
+    }
+
+    fun mergeSykmeldingWithOld(sykmelding: SykmeldingRecord, oldSykmeldingRecord: SykmeldingRecord) : SykmeldingRecord {
+        val newSykmelding = sykmelding.sykmelding
+        val metadata = sykmelding.metadata
+
+        val mergedValidation = mergeValidation(
+            sykmeldingId = sykmelding.sykmelding.id,
+            new = sykmelding.validation,
+            old = oldSykmeldingRecord.validation
+        )
+
         val times =  mergedValidation.rules.map { it.timestamp }
         if(times.size != times.distinct().size) {
             throw SykmeldingMergeValidationException("Sykmelding rulevalidations with same timestamps but different rules ${sykmelding.sykmelding.id}")
         }
+
+        checkSykmeldingData(sykmelding, oldSykmeldingRecord)
+
         return SykmeldingRecord(metadata, newSykmelding , mergedValidation)
     }
 
-    fun getManuellBehandlingRules(sykmelding: SykmeldingRecord): ValidationResult? {
-        val manualDoneTimestamp = manuellbehandlingService.getManuellBehandlingTimestamp(sykmelding.sykmelding.id)
-        when (manualDoneTimestamp) {
-            null -> return null
-            else -> {
-                val pendingRule = PendingRule(
-                    name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
-                    timestamp = sykmelding.sykmelding.metadata.mottattDato,
-                    reason = Reason(
-                        sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
-                        sykmelder = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert"
-                    ),
-                    validationType = ValidationType.AUTOMATIC
-                )
-
-                val rules = sykmelding.validation.rules
-                if (rules.size > 1) {
-                    throw SykmeldingMergeValidationException("Sykmelding ${sykmelding.sykmelding.id}has more than one rule when it should only have one")
-                }
-
-                val newRule = if (rules.isEmpty()) {
-                    okRule(pendingRule, manualDoneTimestamp)
-                } else {
-                    when (val rule = rules.single()) {
-                        is InvalidRule -> rule.copy(timestamp = manualDoneTimestamp)
-                        is OKRule -> rule.copy(timestamp = manualDoneTimestamp)
-                        is PendingRule -> {
-                            log.warn("Sykmelding ${sykmelding.sykmelding.id} has a pending rule that is not valid maybe $rule")
-                            rule.copy(timestamp = manualDoneTimestamp)
-                        }
-                    }
-                }
-
-                return ValidationResult(
-                    status = newRule.type,
-                    timestamp = newRule.timestamp,
-                    rules = listOf(pendingRule, newRule).sortedByDescending { it.timestamp }
-                )
-            }
-        }
+    private fun checkSykmeldingData(
+        sykmelding: SykmeldingRecord,
+        oldSykmeldingRecord: SykmeldingRecord
+    ) {
+        checkMetadata(
+            sykmeldingId = sykmelding.sykmelding.id,
+            newMetadata = sykmelding.metadata,
+            oldMetadata = oldSykmeldingRecord.metadata
+        )
+        checkSykmelding(
+            sykmeldingId = sykmelding.sykmelding.id,
+            newSykmelding = sykmelding.sykmelding,
+            oldSykmelding = oldSykmeldingRecord.sykmelding
+        )
     }
 
-    private fun okRule(pendingRule: PendingRule, manualDoneTimestamp: OffsetDateTime) = OKRule(
-        timestamp = manualDoneTimestamp,
-        name = pendingRule.name,
-        validationType = ValidationType.MANUAL
-    )
+    private fun checkSykmelding(
+        sykmeldingId: String,
+        newSykmelding: Sykmelding,
+        oldSykmelding: Sykmelding
+    ) {
+        if(newSykmelding == oldSykmelding) {
+            return
+        }
+
+        teamlog.warn("Sykmelding is not the same for ${newSykmelding.type}: $sykmeldingId. new: ${newSykmelding.logData()}, old: ${oldSykmelding.logData()}")
+    }
+
+    private fun checkMetadata(
+        sykmeldingId: String,
+        newMetadata: MessageMetadata,
+        oldMetadata: MessageMetadata
+    ) {
+        if(newMetadata == oldMetadata) {
+            return
+        }
+
+        teamlog.warn("Sykmelding meta is not the same for ${newMetadata.type}: $sykmeldingId. new: ${newMetadata.logData()}, old: ${oldMetadata.logData()}")
+    }
 
     private fun insertOrUpdateSykmelding(sykmelding: SykmeldingRecord) {
         sykmeldingRepository.upsertSykmelding(SykmeldingMapper.toSykmeldingDB(sykmelding))
