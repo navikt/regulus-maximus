@@ -22,4 +22,5 @@
     <root level="INFO">
         <appender-ref ref="stdout_json" />
     </root>
+
 </configuration>

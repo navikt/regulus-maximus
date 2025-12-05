@@ -24,6 +24,6 @@ private val logObjectMapper: ObjectMapper =
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
 
-fun Any.logData()  {
-    logObjectMapper.writeValueAsString(this)
+fun Any.logData() : String {
+    return logObjectMapper.writeValueAsString(this)
 }

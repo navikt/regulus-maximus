@@ -138,7 +138,6 @@ class SykmeldingService(
         if(newMetadata == oldMetadata) {
             return
         }
-
         teamlog.warn("Sykmelding meta is not the same for ${newMetadata.type}: $sykmeldingId. new: ${newMetadata.logData()}, old: ${oldMetadata.logData()}")
     }
 
