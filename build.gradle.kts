@@ -1,8 +1,8 @@
 
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.5.8"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.spring") version "2.3.0"
+    id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -18,15 +18,15 @@ repositories {
     }
 }
 
-val kotlin_version = "2.2.21"
-val logback_version = "1.5.21"
+val kotlin_version = "2.3.0"
+val logback_version = "1.5.24"
 val logback_encoder_version = "9.0"
-val flyway_version= "11.16.0"
+val flyway_version= "11.20.1"
 val postgres_version= "42.7.8"
 val jackson_version= "2.20.1"
 val mockitVersion = "6.1.0"
-val kafkaClientVersion = "4.1.0"
-val googleCloudStorageVersion = "2.60.0"
+val kafkaClientVersion = "4.1.1"
+val googleCloudStorageVersion = "2.61.0"
 val sykmelidngInputVersion = "21"
 
 dependencies {
