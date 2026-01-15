@@ -1,40 +1,14 @@
 package no.nav.tsm.mottak.sykmelding.service
 
-import no.nav.tsm.mottak.db.SykmeldingDB
-import no.nav.tsm.mottak.db.SykmeldingMapper
-import no.nav.tsm.mottak.db.SykmeldingRepository
-import no.nav.tsm.mottak.db.invalid
-import no.nav.tsm.mottak.db.ok
-import no.nav.tsm.mottak.db.pending
+import no.nav.tsm.mottak.db.*
 import no.nav.tsm.mottak.pdl.IDENT_GRUPPE
 import no.nav.tsm.mottak.pdl.Ident
 import no.nav.tsm.mottak.pdl.PdlClient
 import no.nav.tsm.mottak.pdl.Person
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
-import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
-import no.nav.tsm.sykmelding.input.core.model.Behandler
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
-import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
-import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
-import no.nav.tsm.sykmelding.input.core.model.RuleType
-import no.nav.tsm.sykmelding.input.core.model.Sykmelder
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingMetadata
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
-import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import no.nav.tsm.sykmelding.input.core.model.ValidationType
-import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
-import no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel
-import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
-import no.nav.tsm.sykmelding.input.core.model.metadata.Meldingstype
-import no.nav.tsm.sykmelding.input.core.model.metadata.MessageInfo
-import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
-import no.nav.tsm.sykmelding.input.core.model.metadata.Organisasjon
-import no.nav.tsm.sykmelding.input.core.model.metadata.OrganisasjonsType
-import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
+import no.nav.tsm.sykmelding.input.core.model.metadata.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.header.internals.RecordHeaders
@@ -45,7 +19,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.postgresql.util.PGobject
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -266,7 +239,7 @@ fun getSykmeldingRecord(validation: ValidationResult) : SykmeldingRecord {
                 avsenderSystem = AvsenderSystem("TSM", "1.0"),
                 strekkode = "123123123123",
             ),
-            medisinskVurdering = MedisinskVurdering(
+            medisinskVurdering = LegacyMedisinskVurdering(
                 hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICD10, "T123", "tekst"),
                 biDiagnoser = emptyList(),
                 annenFraversArsak = null,
