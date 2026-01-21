@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val kafkaTemplate: KafkaProducer<String, SykmeldingRecord>,
-    @Value("\${spring.kafka.topics.sykmeldinger-output}") private val tsmSykmeldingTopic: String,
+    @param:Value($$"${spring.kafka.topics.sykmeldinger-output}") private val tsmSykmeldingTopic: String,
 ) {
 
     companion object {

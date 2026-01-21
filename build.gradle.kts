@@ -27,7 +27,7 @@ val jackson_version= "2.20.1"
 val mockitVersion = "6.1.0"
 val kafkaClientVersion = "4.1.0"
 val googleCloudStorageVersion = "2.60.0"
-val sykmelidngInputVersion = "22"
+val sykmelidngInputVersion = "23"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -48,7 +48,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
     implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
-    implementation("no.nav.tsm.sykmelding", "input", sykmelidngInputVersion)
+    implementation("no.nav.tsm.sykmelding:input:${sykmelidngInputVersion}")
 
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:$flyway_version")

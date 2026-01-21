@@ -21,9 +21,9 @@ data class TexasRequest(
 
 @Component
 class TexasClient(private val restTemplate: RestTemplate,
-                @Value("\${nais.cluster}") private val cluster: String,
-                @Value("\${nais.texas.endpoint}") private val endpoint: String) {
-
+                  @param:Value($$"${nais.cluster}") private val cluster: String,
+                  @param:Value($$"${nais.texas.endpoint}") private val endpoint: String
+) {
     fun getTexasToken(service: String): TexasResponse {
         val texasRequest = TexasRequest(
             identity_provider = "azuread",
