@@ -13,8 +13,9 @@ import java.net.URI
 class PdlClient(
     private val texasClient: TexasClient,
     private val restTemplate: RestTemplate,
-    @Value("\${tsm.pdl.url}") private val tsmPdlCacheUrl: String,
-    @Value("\${tsm.pdl.service}") private val tsmPdlCacheService: String) {
+    @param:Value($$"${tsm.pdl.url}") private val tsmPdlCacheUrl: String,
+    @param:Value($$"${tsm.pdl.service}") private val tsmPdlCacheService: String,
+) {
 
     fun getPerson(ident: String): Person {
 
