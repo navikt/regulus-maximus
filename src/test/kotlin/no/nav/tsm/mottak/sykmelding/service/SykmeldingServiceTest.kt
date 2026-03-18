@@ -28,21 +28,27 @@ class SykmeldingServiceTest {
 
     private val pdlClient = mock(PdlClient::class.java)
     private val sykmeldingRepository: SykmeldingRepository = mock()
-    private val kafkaProducer : KafkaProducer<String, SykmeldingRecord> = mock()
+    private val kafkaProducer: KafkaProducer<String, SykmeldingRecord> = mock()
     private val sykmeldingService = SykmeldingService(
         sykmeldingRepository, kafkaProducer, "tsmSykmeldingTopic"
     )
+
     init {
         Mockito.`when`(pdlClient.getPerson(Mockito.anyString()))
-            .thenReturn(Person(null, null, listOf(
-                Ident("123", IDENT_GRUPPE.FOLKEREGISTERIDENT, false),
-                Ident("123", IDENT_GRUPPE.AKTORID, false)
-            )))
+            .thenReturn(
+                Person(
+                    null, null, listOf(
+                        Ident("123", IDENT_GRUPPE.FOLKEREGISTERIDENT, false),
+                        Ident("123", IDENT_GRUPPE.AKTORID, false)
+                    )
+                )
+            )
         val future: CompletableFuture<RecordMetadata> = mock()
         Mockito.`when`(future.get()).thenReturn(RecordMetadata(null, 0, 0, 0, 0, 0))
         Mockito.`when`(kafkaProducer.send(any())).thenReturn(future)
         Mockito.`when`(sykmeldingRepository.findBySykmeldingId(any())).thenReturn(null)
     }
+
     @Test
     fun `test only ok sykmelding`() {
         val sykmeldingRecord = getSykmeldingRecord(
@@ -53,8 +59,6 @@ class SykmeldingServiceTest {
             )
         )
 
-
-
         sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         Mockito.verify(kafkaProducer).send(argThat {
             val validation = value().validation
@@ -63,69 +67,73 @@ class SykmeldingServiceTest {
         })
     }
 
-        @Test
-        fun `test invalid sykmelding`() {
-            val sykmeldingRecord = getSykmeldingRecord(ValidationResult(
+    @Test
+    fun `test invalid sykmelding`() {
+        val sykmeldingRecord = getSykmeldingRecord(
+            ValidationResult(
                 status = RuleType.INVALID,
                 timestamp = OffsetDateTime.now(),
                 rules = listOf(
                     invalid(),
                 )
-            ))
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
-            Mockito.verify(kafkaProducer).send(argThat {
-                val validation = value().validation
-                validation.status == RuleType.INVALID &&
-                        validation.rules.singleOrNull { it.type == RuleType.INVALID } != null
-            })
-        }
+            )
+        )
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
+        Mockito.verify(kafkaProducer).send(argThat {
+            val validation = value().validation
+            validation.status == RuleType.INVALID &&
+                    validation.rules.singleOrNull { it.type == RuleType.INVALID } != null
+        })
+    }
 
-        @Test
-        fun `test pending sykmelding`() {
-            val sykmeldingRecord = getSykmeldingRecord(ValidationResult(
+    @Test
+    fun `test pending sykmelding`() {
+        val sykmeldingRecord = getSykmeldingRecord(
+            ValidationResult(
                 status = RuleType.PENDING,
                 timestamp = OffsetDateTime.now(),
                 rules = listOf(pending())
-            ))
+            )
+        )
 
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
-            Mockito.verify(kafkaProducer).send(argThat {
-                val validation = value().validation
-                validation.status == RuleType.PENDING &&
-                        validation.rules.size == 1
-            })
-        }
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
+        Mockito.verify(kafkaProducer).send(argThat {
+            val validation = value().validation
+            validation.status == RuleType.PENDING &&
+                    validation.rules.size == 1
+        })
+    }
 
-        @Test
-        fun `test sykmeling ok from manuell`() {
-            val okTimestamp = OffsetDateTime.now().plusHours(5)
-            val sykmeldingRecord = getSykmeldingRecord(
-                ValidationResult(
-                    status = RuleType.OK,
-                    timestamp = okTimestamp,
-                    rules = emptyList()
+    @Test
+    fun `test sykmeling ok from manuell`() {
+        val okTimestamp = OffsetDateTime.now().plusHours(5)
+        val sykmeldingRecord = getSykmeldingRecord(
+            ValidationResult(
+                status = RuleType.OK,
+                timestamp = okTimestamp,
+                rules = emptyList()
+            )
+        )
+        val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
+        val sykmeldingDb = SykmeldingMapper.toSykmeldingDB(
+            sykmeldingRecord.copy(
+                validation = ValidationResult(
+                    status = RuleType.PENDING,
+                    timestamp = pendingTimeStamp,
+                    rules = listOf(pending(timestamp = pendingTimeStamp))
                 )
             )
-            val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
-            val sykmeldingDb = SykmeldingMapper.toSykmeldingDB(
-                sykmeldingRecord.copy(
-                    validation = ValidationResult(
-                        status = RuleType.PENDING,
-                        timestamp = pendingTimeStamp,
-                        rules = listOf(pending(timestamp = pendingTimeStamp))
-                    )
-                )
-            )
-            Mockito.`when`(sykmeldingRepository.findBySykmeldingId("1")).thenReturn(sykmeldingDb)
-            sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
-            Mockito.verify(kafkaProducer).send(argThat {
-                val validation = value().validation
-                validation.status == RuleType.OK &&
-                        validation.rules.size == 2 &&
-                        validation.rules.singleOrNull { it.type == RuleType.PENDING && it.timestamp.isEqual(pendingTimeStamp)} != null &&
-                        validation.rules.singleOrNull { it.type == RuleType.OK && it.timestamp.isEqual(okTimestamp)} != null
-            })
-        }
+        )
+        Mockito.`when`(sykmeldingRepository.findBySykmeldingId("1")).thenReturn(sykmeldingDb)
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
+        Mockito.verify(kafkaProducer).send(argThat {
+            val validation = value().validation
+            validation.status == RuleType.OK &&
+                    validation.rules.size == 2 &&
+                    validation.rules.singleOrNull { it.type == RuleType.PENDING && it.timestamp.isEqual(pendingTimeStamp) } != null &&
+                    validation.rules.singleOrNull { it.type == RuleType.OK && it.timestamp.isEqual(okTimestamp) } != null
+        })
+    }
 
     @Test
     fun `test sykmeling invalid from manuell`() {
@@ -135,7 +143,11 @@ class SykmeldingServiceTest {
                 status = RuleType.INVALID,
                 timestamp = invalidTimesamp,
                 rules = listOf(
-                    invalid(validationType = ValidationType.MANUAL, name = TilbakedatertMerknad.TILBAKEDATERING_UGYLDIG_TILBAKEDATERING.name, timestamp = invalidTimesamp),
+                    invalid(
+                        validationType = ValidationType.MANUAL,
+                        name = TilbakedatertMerknad.TILBAKEDATERING_UGYLDIG_TILBAKEDATERING.name,
+                        timestamp = invalidTimesamp
+                    ),
                 )
             )
         )
@@ -156,7 +168,7 @@ class SykmeldingServiceTest {
             val validation = value().validation
             validation.status == RuleType.INVALID &&
                     validation.rules.size == 2 &&
-                    validation.rules.singleOrNull { it.type == RuleType.PENDING && it.timestamp.isEqual(sykmeldingRecord.sykmelding.metadata.mottattDato)} != null &&
+                    validation.rules.singleOrNull { it.type == RuleType.PENDING && it.timestamp.isEqual(sykmeldingRecord.sykmelding.metadata.mottattDato) } != null &&
                     validation.rules.singleOrNull { it.type == RuleType.INVALID && it.timestamp.isEqual(invalidTimesamp) && it.name == TilbakedatertMerknad.TILBAKEDATERING_UGYLDIG_TILBAKEDATERING.name } != null
         })
     }
@@ -181,7 +193,7 @@ class SykmeldingServiceTest {
 
     @Test
     fun `test pending, ok, ok (bug in syfosmmanuell)`() {
-        val pendingTimestamp =  OffsetDateTime.now(ZoneOffset.UTC).minusDays(1)
+        val pendingTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1)
         val firstOkTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(20)
         val secondOkTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
         val sykmeldingRecord = getSykmeldingRecord(
@@ -206,17 +218,35 @@ class SykmeldingServiceTest {
             )
         )
 
-        assertDoesNotThrow { sykmeldingService.updateSykmelding(
-            "1",
-            sykmeldingRecord,
-            RecordHeaders()
-        ) }
+        assertDoesNotThrow {
+            sykmeldingService.updateSykmelding(
+                "1",
+                sykmeldingRecord,
+                RecordHeaders()
+            )
+        }
+    }
+
+    @Test
+    fun `should correctly get earliest fom and latest tom even with bad order`() {
+        val okValidation = ValidationResult(
+            status = RuleType.OK,
+            timestamp = OffsetDateTime.now(),
+            rules = emptyList()
+        )
+        val sykmeldingRecord = getSykmeldingRecord(
+            okValidation,
+        )
+
+        sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
+        Mockito.verify(sykmeldingRepository).upsertSykmelding(argThat {
+            fom.isBefore(tom)
+        })
     }
 }
 
 
-
-fun getSykmeldingRecord(validation: ValidationResult) : SykmeldingRecord {
+fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
     return SykmeldingRecord(
         metadata = EmottakEnkel(
             msgInfo = MessageInfo(
@@ -258,7 +288,14 @@ fun getSykmeldingRecord(validation: ValidationResult) : SykmeldingRecord {
             aktivitet = listOf(
                 AktivitetIkkeMulig(
                     fom = LocalDate.now(),
-                    tom = LocalDate.now(),
+                    tom = LocalDate.now().plusDays(7),
+                    medisinskArsak = null,
+                    arbeidsrelatertArsak = null
+                ),
+                // This is before the first period on purpose
+                AktivitetIkkeMulig(
+                    fom = LocalDate.now().minusDays(7),
+                    tom = LocalDate.now().minusDays(1),
                     medisinskArsak = null,
                     arbeidsrelatertArsak = null
                 )

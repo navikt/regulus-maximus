@@ -3,6 +3,7 @@ package no.nav.tsm.mottak.db
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.util.applog
+import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -10,6 +11,7 @@ import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.postgresql.util.PGobject
+import java.time.LocalDate
 
 class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(message, ex)
 
@@ -24,8 +26,8 @@ object SykmeldingMapper {
             return SykmeldingDB(
                 sykmeldingId = sykmeldingMedBehandlingsutfall.sykmelding.id,
                 pasientIdent = sykmeldingMedBehandlingsutfall.sykmelding.pasient.fnr,
-                fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.first().fom,
-                tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.last().tom,
+                fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.earliestFom(),
+                tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.latestTom(),
                 generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.metadata.genDate,
                 sykmelding =  sykmeldingMedBehandlingsutfall.sykmelding.toPGobject(),
                 validation = sykmeldingMedBehandlingsutfall.validation.toPGobject(),
@@ -105,6 +107,10 @@ object SykmeldingMapper {
         )
     }
 }
+
+private fun List<Aktivitet>.earliestFom(): LocalDate = minBy { it.fom }.fom
+
+private fun List<Aktivitet>.latestTom(): LocalDate = maxBy { it.tom }.tom
 
 fun Any.toPGobject() : PGobject {
     return PGobject().also {
