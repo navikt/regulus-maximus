@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -28,6 +29,26 @@ class KafkaConsumerConfig {
             props.buildConsumerProperties(null).apply {
                 put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                 put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+                put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
+            }, StringDeserializer(), ByteArrayDeserializer()
+        )
+
+        val factory = ConcurrentKafkaListenerContainerFactory<String, ByteArray?>()
+        factory.consumerFactory = consumerFactory
+        factory.setCommonErrorHandler(errorHandler)
+        return factory
+    }
+
+
+    @Bean
+    fun containerFactoryRerun(
+        props: KafkaProperties,
+        errorHandler: ConsumerErrorHandler
+    ): ConcurrentKafkaListenerContainerFactory<String, ByteArray?> {
+        val consumerFactory = DefaultKafkaConsumerFactory(
+            props.buildConsumerProperties(null).apply {
+                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                 put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
             }, StringDeserializer(), ByteArrayDeserializer()
         )

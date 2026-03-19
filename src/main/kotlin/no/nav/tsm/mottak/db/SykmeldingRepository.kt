@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Repository
 interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
@@ -40,4 +41,13 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
     @Query("DELETE FROM sykmelding WHERE sykmelding_id = :sykmeldingId")
     fun deleteBySykmeldingId(@Param("sykmeldingId") sykmeldingId: String): Boolean
 
+    @Modifying
+    @Query(
+        """
+        UPDATE sykmelding
+        SET fom = :fom, tom = :tom
+        WHERE sykmelding_id = :sykmeldingId
+    """
+    )
+    fun fixFomTom(sykmeldingId: String, fom: LocalDate, tom: LocalDate)
 }
