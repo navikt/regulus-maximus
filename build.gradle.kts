@@ -28,6 +28,7 @@ val mockitVersion = "6.1.0"
 val kafkaClientVersion = "4.1.0"
 val googleCloudStorageVersion = "2.60.0"
 val sykmelidngInputVersion = "24"
+val testcontainerVersion = "2.0.3"
 
 dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
@@ -59,7 +60,8 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.3")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainerVersion")
+    testImplementation("org.testcontainers:testcontainers:$testcontainerVersion")
 }
 
 tasks {

@@ -190,8 +190,4 @@ class SykmeldingService(
             throw exception
         }
     }
-
-    fun fixFomTom(id: String, correctFom: LocalDate, correctTom: LocalDate) {
-        sykmeldingRepository.fixFomTom(id, correctFom, correctTom)
-    }
 }

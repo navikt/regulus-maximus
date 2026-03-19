@@ -40,14 +40,4 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
     @Modifying
     @Query("DELETE FROM sykmelding WHERE sykmelding_id = :sykmeldingId")
     fun deleteBySykmeldingId(@Param("sykmeldingId") sykmeldingId: String): Boolean
-
-    @Modifying
-    @Query(
-        """
-        UPDATE sykmelding
-        SET fom = :fom, tom = :tom
-        WHERE sykmelding_id = :sykmeldingId
-    """
-    )
-    fun fixFomTom(sykmeldingId: String, fom: LocalDate, tom: LocalDate)
 }

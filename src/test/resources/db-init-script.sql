@@ -1,0 +1,1 @@
+create role "bigquery-db-user";

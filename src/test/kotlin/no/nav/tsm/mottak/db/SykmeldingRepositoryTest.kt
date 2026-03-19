@@ -24,6 +24,7 @@ class SykmeldingRepositoryTest {
 
     companion object {
         val postgres = PostgreSQLContainer("postgres:16-alpine")
+            .withInitScript("db-init-script.sql")
 
         init {
             postgres.start()
@@ -39,7 +40,6 @@ class SykmeldingRepositoryTest {
             registry.add("spring.flyway.url", postgres::getJdbcUrl)
             registry.add("spring.flyway.user", postgres::getUsername)
             registry.add("spring.flyway.password", postgres::getPassword)
-            registry.add("spring.flyway.target") { "1" }
         }
     }
 
@@ -97,25 +97,6 @@ class SykmeldingRepositoryTest {
     fun `findBySykmeldingId returns null when not found`() {
         val found = sykmeldingRepository.findBySykmeldingId("nonexistent")
         assertNull(found)
-    }
-
-    @Test
-    fun `fixFomTom updates fom and tom for sykmeldingId`() {
-        val sykmelding = createSykmelding(
-            sykmeldingId = "fix-fom-tom-id",
-            fom = LocalDate.of(2024, 1, 1),
-            tom = LocalDate.of(2024, 1, 15),
-        )
-        sykmeldingRepository.upsertSykmelding(sykmelding)
-
-        val newFom = LocalDate.of(2024, 3, 1)
-        val newTom = LocalDate.of(2024, 3, 31)
-        sykmeldingRepository.fixFomTom("fix-fom-tom-id", newFom, newTom)
-
-        val found = sykmeldingRepository.findBySykmeldingId("fix-fom-tom-id")
-        assertNotNull(found)
-        assertEquals(newFom, found!!.fom)
-        assertEquals(newTom, found.tom)
     }
 
     @Test
