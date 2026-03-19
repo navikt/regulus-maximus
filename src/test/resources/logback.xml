@@ -1,0 +1,18 @@
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider"/>
+        </encoder>
+    </appender>
+
+    <logger name="teamlog" level="INFO" additivity="false">
+        <appender-ref ref="stdout_json"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="stdout_json"/>
+    </root>
+
+</configuration>

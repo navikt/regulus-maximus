@@ -29,7 +29,7 @@ object SykmeldingMapper {
                 fom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.earliestFom(),
                 tom = sykmeldingMedBehandlingsutfall.sykmelding.aktivitet.latestTom(),
                 generatedDate = sykmeldingMedBehandlingsutfall.sykmelding.metadata.genDate,
-                sykmelding =  sykmeldingMedBehandlingsutfall.sykmelding.toPGobject(),
+                sykmelding = sykmeldingMedBehandlingsutfall.sykmelding.toPGobject(),
                 validation = sykmeldingMedBehandlingsutfall.validation.toPGobject(),
                 metadata = sykmeldingMedBehandlingsutfall.metadata.toPGobject(),
             )
@@ -53,14 +53,14 @@ object SykmeldingMapper {
     }
 
     fun mergeValidations(old: ValidationResult, new: ValidationResult): ValidationResult {
-        if(old == new) {
+        if (old == new) {
             return new
         }
 
-        val rule = when(old.status) {
+        val rule = when (old.status) {
             RuleType.PENDING -> {
-                if(new.rules.isEmpty()) {
-                   return mergePendingWithEmpty(old, new)
+                if (new.rules.isEmpty()) {
+                    return mergePendingWithEmpty(old, new)
                 }
                 val allRules = old.rules + new.rules
 
@@ -72,12 +72,12 @@ object SykmeldingMapper {
                     rules = allRules.sortedByDescending { it.timestamp }
                 )
             }
+
             else -> {
-                if(new.status != old.status || new.timestamp != old.timestamp || !old.rules.containsAll(new.rules)) {
-                    if(new.status == RuleType.OK && old.status == RuleType.OK && old.rules.containsAll(new.rules)) {
+                if (new.status != old.status || new.timestamp != old.timestamp || !old.rules.containsAll(new.rules)) {
+                    if (new.status == RuleType.OK && old.status == RuleType.OK && old.rules.containsAll(new.rules)) {
                         logger.warn("Ignoring validation result with status OK with different timestamps")
-                    }
-                    else {
+                    } else {
                         throw SykmeldingMergeValidationException("Cannot merge from ${old.status} to ${new.status}")
                     }
                 }
@@ -98,6 +98,7 @@ object SykmeldingMapper {
                 timestamp = new.timestamp,
                 validationType = ValidationType.MANUAL
             )
+
             else -> throw SykmeldingMergeValidationException("Cannot merge from ${old.status} to ${new.status}")
         }
         return ValidationResult(
@@ -108,11 +109,11 @@ object SykmeldingMapper {
     }
 }
 
-private fun List<Aktivitet>.earliestFom(): LocalDate = minBy { it.fom }.fom
+fun List<Aktivitet>.earliestFom(): LocalDate = minBy { it.fom }.fom
 
-private fun List<Aktivitet>.latestTom(): LocalDate = maxBy { it.tom }.tom
+fun List<Aktivitet>.latestTom(): LocalDate = maxBy { it.tom }.tom
 
-fun Any.toPGobject() : PGobject {
+fun Any.toPGobject(): PGobject {
     return PGobject().also {
         it.value = sykmeldingObjectMapper.writeValueAsString(this)
         it.type = "json"

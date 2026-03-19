@@ -18,6 +18,7 @@ import org.apache.kafka.common.header.Headers
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class SykmeldingService(
@@ -188,5 +189,9 @@ class SykmeldingService(
             log.error("Failed to tombstone sykmelding to tsm.tsm-sykmelding", exception)
             throw exception
         }
+    }
+
+    fun fixFomTom(id: String, correctFom: LocalDate, correctTom: LocalDate) {
+        sykmeldingRepository.fixFomTom(id, correctFom, correctTom)
     }
 }
