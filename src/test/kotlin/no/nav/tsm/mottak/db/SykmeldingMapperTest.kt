@@ -1,10 +1,8 @@
 package no.nav.tsm.mottak.db
 
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.sykmelding.input.core.model.InvalidRule
-import no.nav.tsm.sykmelding.input.core.model.OKRule
-import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reason
+import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
@@ -206,7 +204,7 @@ class SykmeldingMapperTest {
             status = RuleType.OK,
             timestamp = new.timestamp,
             rules = listOf(
-                OKRule(
+                Rule.OK(
                     name = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
                     timestamp = new.timestamp,
                     validationType = ValidationType.MANUAL,
@@ -360,7 +358,7 @@ fun pending(
     validationType: ValidationType = ValidationType.AUTOMATIC,
     name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
     description: String = "Tilbakedatert sykmelding til manuell behandling",
-) = PendingRule(
+) = Rule.Pending(
     name = name,
     timestamp = timestamp,
     reason = Reason(description, description),
@@ -372,7 +370,7 @@ fun ok(
     validationType: ValidationType = ValidationType.AUTOMATIC,
     name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
     description: String = "Tilbakedatert sykmelding til manuell behandling",
-) = OKRule(
+) = Rule.OK(
     name = name,
     timestamp = timestamp,
     validationType = validationType,
@@ -383,7 +381,7 @@ fun invalid(
     validationType: ValidationType = ValidationType.AUTOMATIC,
     name: String = TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name,
     description: String = "Tilbakedatert sykmelding til manuell behandling",
-) = InvalidRule(
+) = Rule.Invalid(
     name = name,
     timestamp = timestamp,
     reason = Reason(description, description),
