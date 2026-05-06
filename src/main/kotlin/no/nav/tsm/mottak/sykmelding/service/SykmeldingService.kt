@@ -2,12 +2,12 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import no.nav.tsm.mottak.db.SykmeldingMapper
 import no.nav.tsm.mottak.db.SykmeldingRepository
+import no.nav.tsm.mottak.db.toSpecificSykmeldingRecord
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.util.applog
 import no.nav.tsm.mottak.util.logData
 import no.nav.tsm.mottak.util.teamLogger
-import no.nav.tsm.sykmelding.input.core.model.InvalidRule
-import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
@@ -18,7 +18,6 @@ import org.apache.kafka.common.header.Headers
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class SykmeldingService(
@@ -46,9 +45,8 @@ class SykmeldingService(
             }
         } ?: sykmelding
 
-        if( newSykmeldingRecord.validation.rules.any { it is InvalidRule } && newSykmeldingRecord.validation.rules.any { it is OKRule }) {
+        if(newSykmeldingRecord.validation.rules.any { it is Rule.Invalid } && newSykmeldingRecord.validation.rules.any { it is Rule.OK }) {
             log.info("Sykmelding with id $sykmeldingId has invalid rules ${newSykmeldingRecord.validation}")
-
             throw SykmeldingMergeValidationException("Sykmelding with id $sykmeldingId has invalid rules, both ok and invalid")
         }
 
@@ -100,7 +98,7 @@ class SykmeldingService(
 
         checkSykmeldingData(sykmelding, oldSykmeldingRecord)
 
-        return SykmeldingRecord(metadata, newSykmelding , mergedValidation)
+        return toSpecificSykmeldingRecord(sykmelding = newSykmelding, metadata = metadata, validation = mergedValidation)
     }
 
     private fun checkSykmeldingData(
@@ -158,11 +156,7 @@ class SykmeldingService(
                 tsmSykmeldingTopic,
                 null,
                 sykmelding.sykmelding.id,
-                SykmeldingRecord(
-                    sykmelding = sykmelding.sykmelding,
-                    metadata = sykmelding.metadata,
-                    validation = sykmelding.validation
-                ),
+                sykmelding,
                 headers,
             )
             kafkaTemplate.send(

@@ -9,6 +9,7 @@ import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationExceptio
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.metadata.*
+import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata.Xml.Emottak
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.header.internals.RecordHeaders
@@ -23,6 +24,11 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.CompletableFuture
+import kotlin.collections.emptyList
+
+fun SykmeldingRecord.copy(validation: ValidationResult): SykmeldingRecord {
+    return toSpecificSykmeldingRecord(sykmelding, metadata, validation)
+}
 
 class SykmeldingServiceTest {
 
@@ -247,8 +253,8 @@ class SykmeldingServiceTest {
 
 
 fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
-    return SykmeldingRecord(
-        metadata = EmottakEnkel(
+    return SykmeldingRecord.Xml(
+        metadata = Emottak.Legacy(
             msgInfo = MessageInfo(
                 Meldingstype.SYKMELDING,
                 genDate = OffsetDateTime.now(),
@@ -259,9 +265,9 @@ fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
             vedlegg = emptyList(),
             receiver = Organisasjon(null, OrganisasjonsType.IKKE_OPPGITT, emptyList(), null, null, null, null),
         ),
-        sykmelding = XmlSykmelding(
+        sykmelding = Sykmelding.Xml(
             id = "1",
-            metadata = SykmeldingMetadata(
+            metadata = SykmeldingMeta.Legacy(
                 genDate = OffsetDateTime.now(),
                 mottattDato = OffsetDateTime.now(),
                 behandletTidspunkt = OffsetDateTime.now(),
@@ -269,7 +275,7 @@ fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
                 avsenderSystem = AvsenderSystem("TSM", "1.0"),
                 strekkode = "123123123123",
             ),
-            medisinskVurdering = LegacyMedisinskVurdering(
+            medisinskVurdering = MedisinskVurdering.Legacy(
                 hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICD10, "T123", "tekst"),
                 biDiagnoser = emptyList(),
                 annenFraversArsak = null,
@@ -286,14 +292,14 @@ fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
                 kontaktinfo = emptyList()
             ),
             aktivitet = listOf(
-                AktivitetIkkeMulig(
+                Aktivitet.IkkeMulig(
                     fom = LocalDate.now(),
                     tom = LocalDate.now().plusDays(7),
                     medisinskArsak = null,
                     arbeidsrelatertArsak = null
                 ),
                 // This is before the first period on purpose
-                AktivitetIkkeMulig(
+                Aktivitet.IkkeMulig(
                     fom = LocalDate.now().minusDays(7),
                     tom = LocalDate.now().minusDays(1),
                     medisinskArsak = null,
@@ -309,7 +315,7 @@ fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
             prognose = null,
             tiltak = null,
             bistandNav = null,
-            arbeidsgiver = IngenArbeidsgiver(),
+            arbeidsgiver = ArbeidsgiverInfo.Ingen(),
             sykmelder = Sykmelder(
                 ids = emptyList(),
                 helsepersonellKategori = HelsepersonellKategori.LEGE
