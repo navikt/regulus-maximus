@@ -39,8 +39,6 @@ spec:
         maintenance:
           day: 1
           hour: 5
-    buckets:
-      - name: regulus-maximus-bucket-prod
   image: {{ image }}
   replicas:
     min: 1
