@@ -1,6 +1,7 @@
 package no.nav.tsm
 
 import io.ktor.server.application.*
+import no.nav.tsm.admin.configureAdminModule
 import no.nav.tsm.mottak.configureMottakModule
 import no.nav.tsm.plugins.*
 import no.nav.tsm.plugins.auth.configureAuthentication
@@ -19,4 +20,5 @@ fun Application.module() {
 
     // Specific modules
     configureMottakModule()
+    configureAdminModule()
 }
