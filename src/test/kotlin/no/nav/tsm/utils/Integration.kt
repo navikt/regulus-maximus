@@ -1,0 +1,50 @@
+package no.nav.tsm.utils
+
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
+
+abstract class WithPostgresql {
+    companion object {
+        val postgres =
+            PostgreSQLContainer("postgres:17-alpine").apply {
+                withInitScript("db/test_init.sql")
+                start()
+            }
+
+        val config = createIntegrationEnvironment(postgres, null)
+
+        fun runMigrations(clean: Boolean = false) {
+            val flyway =
+                Flyway.configure()
+                    .dataSource(
+                        config.postgres.jdbc,
+                        config.postgres.username,
+                        config.postgres.password,
+                    )
+                    .cleanDisabled(false)
+                    .locations("db/migration")
+                    .load()
+
+            if (clean) {
+                flyway.clean()
+            }
+            flyway.migrate()
+        }
+
+        fun connect() {
+            R2dbcDatabase.connect(
+                url = config.postgres.r2.url,
+                user = config.postgres.username,
+                password = config.postgres.password,
+            )
+        }
+    }
+}
+
+abstract class WithAll : WithPostgresql() {
+    companion object {
+        val kafka = ConfluentKafkaContainer("confluentinc/cp-kafka:8.1.0").apply { start() }
+    }
+}

@@ -1,41 +1,82 @@
 package no.nav.tsm.mottak.pdl
 
-import no.nav.tsm.mottak.texas.TexasClient
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.RequestEntity
-import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
-import java.net.URI
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.http.*
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.plugins.di.annotations.*
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.logger
+import no.nav.tsm.core.otel.failSpan
+import no.nav.tsm.plugins.auth.TexasClient
 
-@Component
-class PdlClient(
+sealed interface PdlClient {
+    enum class PdlErrors {
+        NotFound,
+        UnknownError,
+    }
+
+    suspend fun getPerson(ident: String): Either<PdlErrors, PdlPerson>
+}
+
+class PdlCloudClient(
+    @Named("RetryHttpClient") httpClient: HttpClient,
     private val texasClient: TexasClient,
-    private val restTemplate: RestTemplate,
-    @param:Value($$"${tsm.pdl.url}") private val tsmPdlCacheUrl: String,
-    @param:Value($$"${tsm.pdl.service}") private val tsmPdlCacheService: String,
-) {
+    private val environment: Environment,
+) : PdlClient {
+    private val logger = logger()
 
-    fun getPerson(ident: String): Person {
+    private val pdlHttpClient = httpClient.config {
+        install(ContentNegotiation) {
+            jackson {
+                registerModule(JavaTimeModule())
 
-        val texasToken = texasClient.getTexasToken(tsmPdlCacheService)
-        val headers = HttpHeaders().apply {
-            setBearerAuth(texasToken.access_token)
-            set("ident", ident)
-        }
-
-        val requestEntity = RequestEntity
-            .get(URI("$tsmPdlCacheUrl/api/person"))
-            .headers(headers)
-            .build()
-
-        try {
-            return restTemplate.exchange(requestEntity, Person::class.java).body ?: throw PersonNotFoundException("Failed to get person from PDL cache")
-        } catch (e: HttpClientErrorException.NotFound) {
-            throw PersonNotFoundException("Could not find person in pdl cache")
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to get person from PDL cache", e)
+                // tsm-pdl-cache responds with some values we don't care about
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
         }
     }
+
+    @WithSpan
+    override suspend fun getPerson(ident: String): Either<PdlClient.PdlErrors, PdlPerson> {
+        val (token) = getToken()
+
+        val response =
+            pdlHttpClient.get("${environment.external().tsmPdlCache}/api/person") {
+                headers {
+                    append("Nav-Consumer-Id", "regulus-maximus")
+                    append("Authorization", "Bearer $token")
+                    append("Ident", ident)
+                }
+            }
+
+        return when {
+            response.status.isSuccess() ->
+                try {
+                    response.body<PdlPerson>().right()
+                } catch (e: Exception) {
+                    failSpan(Span.current(), e)
+                    logger.error("Error deserializing PDL response", e)
+                    return PdlClient.PdlErrors.UnknownError.left()
+                }
+
+            response.status == HttpStatusCode.NotFound -> PdlClient.PdlErrors.NotFound.left()
+            else -> {
+                logger.error("Unable to get person from pdl, see team logs for ident")
+                PdlClient.PdlErrors.UnknownError.left()
+            }
+        }
+    }
+
+    private suspend fun getToken() = texasClient.entraIdToken("tsm", "tsm-pdl-cache")
 }

@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: regulus-maximus-dev-postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: regulus-maximus
+    ports:
+      - '7967:5432'
+    volumes:
+      - ./src/test/resources/db/test_init.sql:/docker-entrypoint-initdb.d/test_init.sql
+  kafka:
+    image: confluentinc/confluent-local:8.1.0
+    container_name: regulus-maximus-dev-kafka
+    ports:
+      - "9067:9092"

@@ -1,83 +1,130 @@
+import com.diffplug.gradle.spotless.SpotlessExtension
+import dev.detekt.gradle.Detekt
 
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    id("org.springframework.boot") version "3.5.8"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.flyway)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.gradle.versions)
 }
 
-group = "no.nav.tsm.mottak"
-version = "0.0.2"
+group = "no.nav.tsm"
+version = "0.0.1"
+
+application {
+    mainClass = "io.ktor.server.netty.EngineMain"
+}
+
+kotlin {
+    jvmToolchain(21)
+}
 
 repositories {
     mavenCentral()
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
 }
 
-val kotlin_version = "2.2.21"
-val logback_version = "1.5.21"
-val logback_encoder_version = "9.0"
-val flyway_version= "11.16.0"
-val postgres_version= "42.7.8"
-val jackson_version= "2.20.1"
-val mockitVersion = "6.1.0"
-val kafkaClientVersion = "4.1.0"
-val googleCloudStorageVersion = "2.60.0"
-val sykmelidngInputVersion = "26"
-val testcontainerVersion = "2.0.3"
-
 dependencies {
-    //implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // Ktor
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.di)
+    implementation(libs.ktor.server.call.id)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.server.metrics.micrometer)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.apache)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.call.id)
+    implementation(libs.arrow.core)
+    implementation(libs.arrow.fx.coroutines)
 
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.postgresql:postgresql:$postgres_version")
-    implementation("net.logstash.logback:logstash-logback-encoder:${logback_encoder_version}")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    // TSM libraries
+    implementation(libs.tsm.sykmeldinger.input)
+    implementation(libs.tsm.diagnoser)
+    implementation(libs.tsm.regula)
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
-    implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
-    implementation("no.nav.tsm.sykmelding:input:${sykmelidngInputVersion}")
+    // Database and such
+    implementation(libs.flyway.postgres)
+    implementation(libs.flyway.core)
+    runtimeOnly(libs.postgresql)
+    implementation(libs.postgresql.r2dbc)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.json)
+    implementation(libs.exposed.date)
+    implementation(libs.kafka.client)
 
-    implementation("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-core:$flyway_version")
-    implementation("com.google.cloud:google-cloud-storage:$googleCloudStorageVersion")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitVersion")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainerVersion")
-    testImplementation("org.testcontainers:testcontainers:$testcontainerVersion")
+    // Monitoring and logging
+    implementation(libs.micrometer.registry.prometheus)
+    implementation(libs.khealth)
+    implementation(libs.logback.classic)
+    implementation(libs.logback.encoder)
+    implementation(libs.otel.annotations)
+
+    // Test
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.client.test.mock)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.kafka)
+    testImplementation(libs.kotest.assertions)
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
     shadowJar {
-        archiveBaseName.set("app")
-        archiveClassifier.set("")
-        isZip64 = true
-        manifest {
-            attributes["Main-Class"] = "no.nav.tsm.mottak.ApplicationKt"
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        mergeServiceFiles {}
+        from("src/main/resources/logback.xml") {
+            into("/")
         }
     }
 
-    bootJar {
-        archiveFileName = "app.jar"
+    configure<SpotlessExtension> {
+        kotlin { ktfmt("0.62").kotlinlangStyle() }
+        check {
+            dependsOn("spotlessApply")
+        }
+    }
+}
+
+tasks.register<Exec>("preRunLocal") {
+    group = "application"
+    commandLine("./scripts/pre-dev.sh")
+}
+
+tasks.register<JavaExec>("runLocal") {
+    group = "application"
+    mainClass.set("io.ktor.server.netty.EngineMain")
+    classpath = sourceSets["main"].runtimeClasspath
+
+    args("-config=application-local.conf")
+    jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
+
+    dependsOn("preRunLocal")
+}
+
+tasks.withType<Detekt>().configureEach {
+    config.setFrom(file("detekt.yml"))
+    buildUponDefaultConfig = true
+
+    dependsOn("spotlessApply")
+}
+
+/**
+ * Disable auto running of detekt on build and stuff
+ */
+afterEvaluate {
+    tasks.named("check") {
+        setDependsOn(dependsOn.filter { !it.toString().contains("detekt") })
     }
 }

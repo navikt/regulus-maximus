@@ -1,13 +1,12 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
   name: regulus-maximus
   namespace: tsm
   labels:
     team: tsm
     system: mottak
-  annotations:
-    texas.nais.io/enabled: "true"
+
 spec:
   gcp:
     sqlInstances:
@@ -39,42 +38,53 @@ spec:
         maintenance:
           day: 1
           hour: 5
-  image: {{ image }}
+
+  kafka:
+    pool: nav-prod
+
+  port: 8080
   replicas:
     min: 1
     max: 10
-  port: 8080
-  liveness:
-    path: /internal/health
-  readiness:
-    path: /internal/health
-  startup:
-    path: /internal/health
-    initialDelay: 60
-  prometheus:
-    enabled: true
-    path: /internal/prometheus
   resources:
     limits:
       memory: 1Gi
     requests:
-      cpu: 50m
+      cpu: 30m
       memory: 512Mi
-  kafka:
-    pool: nav-prod
+
+  liveness:
+    path: /internal/health/alive
+  readiness:
+    path: /internal/health/ready
+  preStopHook:
+    http:
+      path: /internal/shutdown
+  prometheus:
+    enabled: true
+    path: /internal/metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+
+  # Used to authorize /admin endpoints with Entra AD OBO-tokens
   azure:
     application:
       enabled: true
+      tenant: nav.no
+      allowAllUsers: false
+      claims:
+        groups:
+          # EntraAD: nais-team-tsm (developers - same as Zara uses)
+          - id: '35c70ac7-e8e6-4cec-933b-86106a97c0d4'
+
   accessPolicy:
+    inbound:
+      rules:
+        - application: zara
     outbound:
       rules:
         - application: logging
           namespace: nais-system
         - application: tsm-pdl-cache
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
-    logging:
-      destinations:
-        - id: loki
