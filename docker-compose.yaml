@@ -14,4 +14,4 @@ services:
     image: confluentinc/confluent-local:8.1.0
     container_name: regulus-maximus-dev-kafka
     ports:
-      - "9067:9092"
+      - "9092:9092"
