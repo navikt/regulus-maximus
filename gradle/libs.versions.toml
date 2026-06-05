@@ -1,0 +1,79 @@
+[versions]
+kotlin = "2.3.21"
+ktor = "3.5.0"
+khealth = "3.0.2"
+logback = "1.5.32"
+logbackEncoder = "9.0"
+postgresR2dbc = "1.1.1.RELEASE"
+postgres = "42.7.11"
+exposed = "1.3.0"
+prometheus = "1.16.5"
+flyway = "12.6.2"
+kafka = "4.3.0"
+mockk = "1.14.9"
+testcontainers = "2.0.5"
+otel = "2.28.1"
+arrow = "2.2.2.1"
+kotest-assertions = "6.1.11"
+tsm-sykmeldinger-input = "26"
+tsm-regula = "54"
+tsm-diagnoser = "2026.1.13"
+
+[libraries]
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-di = { module = "io.ktor:ktor-server-di", version.ref = "ktor" }
+ktor-server-call-id = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache5", version.ref = "ktor" }
+ktor-client-call-id = { module = "io.ktor:ktor-client-call-id", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+khealth = { module = "dev.hayden:khealth", version.ref = "khealth" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+
+# Monitoring and observability
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "prometheus" }
+otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version.ref = "otel" }
+
+# TSM Dependencies
+tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version.ref = "tsm-sykmeldinger-input" }
+tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser" }
+tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
+
+# Testing
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-client-test-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest-assertions" }
+
+# Database stuff
+postgresql-r2dbc = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgresR2dbc" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-r2dbc", version.ref = "exposed" }
+exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed" }
+exposed-date = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+kafka-client = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
+
+[plugins]
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+spotless = { id = "com.diffplug.spotless", version = "8.5.1" }
+detekt = { id = "dev.detekt", version = "2.0.0-alpha.3" }
+gradle-versions = { id = "com.github.ben-manes.versions", version = "0.54.0" }

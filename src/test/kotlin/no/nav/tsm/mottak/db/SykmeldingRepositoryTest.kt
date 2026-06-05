@@ -1,87 +1,45 @@
 package no.nav.tsm.mottak.db
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
-import org.postgresql.util.PGobject
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.postgresql.PostgreSQLContainer
+import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import kotlinx.coroutines.test.runTest
+import no.nav.tsm.sykmelding.input.core.model.*
+import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
+import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
+import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
+import no.nav.tsm.utils.WithPostgresql
+import org.junit.Test
 
-@DataJdbcTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ImportAutoConfiguration(FlywayAutoConfiguration::class)
-class SykmeldingRepositoryTest {
-
+class SykmeldingRepositoryTest : WithPostgresql() {
     companion object {
-        val postgres = PostgreSQLContainer("postgres:16-alpine")
-            .withInitScript("db-init-script.sql")
-
         init {
-            postgres.start()
-        }
-
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url", postgres::getJdbcUrl)
-            registry.add("spring.datasource.username", postgres::getUsername)
-            registry.add("spring.datasource.password", postgres::getPassword)
-            registry.add("spring.flyway.url", postgres::getJdbcUrl)
-            registry.add("spring.flyway.user", postgres::getUsername)
-            registry.add("spring.flyway.password", postgres::getPassword)
+            runMigrations(true)
+            connect()
         }
     }
 
-    @Autowired
-    lateinit var sykmeldingRepository: SykmeldingRepository
-
-    private fun jsonb(value: String): PGobject = PGobject().apply {
-        type = "jsonb"
-        this.value = value
-    }
-
-    private fun createSykmelding(
-        sykmeldingId: String = "test-id-1",
-        pasientIdent: String = "12345678901",
-        fom: LocalDate = LocalDate.of(2024, 1, 1),
-        tom: LocalDate = LocalDate.of(2024, 1, 15),
-    ) = SykmeldingDB(
-        sykmeldingId = sykmeldingId,
-        pasientIdent = pasientIdent,
-        fom = fom,
-        tom = tom,
-        generatedDate = OffsetDateTime.now(),
-        sykmelding = jsonb("""{"type": "test"}"""),
-        validation = jsonb("""{"status": "OK"}"""),
-        metadata = jsonb("""{"source": "test"}"""),
-    )
+    private val sykmeldingRepository = SykmeldingRepository()
 
     @Test
-    fun `upsert and find by sykmeldingId`() {
+    fun `upsert and find by sykmeldingId`() = runTest {
         val sykmelding = createSykmelding()
         sykmeldingRepository.upsertSykmelding(sykmelding)
 
         val found = sykmeldingRepository.findBySykmeldingId("test-id-1")
-        assertNotNull(found)
-        assertEquals("test-id-1", found!!.sykmeldingId)
-        assertEquals("12345678901", found.pasientIdent)
-        assertEquals(LocalDate.of(2024, 1, 1), found.fom)
-        assertEquals(LocalDate.of(2024, 1, 15), found.tom)
+
+        found.shouldNotBeNull()
+        found.sykmelding.id shouldEqual "test-id-1"
+        found.sykmelding.pasient.fnr shouldEqual "12345678901"
+        found.sykmelding.aktivitet.first().fom shouldEqual LocalDate.of(2024, 1, 1)
+        found.sykmelding.aktivitet.first().tom shouldEqual LocalDate.of(2024, 1, 15)
     }
 
     @Test
-    fun `upsert updates existing record on conflict`() {
+    fun `upsert updates existing record on conflict`() = runTest {
         val original = createSykmelding(pasientIdent = "11111111111")
         sykmeldingRepository.upsertSykmelding(original)
 
@@ -89,25 +47,89 @@ class SykmeldingRepositoryTest {
         sykmeldingRepository.upsertSykmelding(updated)
 
         val found = sykmeldingRepository.findBySykmeldingId("test-id-1")
-        assertNotNull(found)
-        assertEquals("22222222222", found!!.pasientIdent)
+        found.shouldNotBeNull()
+        found.sykmelding.pasient.fnr shouldEqual "22222222222"
     }
 
     @Test
-    fun `findBySykmeldingId returns null when not found`() {
+    fun `findBySykmeldingId returns null when not found`() = runTest {
         val found = sykmeldingRepository.findBySykmeldingId("nonexistent")
-        assertNull(found)
+
+        found.shouldBeNull()
     }
 
     @Test
-    fun `deleteBySykmeldingId deletes existing record`() {
+    fun `deleteBySykmeldingId deletes existing record`() = runTest {
         val sykmelding = createSykmelding(sykmeldingId = "to-delete")
         sykmeldingRepository.upsertSykmelding(sykmelding)
 
         val deleted = sykmeldingRepository.deleteBySykmeldingId("to-delete")
-        assertTrue(deleted)
+        deleted shouldBe 1
 
         val found = sykmeldingRepository.findBySykmeldingId("to-delete")
-        assertNull(found)
+        found.shouldBeNull()
     }
 }
+
+private fun createSykmelding(
+    sykmeldingId: String = "test-id-1",
+    pasientIdent: String = "12345678901",
+    fom: LocalDate = LocalDate.of(2024, 1, 1),
+    tom: LocalDate = LocalDate.of(2024, 1, 15),
+) =
+    SykmeldingRecord.Digital(
+        metadata = MessageMetadata.Digital("12312321"),
+        sykmelding =
+            Sykmelding.Digital(
+                id = sykmeldingId,
+                metadata =
+                    SykmeldingMeta.Digital(
+                        mottattDato = OffsetDateTime.now(),
+                        genDate = OffsetDateTime.now(),
+                        avsenderSystem = AvsenderSystem(navn = "TestySystemmy", "1.0.0"),
+                    ),
+                pasient =
+                    Pasient(
+                        navn = Navn(fornavn = "Forri", mellomnavn = null, etternavn = "Navni"),
+                        navKontor = null,
+                        navnFastlege = null,
+                        fnr = pasientIdent,
+                        kontaktinfo = emptyList(),
+                    ),
+                medisinskVurdering =
+                    MedisinskVurdering.Digital(
+                        hovedDiagnose = null,
+                        biDiagnoser = null,
+                        svangerskap = false,
+                        yrkesskade = null,
+                        skjermetForPasient = false,
+                        annenFravarsgrunn = null,
+                    ),
+                aktivitet =
+                    listOf(
+                        Aktivitet.Gradert(fom = fom, tom = tom, grad = 90, reisetilskudd = false)
+                    ),
+                behandler =
+                    Behandler(
+                        navn = Navn(fornavn = "Beh", mellomnavn = null, etternavn = "Handler"),
+                        adresse = null,
+                        ids = emptyList(),
+                        kontaktinfo = emptyList(),
+                    ),
+                sykmelder =
+                    Sykmelder(
+                        ids = emptyList(),
+                        helsepersonellKategori = HelsepersonellKategori.HJELPEPLEIER,
+                    ),
+                arbeidsgiver = ArbeidsgiverInfo.Ingen(),
+                tilbakedatering = null,
+                bistandNav = null,
+                utdypendeSporsmal = null,
+            ),
+        validation =
+            ValidationResult(
+                status = RuleType.OK,
+                timestamp = OffsetDateTime.now(),
+                rules = emptyList(),
+            ),
+    )

@@ -1,43 +1,52 @@
 package no.nav.tsm.mottak.db
 
-import org.springframework.data.jdbc.repository.query.Modifying
-import org.springframework.data.jdbc.repository.query.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.query.Param
-import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.sykmelding.input.core.model.Aktivitet
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.upsert
 
-@Repository
-interface SykmeldingRepository : CrudRepository<SykmeldingDB, String> {
+class SykmeldingRepository {
+    suspend fun findBySykmeldingId(sykmeldingId: String): SykmeldingRecord? = dbQuery {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.sykmeldingId eq sykmeldingId }
+            .map {
+                toSpecificSykmeldingRecord(
+                    sykmelding = it[SykmeldingTable.sykmelding],
+                    metadata = it[SykmeldingTable.metadata],
+                    validation = it[SykmeldingTable.validation],
+                )
+            }
+            .firstOrNull()
+    }
 
-    fun findBySykmeldingId(sykmeldingId: String): SykmeldingDB?
+    suspend fun upsertSykmelding(sykmelding: SykmeldingRecord) =
+        dbQuery<Unit> {
+            SykmeldingTable.upsert(
+                where = { SykmeldingTable.sykmeldingId eq sykmelding.sykmelding.id },
+                onUpdateExclude = listOf(SykmeldingTable.sykmeldingId),
+            ) {
+                it[SykmeldingTable.sykmeldingId] = sykmelding.sykmelding.id
+                it[SykmeldingTable.pasientIdent] = sykmelding.sykmelding.pasient.fnr
+                it[SykmeldingTable.fom] = sykmelding.sykmelding.aktivitet.earliestFom()
+                it[SykmeldingTable.tom] = sykmelding.sykmelding.aktivitet.latestTom()
+                it[SykmeldingTable.generatedDate] = sykmelding.sykmelding.metadata.genDate
+                it[SykmeldingTable.sykmelding] = sykmelding.sykmelding
+                it[SykmeldingTable.validation] = sykmelding.validation
+                it[SykmeldingTable.metadata] = sykmelding.metadata
+            }
+        }
 
-    @Transactional
-    @Modifying
-    @Query(
-        """
-    INSERT INTO sykmelding (
-        sykmelding_id, pasient_ident, fom, tom, generated_date, sykmelding, metadata, validation
-    ) VALUES (
-        :#{#sykmelding.sykmeldingId}, :#{#sykmelding.pasientIdent}, :#{#sykmelding.fom}, 
-        :#{#sykmelding.tom}, :#{#sykmelding.generatedDate}, :#{#sykmelding.sykmelding},
-        :#{#sykmelding.metadata}, :#{#sykmelding.validation}
-    )
-    ON CONFLICT (sykmelding_id) DO UPDATE SET 
-        pasient_ident = EXCLUDED.pasient_ident,
-        fom = EXCLUDED.fom,
-        tom = EXCLUDED.tom,
-        generated_date = EXCLUDED.generated_date,
-        sykmelding = EXCLUDED.sykmelding,
-        metadata = EXCLUDED.metadata,
-        validation = EXCLUDED.validation
-    """
-    )
-    fun upsertSykmelding(@Param("sykmelding") sykmelding: SykmeldingDB)
-
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM sykmelding WHERE sykmelding_id = :sykmeldingId")
-    fun deleteBySykmeldingId(@Param("sykmeldingId") sykmeldingId: String): Boolean
+    suspend fun deleteBySykmeldingId(sykmeldingId: String): Int = dbQuery {
+        SykmeldingTable.deleteWhere { SykmeldingTable.sykmeldingId eq sykmeldingId }
+    }
 }
+
+private fun List<Aktivitet>.earliestFom(): LocalDate = minBy { it.fom }.fom
+
+private fun List<Aktivitet>.latestTom(): LocalDate = maxBy { it.tom }.tom

@@ -1,18 +1,39 @@
 <configuration>
+    <!-- Reduces the spammy logback logging during startup -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 
-    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider"/>
+    <root level="INFO">
+        <appender-ref ref="PRETTY-CONSOLE"/>
+    </root>
+
+    <logger name="teamlog" level="INFO" additivity="false">
+        <appender-ref ref="TEAM_LOG"/>
+    </logger>
+
+    <logger name="no.nav.tsm" level="DEBUG"/>
+
+    <!-- Stuff we wanna squelch, use sparingly -->
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
+    <logger name="org.apache.kafka.clients.consumer" level="WARN"/>
+    <logger name="org.testcontainers" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+
+    <!-- Local development, redirect secure logs to console with nice colors -->
+    <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %red(\(TEAMLOG\)) %highlight(%-5level) %X{call-id} [%thread] %logger{36} - %msg%n
+            </pattern>
         </encoder>
     </appender>
 
-    <logger name="teamlog" level="INFO" additivity="false">
-        <appender-ref ref="stdout_json"/>
-    </logger>
-
-    <root level="INFO">
-        <appender-ref ref="stdout_json"/>
-    </root>
-
+    <!-- Pretty console appender for local development -->
+    <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %highlight(%-5level) %X{call-id} [%thread] %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
 </configuration>

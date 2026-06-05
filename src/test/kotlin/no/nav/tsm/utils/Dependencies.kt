@@ -1,0 +1,71 @@
+package no.nav.tsm.utils
+
+import io.ktor.server.application.*
+import io.ktor.server.plugins.di.*
+import io.mockk.mockk
+import java.util.Properties
+import kotlin.time.Duration.Companion.milliseconds
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.KafkaConfig
+import no.nav.tsm.core.KafkaSykmeldingConsumer
+import no.nav.tsm.core.PostgresConfig
+import no.nav.tsm.core.PostgresR2DBCConfig
+import no.nav.tsm.core.Runtime
+import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.module
+import no.nav.tsm.plugins.auth.configureAuthentication
+import no.nav.tsm.plugins.configureDependencies
+import no.nav.tsm.plugins.configureSerialization
+import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
+
+fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer) {
+    // Integration test specific Environment configuration
+    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, null) } }
+
+    // Global
+    configureAuthentication()
+    configureDependencies()
+    configureSerialization()
+
+    // #1: Postgres specific tests will have to provide their own "in test" set of modules
+}
+
+fun Application.configureFullIntegrationTests(
+    postgres: PostgreSQLContainer,
+    kafka: ConfluentKafkaContainer,
+) {
+    // Integration test specific Environment configuration
+    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, kafka) } }
+
+    // #2: Postgresql + Kafka tests just set up the entire application
+    module()
+}
+
+fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
+    Environment(
+        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
+        postgres =
+            PostgresConfig(
+                jdbc = postgres.jdbcUrl,
+                r2 =
+                    PostgresR2DBCConfig(
+                        url = "r2dbc:${postgres.jdbcUrl.removePrefix("jdbc:")}",
+                        sslCert = null,
+                        sslKeyPk8 = null,
+                    ),
+                username = postgres.username,
+                password = postgres.password,
+            ),
+        kafka =
+            KafkaConfig(
+                config =
+                    if (kafka != null)
+                        Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
+                    else mockk(),
+                sykmeldingInputConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
+            ),
+        texas = { mockk() },
+        external = { mockk() },
+        auth = { mockk() },
+    )
