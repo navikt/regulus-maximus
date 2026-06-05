@@ -21,7 +21,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 class SykmeldingInputConsumer(environment: Environment) {
     private val logger = logger()
 
-    private val topicName = "tsm.sykmeldinger"
+    private val topicName = "tsm.sykmeldinger-input"
     private val groupId = "regulus-maximus-consumer"
 
     private val duration: Duration =
