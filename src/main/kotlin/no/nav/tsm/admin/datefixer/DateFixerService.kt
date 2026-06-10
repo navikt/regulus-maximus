@@ -32,7 +32,6 @@ class DateFixerService(
                     }
                 } catch (_: CancellationException) {
                     logger.info("Sykmelding fixer job cancelled, shutting down gracefully")
-                    withContext(NonCancellable) { consumer.unsubscribe() }
                 } catch (ex: Exception) {
                     logger.error("Error while consuming fixer records", ex)
                     consumer.unsubscribe()
@@ -41,6 +40,7 @@ class DateFixerService(
                     logger.warn("Retrying after 60 seconds... (fixer)")
                 }
             }
+            withContext(NonCancellable) { consumer.unsubscribe() }
         }
 
     @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)

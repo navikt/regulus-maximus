@@ -31,7 +31,6 @@ class SykmeldingInputConsumerService(
                     }
                 } catch (_: CancellationException) {
                     logger.info("Sykmelding consumer job cancelled, shutting down gracefully")
-                    withContext(NonCancellable) { consumer.unsubscribe() }
                 } catch (ex: Exception) {
                     logger.error("Error while consuming records", ex)
                     consumer.unsubscribe()
@@ -40,6 +39,8 @@ class SykmeldingInputConsumerService(
                     logger.warn("Retrying after 60 seconds...")
                 }
             }
+
+            withContext(NonCancellable) { consumer.unsubscribe() }
         }
 
     @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)

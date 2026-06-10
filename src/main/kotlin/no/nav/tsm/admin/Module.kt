@@ -3,6 +3,7 @@ package no.nav.tsm.admin
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.plugins.di.dependencies
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.nav.tsm.admin.datefixer.DateFixerRepo
 import no.nav.tsm.admin.datefixer.DateFixerService
@@ -25,5 +26,5 @@ fun Application.configureAdminModule() {
 private fun Application.startFixerConsumer() {
     val consumer: DateFixerService by dependencies
 
-    monitor.subscribe(ApplicationStarted) { launch { consumer.consumeWithRetry() } }
+    monitor.subscribe(ApplicationStarted) { launch(Dispatchers.IO) { consumer.consumeWithRetry() } }
 }
