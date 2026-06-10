@@ -57,6 +57,9 @@ spec:
     path: /internal/health/alive
   readiness:
     path: /internal/health/ready
+    failureThreshold: 10
+    initialDelay: 60
+    timeout: 240
   preStopHook:
     http:
       path: /internal/shutdown
