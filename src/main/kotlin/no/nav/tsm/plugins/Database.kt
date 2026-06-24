@@ -11,11 +11,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Base64
 import java.util.function.Function
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.db.getFlyway
+import no.nav.tsm.core.db.runConcurrentIndexes
+import no.nav.tsm.core.logger
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
+
+private val logger = logger()
 
 fun Application.configureDatabase() {
     val env: Environment by dependencies
@@ -28,6 +34,16 @@ fun Application.configureDatabase() {
         password = env.postgres.password,
         databaseConfig = createR2DbcConfig(env.postgres),
     )
+
+    monitor.subscribe(ApplicationStarted) {
+        launch(Dispatchers.IO) {
+            try {
+                runConcurrentIndexes(env.postgres)
+            } catch (e: Exception) {
+                logger.error("Failed to create concurrent indexes", e)
+            }
+        }
+    }
 }
 
 private fun createR2DbcConfig(postgresConfig: PostgresConfig) = R2dbcDatabaseConfig {
