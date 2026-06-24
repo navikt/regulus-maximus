@@ -1,5 +1,6 @@
 package no.nav.tsm.utils
 
+import no.nav.tsm.core.db.runConcurrentIndexes
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.testcontainers.kafka.ConfluentKafkaContainer
@@ -31,6 +32,7 @@ abstract class WithPostgresql {
                 flyway.clean()
             }
             flyway.migrate()
+            runConcurrentIndexes(config.postgres)
         }
 
         fun connect() {
