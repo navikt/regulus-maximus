@@ -39,6 +39,7 @@ class Environment(
     val runtime: Runtime,
     val kafka: KafkaConfig,
     val postgres: PostgresConfig,
+    val behandlingsdagerIds: List<String>,
     val texas: () -> Texas,
     val external: () -> ExternalApi,
     val auth: () -> Auth,
@@ -82,6 +83,10 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         external = {
             ExternalApi(tsmPdlCache = config.property("external.tsmPdlCache").getString())
         },
+        behandlingsdagerIds =
+            config.property("behandlingsdager.ids").getString().split(',').filter {
+                it.isNotEmpty()
+            },
         auth = {
             Auth(
                 entra =

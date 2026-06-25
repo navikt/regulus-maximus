@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.sykmelding.service
 
+import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logData
 import no.nav.tsm.core.logger
 import no.nav.tsm.core.teamLogger
@@ -18,11 +19,18 @@ import org.apache.kafka.common.header.Headers
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingProducerService: SykmeldingProducerService,
+    env: Environment,
 ) {
 
     companion object {
         private val log = logger()
         private val teamlog = teamLogger()
+    }
+
+    private val behandlingsdagerIds: List<String> = env.behandlingsdagerIds
+
+    init {
+        log.info("behandlerids size is ${behandlingsdagerIds.size}")
     }
 
     suspend fun updateSykmelding(
@@ -35,6 +43,24 @@ class SykmeldingService(
             sykmeldingProducerService.tombstoneTsmSykmelding(sykmeldingId, headers)
             return
         }
+
+        val newSykmeldingRecord =
+            when (behandlingsdagerIds.contains(sykmeldingId)) {
+                true -> {
+                    log.info("Prosesserer sykmelding med behandlingsdager $sykmeldingId")
+                    sykmelding
+                }
+                false -> processSykmelding(sykmeldingId, sykmelding)
+            }
+
+        sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
+        sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
+    }
+
+    private suspend fun processSykmelding(
+        sykmeldingId: String,
+        sykmelding: SykmeldingRecord,
+    ): SykmeldingRecord {
 
         val newSykmeldingRecord =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)?.let { oldSykmeldingRecord ->
@@ -56,9 +82,7 @@ class SykmeldingService(
                 "Sykmelding with id $sykmeldingId has invalid rules, both ok and invalid"
             )
         }
-
-        sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
-        sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
+        return newSykmeldingRecord
     }
 
     private fun mergeValidation(

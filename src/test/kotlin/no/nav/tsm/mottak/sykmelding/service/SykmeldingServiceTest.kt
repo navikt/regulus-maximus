@@ -10,6 +10,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.test.BeforeTest
 import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.Environment
 import no.nav.tsm.mottak.db.*
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingProducerService
@@ -28,14 +29,19 @@ class SykmeldingServiceTest {
 
     private val sykmeldingRepository: SykmeldingRepository = mockk()
     private val sykmeldingProducer: SykmeldingProducerService = mockk()
+
+    private val env: Environment = mockk(relaxed = true)
+
     private val sykmeldingService =
         SykmeldingService(
             sykmeldingRepository = sykmeldingRepository,
             sykmeldingProducerService = sykmeldingProducer,
+            env = env,
         )
 
     @BeforeTest
     fun setup() {
+
         coEvery { sykmeldingRepository.findBySykmeldingId(any()) } returns null
         coEvery { sykmeldingRepository.upsertSykmelding(any()) } returns Unit
         coEvery { sykmeldingProducer.sendToTsmSykmelding(any(), any()) } returns Unit

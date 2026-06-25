@@ -34,6 +34,7 @@ class EnvironmentTest {
                             "KAFKA_CREDSTORE_PASSWORD" to "credstore-password",
                             "KAFKA_KEYSTORE_PATH" to "/var/run/secrets/kafka/keystore.p12",
                             "NAIS_TOKEN_ENDPOINT" to "https://texas/token",
+                            "BEHANDLINGSDAGER_IDS" to "123,123,123",
                         )
                     )
                     .withFallback(ConfigFactory.parseResources("application.conf"))
