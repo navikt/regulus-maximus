@@ -67,5 +67,6 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
             ),
         texas = { mockk() },
         external = { mockk() },
+        behandlingsdagerIds = emptyList(),
         auth = { mockk() },
     )

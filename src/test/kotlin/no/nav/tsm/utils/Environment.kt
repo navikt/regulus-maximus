@@ -15,4 +15,5 @@ val simpleUnitTestEnvironment =
         postgres = mockk(relaxed = true),
         external = { ExternalApi(tsmPdlCache = "https://test.pdlcache.endpoint") },
         auth = mockk(relaxed = true),
+        behandlingsdagerIds = emptyList(),
     )

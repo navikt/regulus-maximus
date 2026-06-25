@@ -66,7 +66,8 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
-
+  envFrom:
+    - configmap: regulus-behandlingsdager
   # Used to authorize /admin endpoints with Entra AD OBO-tokens
   azure:
     application:
