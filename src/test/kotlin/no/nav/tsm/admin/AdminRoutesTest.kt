@@ -58,4 +58,20 @@ class AdminRoutesTest : WithPostgresql() {
             response.status shouldBe HttpStatusCode.OK
             response.body<List<SykmeldingRecord>>() shouldBe emptyList()
         }
+
+    @Test
+    fun `sanity check with correct uuid param, hit the DB get 404`() = testApplication {
+        configureAdminRoutesTest()
+
+        val response =
+            client.get(
+                "/internal/admin/sykmelding-history/fb33f9bf-4c40-49f9-af1e-02228634e661/LAST_3_YEARS"
+            ) {
+                headers { append("Content-Type", "application/json") }
+            }
+
+        response.status shouldBe HttpStatusCode.NotFound
+        response.body<String>() shouldBe
+            "Sykmelding with UUID fb33f9bf-4c40-49f9-af1e-02228634e661 not found"
+    }
 }

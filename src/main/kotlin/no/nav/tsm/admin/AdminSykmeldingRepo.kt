@@ -1,6 +1,7 @@
 package no.nav.tsm.admin
 
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.mottak.db.SykmeldingTable
@@ -18,6 +19,19 @@ enum class SykmeldingHistoryRanges {
 }
 
 class AdminSykmeldingRepo {
+    suspend fun singleByUuid(uuid: String): SykmeldingRecord? = dbQuery {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.sykmeldingId eq uuid }
+            .singleOrNull()
+            ?.let {
+                toSpecificSykmeldingRecord(
+                    sykmelding = it[SykmeldingTable.sykmelding],
+                    metadata = it[SykmeldingTable.metadata],
+                    validation = it[SykmeldingTable.validation],
+                )
+            }
+    }
+
     suspend fun allByUser(
         userIdent: String,
         range: SykmeldingHistoryRanges,
