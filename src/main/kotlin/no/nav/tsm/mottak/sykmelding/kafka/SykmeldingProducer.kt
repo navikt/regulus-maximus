@@ -3,7 +3,7 @@ package no.nav.tsm.mottak.sykmelding.kafka
 import java.util.Properties
 import kotlin.collections.set
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.clients.producer.KafkaProducer

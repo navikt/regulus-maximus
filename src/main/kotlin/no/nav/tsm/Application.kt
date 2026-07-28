@@ -4,7 +4,6 @@ import io.ktor.server.application.*
 import no.nav.tsm.admin.configureAdminModule
 import no.nav.tsm.mottak.configureMottakModule
 import no.nav.tsm.plugins.*
-import no.nav.tsm.plugins.auth.configureAuthentication
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)

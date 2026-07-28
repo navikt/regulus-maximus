@@ -13,7 +13,7 @@ import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.module
-import no.nav.tsm.plugins.auth.configureAuthentication
+import no.nav.tsm.plugins.configureAuthentication
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureSerialization
 import org.testcontainers.kafka.ConfluentKafkaContainer

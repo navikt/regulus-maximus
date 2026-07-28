@@ -9,7 +9,7 @@ import java.time.Duration
 import java.util.*
 import kotlin.time.toJavaDuration
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig

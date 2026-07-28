@@ -9,7 +9,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.apache.kafka.common.header.Headers

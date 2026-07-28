@@ -2,14 +2,13 @@ package no.nav.tsm.admin
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.tsm.core.logger
-import no.nav.tsm.plugins.auth.INTERNAL_SYMFONI_AUTH
-import no.nav.tsm.plugins.auth.internalSymfoniUser
+import no.nav.tsm.ktor.auth.entra.entraOnBehalfOf
+import no.nav.tsm.ktor.auth.entra.obo.onBehalfOfUser
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 fun Application.configureAdminRoutes() {
@@ -17,7 +16,7 @@ fun Application.configureAdminRoutes() {
     val adminSykmeldingRepo: AdminSykmeldingRepo by dependencies
 
     routing {
-        authenticate(INTERNAL_SYMFONI_AUTH) {
+        entraOnBehalfOf {
             route("/internal/admin") {
                 post("/sykmelding-history/{range}") {
                     val userIdent =
@@ -33,9 +32,9 @@ fun Application.configureAdminRoutes() {
                                 invalidRangeError,
                             )
 
-                    val principal = internalSymfoniUser()
+                    val principal = call.onBehalfOfUser()
                     logger.info(
-                        "User ${principal.userId} requested sykmelding history (${range.name}) for a user"
+                        "User ${principal.email} requested sykmelding history (${range.name}) for a user"
                     )
 
                     try {
@@ -64,9 +63,9 @@ fun Application.configureAdminRoutes() {
                         call.getRangeFromPathParam()
                             ?: return@get call.respond(HttpStatusCode.BadRequest, invalidRangeError)
 
-                    val principal = internalSymfoniUser()
+                    val principal = call.onBehalfOfUser()
                     logger.info(
-                        "User ${principal.userId} requested sykmelding history (${range.name}) for UUID ${uuid}"
+                        "User ${principal.email} requested sykmelding history (${range.name}) for UUID $uuid"
                     )
 
                     try {
