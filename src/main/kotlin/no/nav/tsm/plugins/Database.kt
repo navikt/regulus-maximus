@@ -17,7 +17,7 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.db.getFlyway
 import no.nav.tsm.core.db.runConcurrentIndexes
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
 

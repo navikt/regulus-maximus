@@ -2,7 +2,7 @@ package no.nav.tsm.core.db
 
 import java.sql.DriverManager
 import no.nav.tsm.core.PostgresConfig
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 
 private val logger = logger()
 private const val INDEX_ADVISORY_LOCK_KEY = 136918763L

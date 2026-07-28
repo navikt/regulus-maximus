@@ -2,8 +2,8 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logData
-import no.nav.tsm.core.logger
-import no.nav.tsm.core.teamLogger
+import no.nav.tsm.ktor.logger
+import no.nav.tsm.ktor.teamLogger
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.db.mergeValidations
 import no.nav.tsm.mottak.db.toSpecificSykmeldingRecord

@@ -2,7 +2,7 @@ package no.nav.tsm.mottak
 
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import no.nav.tsm.core.dynamicDependencies
+import no.nav.tsm.ktor.di.dynamicDependencies
 import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.pdl.PdlCloudClient
 import no.nav.tsm.mottak.pdl.PdlLocalClient

@@ -1,6 +1,6 @@
 package no.nav.tsm.mottak.db
 
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
