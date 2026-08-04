@@ -1,6 +1,6 @@
 rootProject.name = "regulus-maximus"
 
-val ktorVersion = "3.5.1"
+val ktorVersion = "3.5.2"
 val tsmKtorVersion = "1.0.0"
 
 dependencyResolutionManagement {
