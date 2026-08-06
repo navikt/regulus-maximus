@@ -11,7 +11,7 @@ import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.module
 import no.nav.tsm.plugins.configureAuthentication
 import no.nav.tsm.plugins.configureDependencies
@@ -44,7 +44,7 @@ fun Application.configureFullIntegrationTests(
 
 fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
     Environment(
-        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
+        runtime = Runtime(env = RuntimeCluster.LOCAL, name = "test-app"),
         postgres =
             PostgresConfig(
                 jdbc = postgres.jdbcUrl,
@@ -65,8 +65,6 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                     else mockk(),
                 sykmeldingInputConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
             ),
-        texas = { mockk() },
         external = { mockk() },
         behandlingsdagerIds = emptyList(),
-        auth = { mockk() },
     )

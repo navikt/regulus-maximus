@@ -1,11 +1,5 @@
 package no.nav.tsm.mottak.db
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlin.reflect.KClass
 import no.nav.tsm.sykmelding.input.core.model.CustomDeserializer
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
@@ -14,6 +8,9 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.MetadataType
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.json.jsonb
+import tools.jackson.databind.module.SimpleModule
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.readValue
 
 class MessageMetadataDeserializer : CustomDeserializer<MessageMetadata>() {
     override fun getClass(type: String): KClass<out MessageMetadata> {
@@ -35,14 +32,7 @@ class MetadataModule : SimpleModule() {
 }
 
 val sykmeldingRecordMapper =
-    jacksonObjectMapper().apply {
-        registerModule(SykmeldingModule())
-        registerModule(MetadataModule())
-        registerModule(JavaTimeModule())
-
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    }
+    jacksonMapperBuilder().addModules(SykmeldingModule(), MetadataModule()).build()
 
 inline fun <reified Type : Any> Table.jacksonJsonb(name: String): Column<Type> {
     return jsonb(
