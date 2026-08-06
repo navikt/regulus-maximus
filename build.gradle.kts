@@ -29,7 +29,7 @@ dependencies {
     implementation(ktorLibs.server.callId)
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.contentNegotiation)
-    implementation(ktorLibs.serialization.jackson)
+    implementation(ktorLibs.serialization.jackson3)
     implementation(ktorLibs.server.metrics.micrometer)
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.client.core)
@@ -71,8 +71,6 @@ dependencies {
     implementation(libs.kafka.client)
 
     // Monitoring and logging
-    implementation(libs.micrometer.registry.prometheus)
-    implementation(libs.khealth)
     implementation(libs.logback.classic)
     implementation(libs.logback.encoder)
     implementation(libs.otel.annotations)

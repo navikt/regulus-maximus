@@ -3,7 +3,6 @@ package no.nav.tsm.utils
 import no.nav.tsm.core.db.runConcurrentIndexes
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
-import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 
 abstract class WithPostgresql {
@@ -42,11 +41,5 @@ abstract class WithPostgresql {
                 password = config.postgres.password,
             )
         }
-    }
-}
-
-abstract class WithAll : WithPostgresql() {
-    companion object {
-        val kafka = ConfluentKafkaContainer("confluentinc/cp-kafka:8.1.0").apply { start() }
     }
 }

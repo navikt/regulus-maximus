@@ -1,10 +1,5 @@
 package no.nav.tsm.mottak.sykmelding.kafka
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.*
 import kotlin.time.toJavaDuration
@@ -17,6 +12,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.header.Headers
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.readValue
 
 class SykmeldingInputConsumer(environment: Environment) {
     private val logger = logger()
@@ -68,11 +65,5 @@ class SykmeldingInputConsumer(environment: Environment) {
         return recordObjectMapper.readValue<SykmeldingRecord?>(bytes)
     }
 
-    private val recordObjectMapper =
-        jacksonObjectMapper().apply {
-            registerModule(SykmeldingModule())
-            registerModule(JavaTimeModule())
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        }
+    private val recordObjectMapper = jacksonMapperBuilder().addModules(SykmeldingModule()).build()
 }

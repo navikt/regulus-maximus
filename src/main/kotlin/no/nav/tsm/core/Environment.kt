@@ -1,18 +1,12 @@
 package no.nav.tsm.core
 
-import io.ktor.server.application.*
 import io.ktor.server.config.*
-import io.ktor.server.plugins.di.*
 import java.util.*
 import kotlin.time.Duration
+import no.nav.tsm.ktor.nais.RuntimeCluster
+import no.nav.tsm.ktor.nais.getRuntimeCluster
 
-enum class RuntimeEnvironments(val nais: String) {
-    LOCAL("local"),
-    DEV("dev-gcp"),
-    PROD("prod-gcp"),
-}
-
-class Runtime(val env: RuntimeEnvironments, val name: String)
+class Runtime(val env: RuntimeCluster, val name: String)
 
 class PostgresR2DBCConfig(val url: String, val sslCert: String?, val sslKeyPk8: String?)
 
@@ -23,13 +17,7 @@ class PostgresConfig(
     val password: String,
 )
 
-class Texas(val tokenEndpoint: String)
-
 class ExternalApi(val tsmPdlCache: String)
-
-class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
-
-class Auth(val entra: EntraAuth)
 
 class KafkaSykmeldingConsumer(val longPoll: Duration)
 
@@ -40,9 +28,7 @@ class Environment(
     val kafka: KafkaConfig,
     val postgres: PostgresConfig,
     val behandlingsdagerIds: List<String>,
-    val texas: () -> Texas,
     val external: () -> ExternalApi,
-    val auth: () -> Auth,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -60,10 +46,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
 
     return Environment(
         runtime =
-            Runtime(
-                env = config.inferRuntimeEnvironment(),
-                name = config.property("app.name").getString(),
-            ),
+            Runtime(env = getRuntimeCluster(), name = config.property("app.name").getString()),
         kafka = kafkaProperties,
         postgres =
             PostgresConfig(
@@ -77,9 +60,6 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
             ),
-        texas = {
-            Texas(tokenEndpoint = config.property("external.texas.tokenEndpoint").getString())
-        },
         external = {
             ExternalApi(tsmPdlCache = config.property("external.tsmPdlCache").getString())
         },
@@ -87,34 +67,5 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             config.property("behandlingsdager.ids").getString().split(',').filter {
                 it.isNotEmpty()
             },
-        auth = {
-            Auth(
-                entra =
-                    EntraAuth(
-                        audience = config.property("auth.entra.audience").getString(),
-                        jwksUri = config.property("auth.entra.openid.jwks").getString(),
-                        issuer = config.property("auth.entra.openid.issuer").getString(),
-                    )
-            )
-        },
     )
-}
-
-fun Application.isLocal(): Boolean {
-    val env: Environment by dependencies
-
-    return env.runtime.env == RuntimeEnvironments.LOCAL
-}
-
-private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {
-    return when (val configEnv = this.property("app.runtime").getString()) {
-        "local" -> RuntimeEnvironments.LOCAL
-        "prod-gcp" -> RuntimeEnvironments.PROD
-        "dev-gcp" -> RuntimeEnvironments.DEV
-        else -> {
-            throw IllegalStateException(
-                "Unexpected 'app.runtime' configuration: ${configEnv}. Should be one of 'local', 'dev-gcp' or 'prod-gcp'"
-            )
-        }
-    }
 }
