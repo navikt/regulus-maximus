@@ -64,8 +64,8 @@ class SykmeldingInputConsumer(environment: Environment) {
         consumer.unsubscribe()
     }
 
-    private fun parseAndMapSykmelding(bytes: ByteArray): SykmeldingRecord {
-        return recordObjectMapper.readValue<SykmeldingRecord>(bytes)
+    private fun parseAndMapSykmelding(bytes: ByteArray): SykmeldingRecord? {
+        return recordObjectMapper.readValue<SykmeldingRecord?>(bytes)
     }
 
     private val recordObjectMapper =
