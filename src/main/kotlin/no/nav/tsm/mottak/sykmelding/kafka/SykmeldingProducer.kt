@@ -42,7 +42,8 @@ class SykmeldingProducer(environment: Environment) {
     }
 
     fun tombstone(id: String, headers: Headers) {
-        val record = ProducerRecord(topicName, null, id, null, headers)
-        logger.info("tombstone record with id $id on partition ${record.partition()}")
+        val record = ProducerRecord<String, SykmeldingRecord?>(topicName, null, id, null, headers)
+        val result = kafkaProducer.send(record).get()
+        logger.info("tombstone record with id $id on partition ${result.partition()}")
     }
 }
