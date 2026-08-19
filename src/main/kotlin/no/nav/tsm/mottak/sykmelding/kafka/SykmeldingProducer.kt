@@ -43,6 +43,6 @@ class SykmeldingProducer(environment: Environment) {
 
     fun tombstone(id: String, headers: Headers) {
         val record = ProducerRecord(topicName, null, id, null, headers)
-        logger.debug("tombstone record with id $id on partition ${record.partition()}")
+        logger.info("tombstone record with id $id on partition ${record.partition()}")
     }
 }
