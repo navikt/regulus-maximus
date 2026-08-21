@@ -1,7 +1,7 @@
 rootProject.name = "regulus-maximus"
 
 val ktorVersion = "3.5.2"
-val tsmKtorVersion = "1.2.6"
+val tsmKtorVersion = "1.2.7"
 
 dependencyResolutionManagement {
     repositories {
@@ -22,4 +22,8 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://jitpack.io")
     }
+}
+
+plugins {
+    id("io.github.ben-manes.versions.settings") version "0.61.0"
 }

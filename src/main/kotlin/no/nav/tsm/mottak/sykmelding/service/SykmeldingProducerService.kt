@@ -12,7 +12,7 @@ class SykmeldingProducerService(
 
     fun sendToTsmSykmelding(sykmelding: SykmeldingRecord, headers: Headers) {
         try {
-            sykmeldingProducer.send(sykmelding.sykmelding.id, sykmelding, headers.associate { it.key() to it.value().contentToString() })
+            sykmeldingProducer.send(sykmelding.sykmelding.id, sykmelding, headers)
         } catch (exception: Exception) {
             logger.error("Failed to publish sykmelding to tsm.sykmelding", exception)
             throw exception
@@ -21,7 +21,7 @@ class SykmeldingProducerService(
 
     fun tombstoneTsmSykmelding(sykmeldingId: String, headers: Headers) {
         try {
-            sykmeldingProducer.tombstone(sykmeldingId, headers.associate { it.key() to it.value().contentToString() })
+            sykmeldingProducer.tombstone(sykmeldingId, headers)
         } catch (exception: Exception) {
             logger.error("Failed to tombstone sykmelding to tsm.tsm-sykmelding", exception)
             throw exception

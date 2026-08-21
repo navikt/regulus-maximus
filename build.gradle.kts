@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.flyway)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.gradle.versions)
 }
 
 group = "no.nav.tsm"
