@@ -2,12 +2,7 @@ package no.nav.tsm.utils
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
-import io.mockk.mockk
-import java.util.Properties
-import kotlin.time.Duration.Companion.milliseconds
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.KafkaConfig
-import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.Runtime
@@ -57,14 +52,5 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                 username = postgres.username,
                 password = postgres.password,
             ),
-        kafka =
-            KafkaConfig(
-                config =
-                    if (kafka != null)
-                        Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
-                    else mockk(),
-                sykmeldingInputConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
-            ),
-        external = { mockk() },
         behandlingsdagerIds = emptyList(),
     )

@@ -1,29 +1,24 @@
 package no.nav.tsm.mottak
 
-import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.dependencies
-import no.nav.tsm.ktor.di.dynamicDependencies
+import io.ktor.server.application.*
+import io.ktor.server.plugins.di.*
+import no.nav.tsm.ktor.clients.pdl.PdlPlugin
+import no.nav.tsm.ktor.kafka.producer.KafkaRecordProducer
+import no.nav.tsm.ktor.kafka.producer.createProducer
 import no.nav.tsm.mottak.db.SykmeldingRepository
-import no.nav.tsm.mottak.pdl.PdlCloudClient
-import no.nav.tsm.mottak.pdl.PdlLocalClient
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingInputConsumer
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingInputConsumerService
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingProducer
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingProducerService
+import no.nav.tsm.mottak.sykmelding.service.SykmeldingProducerService
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 fun Application.configureMottakDependencies() {
-    dynamicDependencies {
-        local { provide(PdlLocalClient::class) }
-        cloud { provide(PdlCloudClient::class) }
-    }
+    install(PdlPlugin)
 
     dependencies {
         provide(SykmeldingService::class)
         provide(SykmeldingRepository::class)
-        provide(SykmeldingInputConsumer::class)
-        provide(SykmeldingInputConsumerService::class)
-        provide(SykmeldingProducer::class)
+        provide<KafkaRecordProducer<SykmeldingRecord>> {
+            this@configureMottakDependencies.createProducer(topic = "tsm.sykmeldinger")
+        }
         provide(SykmeldingProducerService::class)
     }
 }
