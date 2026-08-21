@@ -8,7 +8,6 @@ import no.nav.tsm.mottak.db.SykmeldingRepository
 import no.nav.tsm.mottak.db.mergeValidations
 import no.nav.tsm.mottak.db.toSpecificSykmeldingRecord
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingProducerService
 import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -35,15 +34,9 @@ class SykmeldingService(
 
     suspend fun updateSykmelding(
         sykmeldingId: String,
-        sykmelding: SykmeldingRecord?,
+        sykmelding: SykmeldingRecord,
         headers: Headers,
     ) {
-        if (sykmelding == null) {
-            delete(sykmeldingId)
-            sykmeldingProducerService.tombstoneTsmSykmelding(sykmeldingId, headers)
-            return
-        }
-
         val newSykmeldingRecord =
             when (behandlingsdagerIds.contains(sykmeldingId)) {
                 true -> {
@@ -55,6 +48,11 @@ class SykmeldingService(
 
         sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
         sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
+    }
+
+    suspend fun deleteSykmelding(sykmeldingId: String, headers: Headers) {
+        delete(sykmeldingId)
+        sykmeldingProducerService.tombstoneTsmSykmelding(sykmeldingId, headers)
     }
 
     private suspend fun processSykmelding(
@@ -111,7 +109,7 @@ class SykmeldingService(
         return mergedValidation
     }
 
-    fun mergeSykmeldingWithOld(
+    private fun mergeSykmeldingWithOld(
         sykmelding: SykmeldingRecord,
         oldSykmeldingRecord: SykmeldingRecord,
     ): SykmeldingRecord {

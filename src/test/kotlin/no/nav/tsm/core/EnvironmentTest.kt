@@ -1,8 +1,8 @@
 package no.nav.tsm.core
 
 import com.typesafe.config.ConfigFactory
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.ktor.server.config.HoconApplicationConfig
+import io.kotest.matchers.equals.shouldEqual
+import io.ktor.server.config.*
 import kotlin.test.Test
 
 class EnvironmentTest {
@@ -44,6 +44,6 @@ class EnvironmentTest {
         val environment = initializeEnvironment(applicationConfig)
 
         // Poke lazy envs as well to ensure they are properly configured
-        environment.external().shouldNotBeNull()
+        environment.runtime.name shouldEqual "regulus-maximus-prod-123"
     }
 }

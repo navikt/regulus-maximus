@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.Environment
 import no.nav.tsm.mottak.db.*
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.kafka.SykmeldingProducerService
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.metadata.*
