@@ -13,7 +13,7 @@ abstract class WithPostgresql {
                 start()
             }
 
-        val config = createIntegrationEnvironment(postgres, null)
+        val config = createIntegrationEnvironment(postgres)
 
         fun runMigrations(clean: Boolean = false) {
             val flyway =

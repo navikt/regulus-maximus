@@ -14,12 +14,6 @@ class EnvironmentTest {
                         mapOf(
                             // Nais injected values
                             "NAIS_POD_NAME" to "regulus-maximus-prod-123",
-                            "NAIS_CLUSTER_NAME" to "prod-gcp",
-                            "AZURE_APP_CLIENT_ID" to "azure-client-id",
-                            "AZURE_OPENID_CONFIG_ISSUER" to
-                                "https://login.microsoftonline.com/test/v2.0",
-                            "AZURE_OPENID_CONFIG_JWKS_URI" to
-                                "https://login.microsoftonline.com/test/discovery/v2.0/keys",
                             "DB_JDBC_URL" to "jdbc:postgresql://db-host:5432/sykinn",
                             "DB_HOST" to "db-host",
                             "DB_PORT" to "5432",
@@ -29,11 +23,6 @@ class EnvironmentTest {
                             "DB_SSLKEY_PK8" to "/var/run/secrets/db/client-key.pk8",
                             "DB_USERNAME" to "db-user",
                             "DB_PASSWORD" to "db-password",
-                            "KAFKA_BROKERS" to "kafka-1:9092,kafka-2:9092",
-                            "KAFKA_TRUSTSTORE_PATH" to "/var/run/secrets/kafka/truststore.jks",
-                            "KAFKA_CREDSTORE_PASSWORD" to "credstore-password",
-                            "KAFKA_KEYSTORE_PATH" to "/var/run/secrets/kafka/keystore.p12",
-                            "NAIS_TOKEN_ENDPOINT" to "https://texas/token",
                             "BEHANDLINGSDAGER_IDS" to "123,123,123",
                         )
                     )
