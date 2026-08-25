@@ -13,7 +13,9 @@ testcontainers = "2.0.5"
 otel = "2.30.0"
 arrow = "2.2.3"
 kotest-assertions = "6.2.4"
+
 tsm-sykmeldinger-input = "29"
+tsm-pdl-client = "0.0.2"
 tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
 
@@ -28,6 +30,7 @@ otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-in
 
 # TSM Dependencies
 tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version.ref = "tsm-sykmeldinger-input" }
+tsm-pdl-client = { module = "no.nav.tsm:pdl-client", version.ref = "tsm-pdl-client" }
 tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser" }
 tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
 

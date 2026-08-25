@@ -40,6 +40,7 @@ dependencies {
 
     // TSM libraries
     implementation(libs.tsm.sykmeldinger.input)
+    implementation(libs.tsm.pdl.client)
     implementation(libs.tsm.diagnoser)
     implementation(libs.tsm.regula)
     implementation(tsmKtorLibs.core)
