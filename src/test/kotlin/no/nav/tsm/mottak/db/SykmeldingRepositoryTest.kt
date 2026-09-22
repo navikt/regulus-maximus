@@ -125,6 +125,7 @@ private fun createSykmelding(
                 tilbakedatering = null,
                 bistandNav = null,
                 utdypendeSporsmal = null,
+                prognose = null,
             ),
         validation =
             ValidationResult(
