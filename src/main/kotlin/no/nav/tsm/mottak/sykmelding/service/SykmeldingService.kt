@@ -11,6 +11,7 @@ import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationExceptio
 import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import org.apache.kafka.common.header.Headers
@@ -45,6 +46,11 @@ class SykmeldingService(
                 }
                 false -> processSykmelding(sykmeldingId, sykmelding)
             }
+
+        if (newSykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
+
+
+        }
 
         sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
         sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)

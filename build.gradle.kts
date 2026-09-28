@@ -90,20 +90,21 @@ tasks {
     }
 }
 
-tasks.register<Exec>("preRunLocal") {
+/*tasks.register<Exec>("preRunLocal") {
     group = "application"
     commandLine("./scripts/pre-dev.sh")
-}
+}*/
 
 tasks.register<JavaExec>("runLocal") {
+    description = "Running the application localy"
     group = "application"
     mainClass.set("io.ktor.server.netty.EngineMain")
     classpath = sourceSets["main"].runtimeClasspath
 
     args("-config=application-local.conf")
     jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
-
-    dependsOn("preRunLocal")
+/*
+    dependsOn("preRunLocal")*/
 }
 
 tasks.withType<Detekt>().configureEach {

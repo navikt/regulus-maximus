@@ -4,6 +4,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.pdl.Ident
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.jetbrains.exposed.v1.core.eq
@@ -44,6 +45,10 @@ class SykmeldingRepository {
 
     suspend fun deleteBySykmeldingId(sykmeldingId: String): Int = dbQuery {
         SykmeldingTable.deleteWhere { SykmeldingTable.sykmeldingId eq sykmeldingId }
+    }
+
+    suspend fun allSykmeldingerLastThreeYearsForIdent(ident: Ident) {
+        // TODO: select all sykmeldinger the last three years
     }
 }
 
