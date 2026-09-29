@@ -5,6 +5,7 @@ import arrow.core.left
 import arrow.core.raise.context.bind
 import arrow.core.right
 import no.nav.tsm.ktor.logger
+import no.nav.tsm.mottak.sykmelder.Sykmelder
 import no.nav.tsm.mottak.sykmelding.mapPdlPersonToRegulaPasient
 import no.nav.tsm.mottak.sykmelding.mapSykmelderToRegulaBehandler
 import no.nav.tsm.pdl.Person
@@ -12,7 +13,6 @@ import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.sykmelding.input.core.model.Sykmelder
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import java.time.LocalDateTime
 
@@ -64,10 +64,9 @@ class RuleService {
         pasient: RegulaPasient,*/
     ): Pair<RegulaResult, List<RegulaJuridiskVurdering>> {
 
-
-
-
-
     }
+
+
+
 
 }
