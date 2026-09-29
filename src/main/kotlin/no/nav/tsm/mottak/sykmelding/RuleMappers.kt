@@ -3,7 +3,11 @@ package no.nav.tsm.mottak.sykmelding
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
+import no.nav.tsm.mottak.db.SykmeldingTable.fom
+import no.nav.tsm.mottak.db.SykmeldingTable.sykmeldingId
+import no.nav.tsm.mottak.db.SykmeldingTable.tom
 import no.nav.tsm.mottak.sykmelder.Sykmelder
+import no.nav.tsm.mottak.sykmelding.toRegulaAktivitet
 import no.nav.tsm.pdl.IdentGruppe
 import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaAvsender
@@ -19,6 +23,9 @@ import no.nav.tsm.regulus.regula.payload.RelevanteMerknader
 import no.nav.tsm.regulus.regula.payload.TidligereSykmelding
 import no.nav.tsm.regulus.regula.payload.TidligereSykmeldingAktivitet
 import no.nav.tsm.regulus.regula.payload.TidligereSykmeldingMeta
+import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
+import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import java.time.LocalDate
@@ -76,68 +83,60 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
         tidligereSykmeldinger = otherSykmeldinger.map { it.toTidligereSykmelding() },
         besvarteUtdypendeOpplysninger =
             sykmelding.sykmelding.utdypendeSporsmal?.toRegulaBesvartUtdypende(),
-        kontaktPasientBegrunnelseIkkeKontakt = sykmelding.values.tilbakedatering?.begrunnelse,
+        kontaktPasientBegrunnelseIkkeKontakt = sykmelding.sykmelding.tilbakedatering?.begrunnelse,
         behandletTidspunkt = behandletTidspunkt,
     )
 }
 
-private fun SykInnDiagnoseSystem.toOID() =
+private fun DiagnoseSystem.toOID() =
     when (this) {
-        SykInnDiagnoseSystem.ICPC2 -> ICPC2.OID
-        SykInnDiagnoseSystem.ICD10 -> ICD10.OID
-        SykInnDiagnoseSystem.ICPC2B -> ICPC2B.OID
+        DiagnoseSystem.ICPC2 -> ICPC2.OID
+        DiagnoseSystem.ICD10 -> ICD10.OID
+        DiagnoseSystem.ICPC2B -> ICPC2B.OID
+        else -> error(
+            "A DIGITAL to be ruled should never have any non-supported DiagnoseSystem: ${this}"
+        )
     }
 
-private fun SykInnDiagnoseInfo.toRegulaDiagnose(): Diagnose {
+private fun DiagnoseInfo.toRegulaDiagnose(): Diagnose {
     return Diagnose(
-        kode = code,
-        system =
-            when (this) {
-                is SykInnDiagnoseInfo.Valid -> system.toOID()
-                is SykInnDiagnoseInfo.Invalid ->
-                    try {
-                        SykInnDiagnoseSystem.valueOf(system).toOID()
-                    } catch (_: Exception) {
-                        error(
-                            "A DIGITAL to be ruled should never have any non-supported DiagnoseSystem: ${this.system}"
-                        )
-                    }
-            },
+        kode = kode,
+        system = system.toOID(),
     )
 }
 
-private fun SykInnAktivitet.toRegulaAktivitet(): Aktivitet =
+private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toRegulaAktivitet(): Aktivitet =
     when (this) {
-        is SykInnAktivitet.IkkeMulig -> Aktivitet.IkkeMulig(fom = fom, tom = tom)
-        is SykInnAktivitet.Gradert -> Aktivitet.Gradert(fom = fom, tom = tom, grad = grad)
-        is SykInnAktivitet.Avventende ->
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig -> Aktivitet.IkkeMulig(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert -> Aktivitet.Gradert(fom = fom, tom = tom, grad = grad)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Avventende ->
             Aktivitet.Avventende(
                 fom = fom,
                 tom = tom,
                 avventendeInnspillTilArbeidsgiver = innspillTilArbeidsgiver,
             )
 
-        is SykInnAktivitet.Behandlingsdager ->
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Behandlingsdager ->
             Aktivitet.Behandlingsdager(
                 fom = fom,
                 tom = tom,
                 behandlingsdager = antallBehandlingsdager,
             )
 
-        is SykInnAktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
-private fun VerifiedSykInnSykmelding.toTidligereSykmelding(): TidligereSykmelding {
+private fun SykmeldingRecord.toTidligereSykmelding(): TidligereSykmelding {
     return TidligereSykmelding(
-        sykmeldingId = sykmeldingId.toString(),
-        hoveddiagnose = values.hoveddiagnose?.toRegulaDiagnose(),
-        aktivitet = values.aktivitet.map { it.toTidligereAktivitet() },
+        sykmeldingId = sykmelding.id,
+        hoveddiagnose = sykmelding.medisinskVurdering.hovedDiagnose?.toRegulaDiagnose(),
+        aktivitet = sykmelding.aktivitet.map { it.toTidligereAktivitet() },
         meta =
             TidligereSykmeldingMeta(
                 status =
-                    when (result) {
-                        is SykInnSykmeldingRuleResult.OK -> RegulaStatus.OK
-                        is SykInnSykmeldingRuleResult.Outcome ->
+                    when (validation) {
+                        RuleType.OK -> RegulaStatus.OK
+                        RuleType.Outcome ->
                             when (result.type) {
                                 RuleType.OK -> RegulaStatus.OK
                                 RuleType.PENDING -> RegulaStatus.MANUAL_PROCESSING

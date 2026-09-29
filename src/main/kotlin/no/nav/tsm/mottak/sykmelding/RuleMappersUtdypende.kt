@@ -20,8 +20,13 @@ fun List<UtdypendeSporsmal>.toRegulaBesvartUtdypende(): List<String> {
     return uke7()
 }
 
-fun List<UtdypendeSporsmal>.uke39() {
-    val tall = this.map {
+fun List<UtdypendeSporsmal>.uke39(): List<String> {
+    val sporsmaalId = this.filterNot {
+        it.type == Sporsmalstype.UAVKLARTE_FORHOLD ||
+                it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID ||
+                it.type == Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN ||
+                it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID
+    }.map {
         if (it.type == Sporsmalstype.MEDISINSK_OPPSUMMERING) {
             it.let { "6.5.1" }
         }
@@ -33,37 +38,22 @@ fun List<UtdypendeSporsmal>.uke39() {
         }
         if (it.type == Sporsmalstype.MEDISINSKE_HENSYN) {
             it.let { "6.5.5" }
+        } else {
+            it.let { "remove" }
         }
-    }.toMutableList()
-    tall.removeAll {
-        it
-    }
-}
-    val tall
-    listOfNotNull(
-        this.find {
-            it.type == Sporsmalstype.MEDISINSK_OPPSUMMERING) {
-            "6.5.1"
-        }
-        }
-    )
-    this.map {
-        if (it.type == Sporsmalstype.MEDISINSK_OPPSUMMERING) {
-            it.let { "6.5.1" }
-        }
-        if (it.type == Sporsmalstype.UTFORDRINGER_MED_ARBEID) {
-            it.let { "6.5.2" }
-        }
-        if (it.type == Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING) {
-            it.let { "6.5.3" }
-        }
-        if (it.type == Sporsmalstype.MEDISINSKE_HENSYN) {
-            it.let { "6.5.5" }
-        }
-    }
 
-fun List<UtdypendeSporsmal>.uke17() =
-    this.map {
+    }.filterNot { it == "remove" }
+
+    return sporsmaalId
+}
+
+fun List<UtdypendeSporsmal>.uke17(): List<String> {
+    val sporsmalId = this.filterNot {
+        it.type == Sporsmalstype.MEDISINSKE_HENSYN ||
+                it.type == Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING ||
+                it.type == Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN ||
+                it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID
+    }.map {
         if (it.type == Sporsmalstype.MEDISINSK_OPPSUMMERING) {
             it.let { "6.4.1" }
         }
@@ -75,13 +65,22 @@ fun List<UtdypendeSporsmal>.uke17() =
         }
         if (it.type == Sporsmalstype.UAVKLARTE_FORHOLD) {
             it.let { "6.4.4" }
+        } else {
+            it.let { "remove" }
         }
+    }.filterNot { it == "remove" }
+    return sporsmalId
+}
 
-    }
 
-
-fun List<UtdypendeSporsmal>.uke7() =
-    this.map {
+fun List<UtdypendeSporsmal>.uke7(): List<String> {
+    val sporsmaalId = this.filter {
+        it.type == Sporsmalstype.UTFORDRINGER_MED_ARBEID ||
+                it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID ||
+                it.type == Sporsmalstype.UAVKLARTE_FORHOLD ||
+                it.type == Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING ||
+                it.type == Sporsmalstype.MEDISINSKE_HENSYN
+    }.map {
         if (it.type == Sporsmalstype.MEDISINSK_OPPSUMMERING) {
             it.let { "6.3.1" }
         }
@@ -90,7 +89,11 @@ fun List<UtdypendeSporsmal>.uke7() =
         }
         if (it.type == Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN) {
             it.let { "6.3.3" }
+        } else {
+            it.let { "remove" }
         }
+    }.filterNot { it == "remove" }
 
-    }
+    return sporsmaalId
+}
 
