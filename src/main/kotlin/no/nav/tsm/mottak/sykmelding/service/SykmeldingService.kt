@@ -26,14 +26,12 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import org.apache.kafka.common.header.Headers
 
-
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingProducerService: SykmeldingProducerService,
     private val ruleService: RuleService,
     private val sykmelderService: SykmelderService,
     private val pdlClient: PdlArrowed,
-
     env: Environment,
 ) {
 
@@ -42,7 +40,7 @@ class SykmeldingService(
         private val teamlog = teamLogger()
     }
 
-     enum class CreateErrors {
+    enum class CreateErrors {
         PersonNotInPdl,
         RuleError,
         UnknownResourceError,
@@ -75,14 +73,19 @@ class SykmeldingService(
 
         if (newSykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
             val newSykmeldingRecordDigital = newSykmeldingRecord as SykmeldingRecord.Digital
-            getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient ->
-            ruleService
-                .verify(sykmelding = newSykmeldingRecordDigital, historiskeSykmeldinger = previous, sykmelder = sykmelder, sykmeldt =  pasient)
-                .mapLeft { CreateErrors.RuleError }
-                .map { (result, _) -> result }
-                .bind()
+            getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient
+                ->
+                ruleService
+                    .verify(
+                        sykmelding = newSykmeldingRecordDigital,
+                        historiskeSykmeldinger = previous,
+                        sykmelder = sykmelder,
+                        sykmeldt = pasient,
+                    )
+                    .mapLeft { CreateErrors.RuleError }
+                    .map { (result, _) -> result }
+                    .bind()
             }
-
         }
 
         sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
@@ -226,7 +229,6 @@ class SykmeldingService(
         log.info("Deleted $deleted sykmelding with id $sykmeldingId")
     }
 
-
     suspend fun byIdent(ident: String): Either<GetErrors, List<SykmeldingRecord>> {
         return sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(ident).right()
     }
@@ -238,11 +240,14 @@ class SykmeldingService(
                 sykmelder: Sykmelder, previous: List<SykmeldingRecord>, pasient: Person,
             ) -> Result,
     ): Either<CreateErrors, Result> = either {
-
         parZip(
             {
                 sykmelderService
-                    .byHpr(sykmelding.sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }!!.id)
+                    .byHpr(
+                        sykmelding.sykmelding.behandler.ids
+                            .find { it.type == PersonIdType.HPR }!!
+                            .id
+                    )
                     .mapLeft { CreateErrors.UnknownResourceError }
                     .bind()
             },

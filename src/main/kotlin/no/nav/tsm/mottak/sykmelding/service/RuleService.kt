@@ -2,8 +2,8 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import arrow.core.Either
 import arrow.core.left
-import arrow.core.raise.context.bind
 import arrow.core.right
+import java.time.LocalDateTime
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.mottak.sykmelder.Sykmelder
 import no.nav.tsm.mottak.sykmelding.mapPdlPersonToRegulaPasient
@@ -16,7 +16,6 @@ import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import java.time.LocalDateTime
 
 enum class RuleErrors {
     InvalidPatient
@@ -30,7 +29,7 @@ class RuleService {
         sykmelding: SykmeldingRecord.Digital,
         historiskeSykmeldinger: List<SykmeldingRecord>,
         sykmelder: Sykmelder,
-        sykmeldt: Person
+        sykmeldt: Person,
     ): Either<RuleErrors, Pair<RegulaResult, List<RegulaJuridiskVurdering>>> {
         val localdateNow = LocalDateTime.now()
 
@@ -41,24 +40,20 @@ class RuleService {
                 "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
             )
 
-           return RuleErrors.InvalidPatient.left()
+            return RuleErrors.InvalidPatient.left()
         }
 
         val regulaBehandler = sykmelder.mapSykmelderToRegulaBehandler()
 
         return this.executeRegulaRules(
-            behandletTidspunkt = localdateNow,
-            sykmelding = sykmelding,
-            historiskeSykmeldinger = historiskeSykmeldinger,
-            behandler = regulaBehandler,
-            pasient = regulaPasient,
-        ).right()
-
-
-
+                behandletTidspunkt = localdateNow,
+                sykmelding = sykmelding,
+                historiskeSykmeldinger = historiskeSykmeldinger,
+                behandler = regulaBehandler,
+                pasient = regulaPasient,
+            )
+            .right()
     }
-
-
 
     private fun executeRegulaRules(
         behandletTidspunkt: LocalDateTime,
@@ -84,8 +79,4 @@ class RuleService {
 
         return result to result.juridisk
     }
-
-
-
-
 }

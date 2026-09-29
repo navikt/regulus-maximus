@@ -12,6 +12,8 @@ import kotlin.test.BeforeTest
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.Environment
 import no.nav.tsm.mottak.db.*
+import no.nav.tsm.mottak.pdl.PdlArrowed
+import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
@@ -28,6 +30,9 @@ class SykmeldingServiceTest {
 
     private val sykmeldingRepository: SykmeldingRepository = mockk()
     private val sykmeldingProducer: SykmeldingProducerService = mockk()
+    private val ruleService = mockk<RuleService>()
+    private val sykmelderService = mockk<SykmelderService>()
+    private val pdlClient = mockk<PdlArrowed>()
 
     private val env: Environment = mockk(relaxed = true)
 
@@ -36,6 +41,9 @@ class SykmeldingServiceTest {
             sykmeldingRepository = sykmeldingRepository,
             sykmeldingProducerService = sykmeldingProducer,
             env = env,
+            ruleService = ruleService,
+            sykmelderService = sykmelderService,
+            pdlClient = pdlClient,
         )
 
     @BeforeTest

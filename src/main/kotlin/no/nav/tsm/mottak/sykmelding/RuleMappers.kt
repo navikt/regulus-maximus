@@ -1,5 +1,7 @@
 package no.nav.tsm.mottak.sykmelding
 
+import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
@@ -23,8 +25,6 @@ import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 fun Sykmelder.mapSykmelderToRegulaBehandler(): RegulaBehandler =
     when (this) {
@@ -38,7 +38,6 @@ fun Sykmelder.mapSykmelderToRegulaBehandler(): RegulaBehandler =
                 fnr = this.ident,
             )
     }
-
 
 fun Person.mapPdlPersonToRegulaPasient(): RegulaPasient? {
     val folkeregisterIdent =
@@ -69,7 +68,8 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
         behandler = behandler,
         avsender = avsender,
         hoveddiagnose = sykmelding.sykmelding.medisinskVurdering.hovedDiagnose?.toRegulaDiagnose(),
-        bidiagnoser = sykmelding.sykmelding.medisinskVurdering.biDiagnoser?.map { it.toRegulaDiagnose() },
+        bidiagnoser =
+            sykmelding.sykmelding.medisinskVurdering.biDiagnoser?.map { it.toRegulaDiagnose() },
         aktivitet = sykmelding.sykmelding.aktivitet.map { it.toRegulaAktivitet() },
         annenFravarsArsak =
             sykmelding.sykmelding.medisinskVurdering.annenFravarsgrunn?.let {
@@ -88,22 +88,22 @@ private fun DiagnoseSystem.toOID() =
         DiagnoseSystem.ICPC2 -> ICPC2.OID
         DiagnoseSystem.ICD10 -> ICD10.OID
         DiagnoseSystem.ICPC2B -> ICPC2B.OID
-        else -> error(
-            "A DIGITAL to be ruled should never have any non-supported DiagnoseSystem: ${this}"
-        )
+        else ->
+            error(
+                "A DIGITAL to be ruled should never have any non-supported DiagnoseSystem: ${this}"
+            )
     }
 
 private fun DiagnoseInfo.toRegulaDiagnose(): Diagnose {
-    return Diagnose(
-        kode = kode,
-        system = system.toOID(),
-    )
+    return Diagnose(kode = kode, system = system.toOID())
 }
 
 private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toRegulaAktivitet(): Aktivitet =
     when (this) {
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig -> Aktivitet.IkkeMulig(fom = fom, tom = tom)
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert -> Aktivitet.Gradert(fom = fom, tom = tom, grad = grad)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig ->
+            Aktivitet.IkkeMulig(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert ->
+            Aktivitet.Gradert(fom = fom, tom = tom, grad = grad)
         is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Avventende ->
             Aktivitet.Avventende(
                 fom = fom,
@@ -118,7 +118,8 @@ private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toRegulaAktivitet()
                 behandlingsdager = antallBehandlingsdager,
             )
 
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd ->
+            Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
 private fun SykmeldingRecord.toTidligereSykmelding(): TidligereSykmelding {
@@ -129,28 +130,31 @@ private fun SykmeldingRecord.toTidligereSykmelding(): TidligereSykmelding {
         meta =
             TidligereSykmeldingMeta(
                 status =
-                            when (validation.status) {
-                                RuleType.OK -> RegulaStatus.OK
-                                RuleType.PENDING -> RegulaStatus.MANUAL_PROCESSING
-                                RuleType.INVALID -> RegulaStatus.INVALID
-                            },
+                    when (validation.status) {
+                        RuleType.OK -> RegulaStatus.OK
+                        RuleType.PENDING -> RegulaStatus.MANUAL_PROCESSING
+                        RuleType.INVALID -> RegulaStatus.INVALID
+                    },
                 userAction = "IKKE_RELEVANT",
                 merknader =
-                    if (
-                        validation.status == RuleType.PENDING
-                    ) {
+                    if (validation.status == RuleType.PENDING) {
                         listOf(RelevanteMerknader.UNDER_BEHANDLING)
                     } else emptyList(),
             ),
     )
 }
 
-private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toTidligereAktivitet(): TidligereSykmeldingAktivitet =
+private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toTidligereAktivitet():
+    TidligereSykmeldingAktivitet =
     when (this) {
-         is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig -> TidligereSykmeldingAktivitet.IkkeMulig(fom = fom, tom = tom)
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Avventende -> TidligereSykmeldingAktivitet.Avventende(fom = fom, tom = tom)
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Behandlingsdager -> TidligereSykmeldingAktivitet.Behandlingsdager(fom = fom, tom = tom)
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert ->   TidligereSykmeldingAktivitet.Gradert(fom = fom, tom = tom, grad = grad)
-        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd -> TidligereSykmeldingAktivitet.Reisetilskudd(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig ->
+            TidligereSykmeldingAktivitet.IkkeMulig(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Avventende ->
+            TidligereSykmeldingAktivitet.Avventende(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Behandlingsdager ->
+            TidligereSykmeldingAktivitet.Behandlingsdager(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert ->
+            TidligereSykmeldingAktivitet.Gradert(fom = fom, tom = tom, grad = grad)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd ->
+            TidligereSykmeldingAktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
-
