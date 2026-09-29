@@ -3,11 +3,7 @@ package no.nav.tsm.mottak.sykmelding
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
-import no.nav.tsm.mottak.db.SykmeldingTable.fom
-import no.nav.tsm.mottak.db.SykmeldingTable.sykmeldingId
-import no.nav.tsm.mottak.db.SykmeldingTable.tom
 import no.nav.tsm.mottak.sykmelder.Sykmelder
-import no.nav.tsm.mottak.sykmelding.toRegulaAktivitet
 import no.nav.tsm.pdl.IdentGruppe
 import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaAvsender
@@ -25,7 +21,6 @@ import no.nav.tsm.regulus.regula.payload.TidligereSykmeldingAktivitet
 import no.nav.tsm.regulus.regula.payload.TidligereSykmeldingMeta
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
-import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import java.time.LocalDate
@@ -134,20 +129,15 @@ private fun SykmeldingRecord.toTidligereSykmelding(): TidligereSykmelding {
         meta =
             TidligereSykmeldingMeta(
                 status =
-                    when (validation) {
-                        RuleType.OK -> RegulaStatus.OK
-                        RuleType.Outcome ->
-                            when (result.type) {
+                            when (validation.status) {
                                 RuleType.OK -> RegulaStatus.OK
                                 RuleType.PENDING -> RegulaStatus.MANUAL_PROCESSING
                                 RuleType.INVALID -> RegulaStatus.INVALID
-                            }
-                    },
+                            },
                 userAction = "IKKE_RELEVANT",
                 merknader =
                     if (
-                        result is SykInnSykmeldingRuleResult.Outcome &&
-                        result.type == RuleType.PENDING
+                        validation.status == RuleType.PENDING
                     ) {
                         listOf(RelevanteMerknader.UNDER_BEHANDLING)
                     } else emptyList(),
@@ -155,19 +145,12 @@ private fun SykmeldingRecord.toTidligereSykmelding(): TidligereSykmelding {
     )
 }
 
-private fun SykInnAktivitet.toTidligereAktivitet(): TidligereSykmeldingAktivitet =
+private fun no.nav.tsm.sykmelding.input.core.model.Aktivitet.toTidligereAktivitet(): TidligereSykmeldingAktivitet =
     when (this) {
-        is SykInnAktivitet.Avventende ->
-            TidligereSykmeldingAktivitet.Avventende(fom = fom, tom = tom)
-
-        is SykInnAktivitet.Behandlingsdager ->
-            TidligereSykmeldingAktivitet.Behandlingsdager(fom = fom, tom = tom)
-
-        is SykInnAktivitet.Gradert ->
-            TidligereSykmeldingAktivitet.Gradert(fom = fom, tom = tom, grad = grad)
-
-        is SykInnAktivitet.IkkeMulig -> TidligereSykmeldingAktivitet.IkkeMulig(fom = fom, tom = tom)
-        is SykInnAktivitet.Reisetilskudd ->
-            TidligereSykmeldingAktivitet.Reisetilskudd(fom = fom, tom = tom)
+         is no.nav.tsm.sykmelding.input.core.model.Aktivitet.IkkeMulig -> TidligereSykmeldingAktivitet.IkkeMulig(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Avventende -> TidligereSykmeldingAktivitet.Avventende(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Behandlingsdager -> TidligereSykmeldingAktivitet.Behandlingsdager(fom = fom, tom = tom)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Gradert ->   TidligereSykmeldingAktivitet.Gradert(fom = fom, tom = tom, grad = grad)
+        is no.nav.tsm.sykmelding.input.core.model.Aktivitet.Reisetilskudd -> TidligereSykmeldingAktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
