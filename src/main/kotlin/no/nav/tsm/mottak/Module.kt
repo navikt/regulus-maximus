@@ -4,11 +4,13 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.kafka.consumer.KafkaConsumer
+import no.nav.tsm.mottak.sykmelder.configureSykmelderModule
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 fun Application.configureMottakModule() {
+    configureSykmelderModule()
     configureMottakDependencies()
     configureConsumer()
 }

@@ -2,10 +2,15 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import arrow.core.Either
 import arrow.core.left
+import arrow.core.raise.context.bind
+import arrow.core.right
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.mottak.sykmelding.mapPdlPersonToRegulaPasient
+import no.nav.tsm.mottak.sykmelding.mapSykmelderToRegulaBehandler
 import no.nav.tsm.pdl.Person
+import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
+import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.sykmelding.input.core.model.Sykmelder
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -37,7 +42,13 @@ class RuleService {
            return RuleErrors.InvalidPatient.left()
         }
 
-        val regulaBehandler = sykmelder.
+        val regulaBehandler = sykmelder.mapSykmelderToRegulaBehandler()
+
+
+
+        return this.executeRegulaRules(
+
+        ).right()
 
 
 
@@ -45,7 +56,17 @@ class RuleService {
 
 
 
-    fun executeRegulaRules(){
+    private fun executeRegulaRules(
+      /*  behandletTidspunkt: LocalDateTime,
+        sykmelding: SykmeldingRecord.Digital,
+        historiskeSykmeldinger: List<SykmeldingRecord>,
+        behandler: RegulaBehandler,
+        pasient: RegulaPasient,*/
+    ): Pair<RegulaResult, List<RegulaJuridiskVurdering>> {
+
+
+
+
 
     }
 

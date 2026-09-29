@@ -48,7 +48,8 @@ class SykmeldingService(
             }
 
         if (newSykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
-
+            // rule validation
+            // get sykmeldingerVerifyRecourses(med sykmelding og block)
 
         }
 
