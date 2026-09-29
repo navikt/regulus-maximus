@@ -81,7 +81,7 @@ class SykmeldingService(
                 .mapLeft { CreateErrors.RuleError }
                 .map { (result, _) -> result }
                 .bind()
-        }
+            }
 
         }
 
