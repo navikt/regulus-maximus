@@ -8,8 +8,6 @@ import no.nav.tsm.mottak.sykmelder.configureSykmelderModule
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 fun Application.configureMottakModule() {
     configureMottakDependencies()
@@ -27,8 +25,6 @@ fun Application.configureConsumer() {
         consume<SykmeldingRecord>(
             name = "tsm.sykmeldinger-input",
             onRecord = { record, meta ->
-                log.info("kafka record  ${jacksonMapperBuilder().build().writeValueAsString(record)}")
-                log.info("kafka meta ${jacksonMapperBuilder().build().writeValueAsString(meta)}")
                 service.updateSykmelding(meta.key, record, meta.headers) },
             onTombstone = { service.deleteSykmelding(it.key, it.headers) },
         )
