@@ -109,8 +109,10 @@ class SykmeldingService(
                             newSykmeldingRecord.validation.status.name == RuleType.PENDING.name ||
                             result.status.name == newSykmeldingRecord.validation.status.name
                     ) {
-                        log.info("Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
-                                " syk-inn and regulus-maximus got same rule result: $result")
+                        log.info(
+                            "Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
+                                " syk-inn and regulus-maximus got same rule result: $result"
+                        )
                     } else {
                         log.info(
                             "This should not happen. Got different rule result id: ${newSykmeldingRecord.sykmelding.id} \n" +
