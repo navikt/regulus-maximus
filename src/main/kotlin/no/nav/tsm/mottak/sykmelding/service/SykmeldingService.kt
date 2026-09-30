@@ -104,20 +104,16 @@ class SykmeldingService(
                     )
                 },
                 { result: RegulaResult ->
-                    log.info(
-                        "Got result id: ${newSykmeldingRecord.sykmelding.id} ${
-                        jacksonMapperBuilder().build().writeValueAsString(result)
-                    }"
-                    )
                     if (
                         result.status.name == RegulaStatus.MANUAL_PROCESSING.name &&
                             newSykmeldingRecord.validation.status.name == RuleType.PENDING.name ||
                             result.status.name == newSykmeldingRecord.validation.status.name
                     ) {
-                        log.info("ok")
+                        log.info("Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
+                                " syk-inn and regulus-maximus got same rule result: $result")
                     } else {
                         log.info(
-                            "Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
+                            "This should not happen. Got different rule result id: ${newSykmeldingRecord.sykmelding.id} \n" +
                                 "syk-inn-api: ${
                                     jacksonMapperBuilder().build()
                                         .writeValueAsString(newSykmeldingRecord.validation)
