@@ -18,7 +18,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(libs.versions.jvmVersion.get().toInt())
 }
 
 dependencies {
@@ -83,17 +83,17 @@ tasks {
     }
 
     configure<SpotlessExtension> {
-        kotlin { ktfmt("0.62").kotlinlangStyle() }
+        kotlin { ktfmt(libs.versions.ktfmt.get()).kotlinlangStyle() }
         check {
             dependsOn("spotlessApply")
         }
     }
 }
 
-/*tasks.register<Exec>("preRunLocal") {
+tasks.register<Exec>("preRunLocal") {
     group = "application"
     commandLine("./scripts/pre-dev.sh")
-}*/
+}
 
 tasks.register<JavaExec>("runLocal") {
     description = "Running the application localy"
@@ -103,8 +103,8 @@ tasks.register<JavaExec>("runLocal") {
 
     args("-config=application-local.conf")
     jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
-/*
-    dependsOn("preRunLocal")*/
+
+    dependsOn("preRunLocal")
 }
 
 tasks.withType<Detekt>().configureEach {
