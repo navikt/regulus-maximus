@@ -18,7 +18,9 @@ import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.sykmelding.input.core.model.Rule
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
@@ -74,9 +76,16 @@ class SykmeldingService(
             }
 
         if (newSykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
-            val newSykmeldingRecordDigital = newSykmeldingRecord as SykmeldingRecord.Digital
-            getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient
-                ->
+            verifyRegulaRules(newSykmeldingRecord)
+        }
+
+        sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
+        sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
+    }
+
+    private suspend fun verifyRegulaRules(newSykmeldingRecord: SykmeldingRecord) {
+        val newSykmeldingRecordDigital = newSykmeldingRecord as SykmeldingRecord.Digital
+        getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient ->
                 ruleService
                     .verify(
                         sykmelding = newSykmeldingRecordDigital,
@@ -87,19 +96,37 @@ class SykmeldingService(
                     .mapLeft { CreateErrors.RuleError }
                     .map { (result, _) -> result }
                     .bind()
-            }.fold(
-                {error: CreateErrors ->
-                    log.error("Error occured on SykmeldingType.DIGITAL, id: ${newSykmeldingRecord.sykmelding.id} $error")
+            }
+            .fold(
+                { error: CreateErrors ->
+                    log.error(
+                        "Error occured on SykmeldingType.DIGITAL, id: ${newSykmeldingRecord.sykmelding.id} $error"
+                    )
                 },
-                {result: RegulaResult ->
-                    log.info("Got result id: ${newSykmeldingRecord.sykmelding.id} ${jacksonMapperBuilder().build().writeValueAsString(result)}")
-                }
+                { result: RegulaResult ->
+                    log.info(
+                        "Got result id: ${newSykmeldingRecord.sykmelding.id} ${
+                        jacksonMapperBuilder().build().writeValueAsString(result)
+                    }"
+                    )
+                    if (
+                        result.status.name == RegulaStatus.MANUAL_PROCESSING.name &&
+                            newSykmeldingRecord.validation.status.name == RuleType.PENDING.name ||
+                            result.status.name == newSykmeldingRecord.validation.status.name
+                    ) {
+                        log.info("ok")
+                    } else {
+                        log.info(
+                            "Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
+                                "syk-inn-api: ${
+                                    jacksonMapperBuilder().build()
+                                        .writeValueAsString(newSykmeldingRecord.validation)
+                                } \n" +
+                                "regulus-maximus ${jacksonMapperBuilder().build().writeValueAsString(result)} "
+                        )
+                    }
+                },
             )
-            //TODO sammenligne resultat som syk-inn-api får
-        }
-
-        sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
-        sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
     }
 
     suspend fun deleteSykmelding(sykmeldingId: String, headers: Headers) {

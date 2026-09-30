@@ -10,8 +10,8 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 fun Application.configureMottakModule() {
-    configureSykmelderModule()
     configureMottakDependencies()
+    configureSykmelderModule()
     configureConsumer()
 }
 
