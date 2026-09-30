@@ -17,6 +17,7 @@ import no.nav.tsm.mottak.sykmelder.Sykmelder
 import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
 import no.nav.tsm.pdl.Person
+import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -25,6 +26,7 @@ import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import org.apache.kafka.common.header.Headers
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
@@ -85,7 +87,15 @@ class SykmeldingService(
                     .mapLeft { CreateErrors.RuleError }
                     .map { (result, _) -> result }
                     .bind()
-            }
+            }.fold(
+                {error: CreateErrors ->
+                    log.error("Error occured on SykmeldingType.DIGITAL, id: ${newSykmeldingRecord.sykmelding.id} $error")
+                },
+                {result: RegulaResult ->
+                    log.info("Got result id: ${newSykmeldingRecord.sykmelding.id} ${jacksonMapperBuilder().build().writeValueAsString(result)}")
+                }
+            )
+            //TODO sammenligne resultat som syk-inn-api får
         }
 
         sykmeldingRepository.upsertSykmelding(newSykmeldingRecord)
