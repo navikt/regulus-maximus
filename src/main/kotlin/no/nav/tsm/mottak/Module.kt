@@ -24,8 +24,7 @@ fun Application.configureConsumer() {
         groupId = "regulus-maximus-consumer"
         consume<SykmeldingRecord>(
             name = "tsm.sykmeldinger-input",
-            onRecord = { record, meta ->
-                service.updateSykmelding(meta.key, record, meta.headers) },
+            onRecord = { record, meta -> service.updateSykmelding(meta.key, record, meta.headers) },
             onTombstone = { service.deleteSykmelding(it.key, it.headers) },
         )
         jacksonModule(SykmeldingModule())

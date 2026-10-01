@@ -28,7 +28,6 @@ import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import org.apache.kafka.common.header.Headers
-import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
@@ -105,8 +104,8 @@ class SykmeldingService(
                 },
                 { result: RegulaResult ->
                     if (
-                        result.status.name == RegulaStatus.MANUAL_PROCESSING.name &&
-                            newSykmeldingRecord.validation.status.name == RuleType.PENDING.name ||
+                        (result.status.name == RegulaStatus.MANUAL_PROCESSING.name &&
+                            newSykmeldingRecord.validation.status.name == RuleType.PENDING.name) ||
                             result.status.name == newSykmeldingRecord.validation.status.name
                     ) {
                         log.info(

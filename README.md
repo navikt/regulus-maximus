@@ -5,19 +5,30 @@ without rulevalidation in regulus maximus because they are authoritative
 
 ### Development
 
-1. Run the database and kafka locally with `docker compose up` or run the compose.yaml file manually
+1. Run the database and kafka locally with `docker compose up -d` or run the compose.yaml file manually
 2. Start the development server in IntelliJ with "program argument" `-config=application-local.conf` or from terminal with `./gradlew runLocal`
 
 ### Kafka
 start producer and produce to tsm.sykmeldinger-input. Example producer with example message: 
 
+ok message:
 ```bash
 docker compose exec -T kafka kafka-console-producer \
   --bootstrap-server localhost:9092 \
   --topic tsm.sykmeldinger-input \
   --property parse.key=true \
   --property key.separator=: \
-  < kafkaMessageValidationInvalid.txt
+  < src/main/resources/validationMessage/kafkaMessageValidationOk.txt
+ ```
+
+invalid message:
+```bash
+docker compose exec -T kafka kafka-console-producer \
+  --bootstrap-server localhost:9092 \
+  --topic tsm.sykmeldinger-input \
+  --property parse.key=true \
+  --property key.separator=: \
+  < src/main/resources/validationMessage/kafkaMessageValidationInvalid.txt
 ```
 
 
