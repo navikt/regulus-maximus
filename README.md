@@ -31,12 +31,3 @@ docker compose exec -T kafka kafka-console-producer \
   < src/main/resources/validationMessage/kafkaMessageValidationInvalid.txt
 ```
 
-
-```bash
-# Exec into Kafka container
-docker exec -it my_kafka_broker bash
-
-# List topics on kafka (from kafka shell)
-kafka-topics --list --bootstrap-server kafka:9092
-```
-
