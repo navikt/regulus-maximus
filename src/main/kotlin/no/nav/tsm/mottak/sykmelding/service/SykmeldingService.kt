@@ -82,7 +82,8 @@ class SykmeldingService(
         sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
     }
 
-    private suspend fun verifyRegulaRules(newSykmeldingRecord: SykmeldingRecord) {
+
+    suspend fun verifyRegulaRules(newSykmeldingRecord: SykmeldingRecord): RegulaResult? {
         val newSykmeldingRecordDigital = newSykmeldingRecord as SykmeldingRecord.Digital
         getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient ->
                 ruleService
@@ -101,6 +102,7 @@ class SykmeldingService(
                     log.error(
                         "Error occured on SykmeldingType.DIGITAL, id: ${newSykmeldingRecord.sykmelding.id} $error"
                     )
+                    return null
                 },
                 { result: RegulaResult ->
                     if (
@@ -112,6 +114,7 @@ class SykmeldingService(
                             "Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
                                 " syk-inn and regulus-maximus got same rule result: ${result.status}"
                         )
+                        return result
                     } else {
                         log.info(
                             "This should not happen. Got different rule result id: ${newSykmeldingRecord.sykmelding.id} \n" +
@@ -120,6 +123,7 @@ class SykmeldingService(
                                 } \n" +
                                 "regulus-maximus ${result.logData()} "
                         )
+                        return result
                     }
                 },
             )

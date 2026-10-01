@@ -49,7 +49,6 @@ class SykmeldingRepository {
         SykmeldingTable.deleteWhere { SykmeldingTable.sykmeldingId eq sykmeldingId }
     }
 
-    // TODO input parameter should be a list of idents, due to ident my change over time
     suspend fun allSykmeldingerLastThreeYearsForIdent(ident: String): List<SykmeldingRecord> =
         dbQuery {
             SykmeldingTable.selectAll()

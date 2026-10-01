@@ -2,6 +2,8 @@ package no.nav.tsm.mottak.sykmelding.service
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -15,6 +17,8 @@ import no.nav.tsm.mottak.db.*
 import no.nav.tsm.mottak.pdl.PdlArrowed
 import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.metadata.*
@@ -263,6 +267,20 @@ class SykmeldingServiceTest {
         shouldNotThrowAny {
             sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         }
+    }
+
+    @Test
+    fun `test verifyRegulaRules happy path`() = runTest {
+        val sykmeldingRecord = getSykmeldingRecord(ValidationResult(
+            status = RuleType.OK,
+            timestamp = OffsetDateTime.now(),
+            rules = listOf(invalid()),
+        ))
+
+        val result = sykmeldingService.verifyRegulaRules(sykmeldingRecord)
+
+        result.shouldNotBeNull()
+        result.status shouldBeEqual RegulaStatus.OK
     }
 }
 
