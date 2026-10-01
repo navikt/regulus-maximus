@@ -262,8 +262,12 @@ class SykmeldingService(
         log.info("Deleted $deleted sykmelding with id $sykmeldingId")
     }
 
-    suspend fun byIdent(ident: String): Either<GetErrors, List<SykmeldingRecord>> {
-        return sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(ident).right()
+    suspend fun byIdents(idents: List<String>): Either<GetErrors, List<SykmeldingRecord>> {
+        val sykmeldinger = mutableListOf<SykmeldingRecord>()
+        idents.forEach {
+            sykmeldinger.addAll(sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(it))
+        }
+        return sykmeldinger.right()
     }
 
     private suspend fun <Result> getSykmeldingVerifyResources(
@@ -273,6 +277,16 @@ class SykmeldingService(
                 sykmelder: Sykmelder, previous: List<SykmeldingRecord>, pasient: Person,
             ) -> Result,
     ): Either<CreateErrors, Result> = either {
+        val pasient = pdlClient
+            .getPerson(sykmelding.sykmelding.pasient.fnr)
+            .mapLeft {
+                when (it) {
+                    PdlArrowed.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
+                    PdlArrowed.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
+                }
+            }
+            .bind()
+
         parZip(
             {
                 sykmelderService
@@ -285,18 +299,10 @@ class SykmeldingService(
                     .bind()
             },
             {
-                pdlClient
-                    .getPerson(sykmelding.sykmelding.pasient.fnr)
-                    .mapLeft {
-                        when (it) {
-                            PdlArrowed.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
-                            PdlArrowed.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
-                        }
-                    }
-                    .bind()
+                pasient
             },
             {
-                byIdent(sykmelding.sykmelding.pasient.fnr)
+                byIdents(pasient.identer.map { it.ident })
                     .mapLeft { CreateErrors.UnknownResourceError }
                     .bind()
             },
