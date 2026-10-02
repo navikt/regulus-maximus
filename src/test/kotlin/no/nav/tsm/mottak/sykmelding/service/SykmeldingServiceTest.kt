@@ -1,5 +1,7 @@
 package no.nav.tsm.mottak.sykmelding.service
 
+import arrow.core.raise.context.bind
+import arrow.core.raise.context.either
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.equals.shouldBeEqual
@@ -9,6 +11,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import arrow.core.right
+import io.mockk.core.ValueClassSupport.boxedValue
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -21,6 +24,7 @@ import no.nav.tsm.mottak.pdl.PdlArrowed
 import no.nav.tsm.mottak.sykmelder.Sykmelder
 import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.mottak.sykmelding.service.SykmeldingService.CreateErrors
 import no.nav.tsm.pdl.Ident
 import no.nav.tsm.pdl.IdentGruppe
 import no.nav.tsm.regulus.regula.RegulaResult
@@ -317,6 +321,99 @@ class SykmeldingServiceTest {
         result.status shouldBeEqual RegulaStatus.OK
     }
 
+    @Test
+    fun `test byIdents with one ident`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns listOf(sykmeldingRecord)
+
+        val idents = listOf(
+            "21914897936"
+        )
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold({}, { result ->
+            result shouldBeEqual listOf(sykmeldingRecord)
+        })
+    }
+
+    @Test
+    fun `test byIdents with two idents and two sykmeldinger`()= runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+        val sykmeldingRecord2 =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                ),
+                Pasient(
+                    navn = Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
+                    navKontor = null,
+                    navnFastlege = null,
+                    fnr = "11111111111",
+                    kontaktinfo = emptyList(),
+                )
+            )
+
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("21914897936") } returns listOf(sykmeldingRecord)
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("11111111111") } returns listOf(sykmeldingRecord2)
+
+        val idents = listOf(
+            "21914897936",
+            "11111111111"
+        )
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold({}, { result ->
+            result shouldBeEqual listOf(sykmeldingRecord, sykmeldingRecord2)
+        })
+    }
+
+    @Test
+    fun `test byIdents with two idents and only one sykmelding`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("11111111111") } returns emptyList()
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("21914897936") } returns listOf(
+            sykmeldingRecord
+        )
+
+        val idents = listOf(
+            "21914897936",
+            "11111111111"
+        )
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold({}, { result ->
+            result shouldBeEqual listOf(sykmeldingRecord)
+        })
+    }
+
     private fun mockVerifyRegulaMethods(pasient: Person) {
         val regulaResult = mockk<RegulaResult>()
         coEvery { pdlClient.getPerson("21914897936") } returns pasient.right()
@@ -441,7 +538,9 @@ private fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord 
     )
 }
 
-private fun getSykmeldingDigitalRecord(validation: ValidationResult): SykmeldingRecord {
+
+// TODO: create sykmeldingBuilder
+private fun getSykmeldingDigitalRecord(validation: ValidationResult, pasient: Pasient? = null ): SykmeldingRecord {
     val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
     return SykmeldingRecord.Digital(
         metadata = MessageMetadata.Digital("864425208"),
@@ -454,14 +553,13 @@ private fun getSykmeldingDigitalRecord(validation: ValidationResult): Sykmelding
                         genDate = timestamp,
                         avsenderSystem = AvsenderSystem(navn = "nav-epj (FHIR)", versjon = "1"),
                     ),
-                pasient =
-                    Pasient(
-                        navn = Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
-                        navKontor = null,
-                        navnFastlege = null,
-                        fnr = "21914897936",
-                        kontaktinfo = emptyList(),
-                    ),
+                pasient = pasient ?: Pasient(
+                    navn = Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
+                    navKontor = null,
+                    navnFastlege = null,
+                    fnr = "21914897936",
+                    kontaktinfo = emptyList(),
+                ),
                 medisinskVurdering =
                     MedisinskVurdering.Digital(
                         hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICPC2, "A02", "Frysninger"),
