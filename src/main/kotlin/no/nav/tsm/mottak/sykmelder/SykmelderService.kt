@@ -10,7 +10,7 @@ import no.nav.tsm.mottak.sykmelder.tsmBehandler.TsmBehandlerClient
 class SykmelderService(private val tsmBehandlerClient: TsmBehandlerClient) {
 
     enum class SykmelderErrors {
-        HprUnknownError,
+        HprUnknownError
     }
 
     @WithSpan

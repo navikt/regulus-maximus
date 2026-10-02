@@ -82,7 +82,6 @@ class SykmeldingService(
         sykmeldingProducerService.sendToTsmSykmelding(newSykmeldingRecord, headers)
     }
 
-
     suspend fun verifyRegulaRules(newSykmeldingRecord: SykmeldingRecord): RegulaResult? {
         val newSykmeldingRecordDigital = newSykmeldingRecord as SykmeldingRecord.Digital
         getSykmeldingVerifyResources(newSykmeldingRecordDigital) { sykmelder, previous, pasient ->
@@ -111,12 +110,14 @@ class SykmeldingService(
                             result.status.name == newSykmeldingRecord.validation.status.name
                     ) {
                         log.info(
-                            "Got result id: ${newSykmeldingRecord.sykmelding.id} \n" +
-                                " syk-inn and regulus-maximus got same rule result: ${result.status}"
+                            "Got same rule results for sykmeldingsId: ${newSykmeldingRecord.sykmelding.id}"
                         )
                         return result
                     } else {
                         log.info(
+                            "Got different rule results for sykmeldingsId: ${newSykmeldingRecord.sykmelding.id}, check teamlogs"
+                        )
+                        teamlog.info(
                             "This should not happen. Got different rule result id: ${newSykmeldingRecord.sykmelding.id} \n" +
                                 "syk-inn-api: ${
                                     newSykmeldingRecord.validation.logData()
@@ -267,11 +268,7 @@ class SykmeldingService(
     }
 
     suspend fun byIdents(idents: List<String>): Either<GetErrors, List<SykmeldingRecord>> {
-        val sykmeldinger = mutableListOf<SykmeldingRecord>()
-        idents.forEach {
-            sykmeldinger.addAll(sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(it))
-        }
-        return sykmeldinger.right()
+        return sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(idents).right()
     }
 
     private suspend fun <Result> getSykmeldingVerifyResources(
@@ -281,15 +278,16 @@ class SykmeldingService(
                 sykmelder: Sykmelder, previous: List<SykmeldingRecord>, pasient: Person,
             ) -> Result,
     ): Either<CreateErrors, Result> = either {
-        val pasient = pdlClient
-            .getPerson(sykmelding.sykmelding.pasient.fnr)
-            .mapLeft {
-                when (it) {
-                    PdlArrowed.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
-                    PdlArrowed.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
+        val pasient =
+            pdlClient
+                .getPerson(sykmelding.sykmelding.pasient.fnr)
+                .mapLeft {
+                    when (it) {
+                        PdlArrowed.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
+                        PdlArrowed.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
+                    }
                 }
-            }
-            .bind()
+                .bind()
 
         parZip(
             {
@@ -302,9 +300,7 @@ class SykmeldingService(
                     .mapLeft { CreateErrors.UnknownResourceError }
                     .bind()
             },
-            {
-                pasient
-            },
+            { pasient },
             {
                 byIdents(pasient.identer.map { it.ident })
                     .mapLeft { CreateErrors.UnknownResourceError }

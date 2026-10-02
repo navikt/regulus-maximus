@@ -10,6 +10,7 @@ import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.upsert
@@ -49,22 +50,23 @@ class SykmeldingRepository {
         SykmeldingTable.deleteWhere { SykmeldingTable.sykmeldingId eq sykmeldingId }
     }
 
-    suspend fun allSykmeldingerLastThreeYearsForIdent(ident: String): List<SykmeldingRecord> =
-        dbQuery {
-            SykmeldingTable.selectAll()
-                .where {
-                    SykmeldingTable.pasientIdent eq ident
-                    SykmeldingTable.generatedDate greaterEq OffsetDateTime.now().minusYears(3)
-                }
-                .map {
-                    toSpecificSykmeldingRecord(
-                        sykmelding = it[SykmeldingTable.sykmelding],
-                        metadata = it[SykmeldingTable.metadata],
-                        validation = it[SykmeldingTable.validation],
-                    )
-                }
-                .toList()
-        }
+    suspend fun allSykmeldingerLastThreeYearsForIdent(
+        idents: List<String>
+    ): List<SykmeldingRecord> = dbQuery {
+        SykmeldingTable.selectAll()
+            .where {
+                SykmeldingTable.pasientIdent inList idents
+                SykmeldingTable.generatedDate greaterEq OffsetDateTime.now().minusYears(3)
+            }
+            .map {
+                toSpecificSykmeldingRecord(
+                    sykmelding = it[SykmeldingTable.sykmelding],
+                    metadata = it[SykmeldingTable.metadata],
+                    validation = it[SykmeldingTable.validation],
+                )
+            }
+            .toList()
+    }
 }
 
 private fun List<Aktivitet>.earliestFom(): LocalDate = minBy { it.fom }.fom

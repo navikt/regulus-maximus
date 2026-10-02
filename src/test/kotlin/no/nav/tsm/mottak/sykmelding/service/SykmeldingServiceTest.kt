@@ -1,20 +1,18 @@
 package no.nav.tsm.mottak.sykmelding.service
 
-import arrow.core.raise.context.bind
-import arrow.core.raise.context.either
+import arrow.core.right
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.mockk.every
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
-import arrow.core.right
-import io.mockk.core.ValueClassSupport.boxedValue
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.collections.emptyList
 import kotlin.test.BeforeTest
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.Environment
@@ -24,20 +22,16 @@ import no.nav.tsm.mottak.pdl.PdlArrowed
 import no.nav.tsm.mottak.sykmelder.Sykmelder
 import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
-import no.nav.tsm.mottak.sykmelding.service.SykmeldingService.CreateErrors
-import no.nav.tsm.pdl.Ident
-import no.nav.tsm.pdl.IdentGruppe
+import no.nav.tsm.pdl.Person
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.metadata.*
-import no.nav.tsm.pdl.Person
-import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata.Xml.Emottak
 import org.apache.kafka.common.header.internals.RecordHeaders
 import org.junit.Test
-import kotlin.collections.emptyList
 
 fun SykmeldingRecord.copy(validation: ValidationResult): SykmeldingRecord {
     return toSpecificSykmeldingRecord(sykmelding, metadata, validation)
@@ -108,7 +102,7 @@ class SykmeldingServiceTest {
             sykmeldingProducer.sendToTsmSykmelding(
                 match { record ->
                     record.validation.status == RuleType.INVALID &&
-                            record.validation.rules.any { it.type == RuleType.INVALID }
+                        record.validation.rules.any { it.type == RuleType.INVALID }
                 },
                 any(),
             )
@@ -145,27 +139,27 @@ class SykmeldingServiceTest {
         val pendingTimeStamp = sykmeldingRecord.sykmelding.metadata.mottattDato
 
         coEvery { sykmeldingRepository.findBySykmeldingId("1") } returns
-                sykmeldingRecord.copy(
-                    validation =
-                        ValidationResult(
-                            status = RuleType.PENDING,
-                            timestamp = pendingTimeStamp,
-                            rules = listOf(pending(timestamp = pendingTimeStamp)),
-                        )
-                )
+            sykmeldingRecord.copy(
+                validation =
+                    ValidationResult(
+                        status = RuleType.PENDING,
+                        timestamp = pendingTimeStamp,
+                        rules = listOf(pending(timestamp = pendingTimeStamp)),
+                    )
+            )
 
         sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         coVerify {
             sykmeldingProducer.sendToTsmSykmelding(
                 match { record ->
                     record.validation.status == RuleType.OK &&
-                            record.validation.rules.size == 2 &&
-                            record.validation.rules.singleOrNull {
-                                it.type == RuleType.PENDING && it.timestamp.isEqual(pendingTimeStamp)
-                            } != null &&
-                            record.validation.rules.singleOrNull {
-                                it.type == RuleType.OK && it.timestamp.isEqual(okTimestamp)
-                            } != null
+                        record.validation.rules.size == 2 &&
+                        record.validation.rules.singleOrNull {
+                            it.type == RuleType.PENDING && it.timestamp.isEqual(pendingTimeStamp)
+                        } != null &&
+                        record.validation.rules.singleOrNull {
+                            it.type == RuleType.OK && it.timestamp.isEqual(okTimestamp)
+                        } != null
                 },
                 any(),
             )
@@ -194,39 +188,39 @@ class SykmeldingServiceTest {
             )
 
         coEvery { sykmeldingRepository.findBySykmeldingId("1") } returns
-                sykmeldingRecord.copy(
-                    validation =
-                        ValidationResult(
-                            status = RuleType.PENDING,
-                            timestamp = sykmeldingRecord.sykmelding.metadata.mottattDato,
-                            rules =
-                                listOf(
-                                    pending(
-                                        timestamp = sykmeldingRecord.sykmelding.metadata.mottattDato
-                                    )
-                                ),
-                        )
-                )
+            sykmeldingRecord.copy(
+                validation =
+                    ValidationResult(
+                        status = RuleType.PENDING,
+                        timestamp = sykmeldingRecord.sykmelding.metadata.mottattDato,
+                        rules =
+                            listOf(
+                                pending(
+                                    timestamp = sykmeldingRecord.sykmelding.metadata.mottattDato
+                                )
+                            ),
+                    )
+            )
 
         sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         coVerify {
             sykmeldingProducer.sendToTsmSykmelding(
                 match { record ->
                     record.validation.status == RuleType.INVALID &&
-                            record.validation.rules.size == 2 &&
-                            record.validation.rules.any {
-                                it.type == RuleType.PENDING &&
-                                        it.timestamp.isEqual(
-                                            sykmeldingRecord.sykmelding.metadata.mottattDato
-                                        )
-                            } &&
-                            record.validation.rules.any {
-                                it.type == RuleType.INVALID &&
-                                        it.timestamp.isEqual(invalidTimesamp) &&
-                                        it.name ==
-                                        TilbakedatertMerknad.TILBAKEDATERING_UGYLDIG_TILBAKEDATERING
-                                            .name
-                            }
+                        record.validation.rules.size == 2 &&
+                        record.validation.rules.any {
+                            it.type == RuleType.PENDING &&
+                                it.timestamp.isEqual(
+                                    sykmeldingRecord.sykmelding.metadata.mottattDato
+                                )
+                        } &&
+                        record.validation.rules.any {
+                            it.type == RuleType.INVALID &&
+                                it.timestamp.isEqual(invalidTimesamp) &&
+                                it.name ==
+                                    TilbakedatertMerknad.TILBAKEDATERING_UGYLDIG_TILBAKEDATERING
+                                        .name
+                        }
                 },
                 any(),
             )
@@ -264,18 +258,18 @@ class SykmeldingServiceTest {
             )
 
         coEvery { sykmeldingRepository.findBySykmeldingId("1") } returns
-                sykmeldingRecord.copy(
-                    validation =
-                        ValidationResult(
-                            status = RuleType.OK,
-                            timestamp = firstOkTimestamp,
-                            rules =
-                                listOf(
-                                    ok(timestamp = firstOkTimestamp),
-                                    pending(timestamp = pendingTimestamp),
-                                ),
-                        )
-                )
+            sykmeldingRecord.copy(
+                validation =
+                    ValidationResult(
+                        status = RuleType.OK,
+                        timestamp = firstOkTimestamp,
+                        rules =
+                            listOf(
+                                ok(timestamp = firstOkTimestamp),
+                                pending(timestamp = pendingTimestamp),
+                            ),
+                    )
+            )
 
         shouldNotThrowAny {
             sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
@@ -287,11 +281,7 @@ class SykmeldingServiceTest {
         val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
         val sykmeldingRecord =
             getSykmeldingDigitalRecord(
-                ValidationResult(
-                    status = RuleType.OK,
-                    timestamp = timestamp,
-                    rules = emptyList(),
-                )
+                ValidationResult(status = RuleType.OK, timestamp = timestamp, rules = emptyList())
             )
 
         val pasient = mockk<Person>(relaxed = true)
@@ -303,23 +293,24 @@ class SykmeldingServiceTest {
     }
 
     @Test
-    fun `test verifyRegulaRules with invalid message that has been validated wrong in syk-inn`() = runTest {
-        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
-        val sykmeldingRecord =
-            getSykmeldingDigitalRecord(
-                ValidationResult(
-                    status = RuleType.INVALID,
-                    timestamp = timestamp,
-                    rules = emptyList(),
+    fun `test verifyRegulaRules with invalid message that has been validated wrong in syk-inn`() =
+        runTest {
+            val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+            val sykmeldingRecord =
+                getSykmeldingDigitalRecord(
+                    ValidationResult(
+                        status = RuleType.INVALID,
+                        timestamp = timestamp,
+                        rules = emptyList(),
+                    )
                 )
-            )
-        val pasient = mockk<Person>(relaxed = true)
-        mockVerifyRegulaMethods(pasient)
-        val result = sykmeldingService.verifyRegulaRules(sykmeldingRecord)
+            val pasient = mockk<Person>(relaxed = true)
+            mockVerifyRegulaMethods(pasient)
+            val result = sykmeldingService.verifyRegulaRules(sykmeldingRecord)
 
-        result.shouldNotBeNull()
-        result.status shouldBeEqual RegulaStatus.OK
-    }
+            result.shouldNotBeNull()
+            result.status shouldBeEqual RegulaStatus.OK
+        }
 
     @Test
     fun `test byIdents with one ident`() = runTest {
@@ -333,20 +324,17 @@ class SykmeldingServiceTest {
                 )
             )
 
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns listOf(sykmeldingRecord)
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns
+            listOf(sykmeldingRecord)
 
-        val idents = listOf(
-            "21914897936"
-        )
+        val idents = listOf("21914897936")
 
         val result = sykmeldingService.byIdents(idents)
-        result.fold({}, { result ->
-            result shouldBeEqual listOf(sykmeldingRecord)
-        })
+        result.fold({}, { result -> result shouldBeEqual listOf(sykmeldingRecord) })
     }
 
     @Test
-    fun `test byIdents with two idents and two sykmeldinger`()= runTest {
+    fun `test byIdents with two idents and two sykmeldinger`() = runTest {
         val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
         val sykmeldingRecord =
             getSykmeldingDigitalRecord(
@@ -369,21 +357,22 @@ class SykmeldingServiceTest {
                     navnFastlege = null,
                     fnr = "11111111111",
                     kontaktinfo = emptyList(),
-                )
+                ),
             )
 
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("21914897936") } returns listOf(sykmeldingRecord)
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("11111111111") } returns listOf(sykmeldingRecord2)
+        coEvery {
+            sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(
+                listOf("21914897936", "11111111111")
+            )
+        } returns listOf(sykmeldingRecord, sykmeldingRecord2)
 
-        val idents = listOf(
-            "21914897936",
-            "11111111111"
-        )
+        val idents = listOf("21914897936", "11111111111")
 
         val result = sykmeldingService.byIdents(idents)
-        result.fold({}, { result ->
-            result shouldBeEqual listOf(sykmeldingRecord, sykmeldingRecord2)
-        })
+        result.fold(
+            {},
+            { result -> result shouldBeEqual listOf(sykmeldingRecord, sykmeldingRecord2) },
+        )
     }
 
     @Test
@@ -398,43 +387,39 @@ class SykmeldingServiceTest {
                 )
             )
 
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("11111111111") } returns emptyList()
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent("21914897936") } returns listOf(
-            sykmeldingRecord
-        )
+        coEvery {
+            sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(
+                listOf("21914897936", "11111111111")
+            )
+        } returns listOf(sykmeldingRecord)
 
-        val idents = listOf(
-            "21914897936",
-            "11111111111"
-        )
+        val idents = listOf("21914897936", "11111111111")
 
         val result = sykmeldingService.byIdents(idents)
-        result.fold({}, { result ->
-            result shouldBeEqual listOf(sykmeldingRecord)
-        })
+        result.fold({}, { result -> result shouldBeEqual listOf(sykmeldingRecord) })
     }
 
     private fun mockVerifyRegulaMethods(pasient: Person) {
         val regulaResult = mockk<RegulaResult>()
         coEvery { pdlClient.getPerson("21914897936") } returns pasient.right()
         coEvery { sykmelderService.byHpr("565501872") } returns
-                Sykmelder.MedSuspensjon(
+            Sykmelder.MedSuspensjon(
                     hpr = "565501872",
                     navn = SimpleNavn("GRØNN", null, "VITS"),
                     godkjenninger = emptyList(),
                     ident = "05898597468",
                     suspendert = false,
-                ).right()
-        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns emptyList()
+                )
+                .right()
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns
+            emptyList()
         every { regulaResult.status } returns RegulaStatus.OK
-        every { ruleService.verify(any(), any(), any(), any()) } returns
-                okRuleResultPair.right()
+        every { ruleService.verify(any(), any(), any(), any()) } returns okRuleResultPair.right()
     }
 }
 
 val okRuleResultPair: Pair<RegulaResult, List<RegulaJuridiskVurdering>> =
     RegulaResult.Ok(emptyList()) to emptyList()
-
 
 private fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
     return SykmeldingRecord.Xml(
@@ -538,9 +523,11 @@ private fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord 
     )
 }
 
-
 // TODO: create sykmeldingBuilder
-private fun getSykmeldingDigitalRecord(validation: ValidationResult, pasient: Pasient? = null ): SykmeldingRecord {
+private fun getSykmeldingDigitalRecord(
+    validation: ValidationResult,
+    pasient: Pasient? = null,
+): SykmeldingRecord {
     val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
     return SykmeldingRecord.Digital(
         metadata = MessageMetadata.Digital("864425208"),
@@ -553,20 +540,27 @@ private fun getSykmeldingDigitalRecord(validation: ValidationResult, pasient: Pa
                         genDate = timestamp,
                         avsenderSystem = AvsenderSystem(navn = "nav-epj (FHIR)", versjon = "1"),
                     ),
-                pasient = pasient ?: Pasient(
-                    navn = Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
-                    navKontor = null,
-                    navnFastlege = null,
-                    fnr = "21914897936",
-                    kontaktinfo = emptyList(),
-                ),
+                pasient =
+                    pasient
+                        ?: Pasient(
+                            navn =
+                                Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
+                            navKontor = null,
+                            navnFastlege = null,
+                            fnr = "21914897936",
+                            kontaktinfo = emptyList(),
+                        ),
                 medisinskVurdering =
                     MedisinskVurdering.Digital(
                         hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICPC2, "A02", "Frysninger"),
                         biDiagnoser =
                             listOf(
                                 DiagnoseInfo(DiagnoseSystem.ICPC2, "A03", "Feber"),
-                                DiagnoseInfo(DiagnoseSystem.ICPC2, "A01", "Smerte generell/flere steder"),
+                                DiagnoseInfo(
+                                    DiagnoseSystem.ICPC2,
+                                    "A01",
+                                    "Smerte generell/flere steder",
+                                ),
                             ),
                         svangerskap = true,
                         yrkesskade = null,
