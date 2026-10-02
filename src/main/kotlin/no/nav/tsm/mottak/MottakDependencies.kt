@@ -5,6 +5,8 @@ import io.ktor.server.plugins.di.*
 import no.nav.tsm.ktor.kafka.producer.KafkaRecordProducer
 import no.nav.tsm.ktor.kafka.producer.createProducer
 import no.nav.tsm.mottak.db.SykmeldingRepository
+import no.nav.tsm.mottak.pdl.PdlArrowed
+import no.nav.tsm.mottak.sykmelding.service.RuleService
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingProducerService
 import no.nav.tsm.mottak.sykmelding.service.SykmeldingService
 import no.nav.tsm.pdl.plugin.PdlPlugin
@@ -16,6 +18,8 @@ fun Application.configureMottakDependencies() {
     dependencies {
         provide(SykmeldingService::class)
         provide(SykmeldingRepository::class)
+        provide(RuleService::class)
+        provide(PdlArrowed::class)
         provide<KafkaRecordProducer<SykmeldingRecord>> {
             this@configureMottakDependencies.createProducer(topic = "tsm.sykmeldinger")
         }

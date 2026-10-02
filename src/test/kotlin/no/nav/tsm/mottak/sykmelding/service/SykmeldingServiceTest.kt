@@ -1,18 +1,31 @@
 package no.nav.tsm.mottak.sykmelding.service
 
+import arrow.core.right
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.collections.emptyList
 import kotlin.test.BeforeTest
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.Environment
+import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.mottak.db.*
+import no.nav.tsm.mottak.pdl.PdlArrowed
+import no.nav.tsm.mottak.sykmelder.Sykmelder
+import no.nav.tsm.mottak.sykmelder.SykmelderService
 import no.nav.tsm.mottak.sykmelding.exceptions.SykmeldingMergeValidationException
+import no.nav.tsm.pdl.Person
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.metadata.*
@@ -28,6 +41,9 @@ class SykmeldingServiceTest {
 
     private val sykmeldingRepository: SykmeldingRepository = mockk()
     private val sykmeldingProducer: SykmeldingProducerService = mockk()
+    private val ruleService = mockk<RuleService>()
+    private val sykmelderService = mockk<SykmelderService>()
+    private val pdlClient = mockk<PdlArrowed>()
 
     private val env: Environment = mockk(relaxed = true)
 
@@ -36,6 +52,9 @@ class SykmeldingServiceTest {
             sykmeldingRepository = sykmeldingRepository,
             sykmeldingProducerService = sykmeldingProducer,
             env = env,
+            ruleService = ruleService,
+            sykmelderService = sykmelderService,
+            pdlClient = pdlClient,
         )
 
     @BeforeTest
@@ -256,7 +275,151 @@ class SykmeldingServiceTest {
             sykmeldingService.updateSykmelding("1", sykmeldingRecord, RecordHeaders())
         }
     }
+
+    @Test
+    fun `test verifyRegulaRules happy path`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(status = RuleType.OK, timestamp = timestamp, rules = emptyList())
+            )
+
+        val pasient = mockk<Person>(relaxed = true)
+        mockVerifyRegulaMethods(pasient)
+        val result = sykmeldingService.verifyRegulaRules(sykmeldingRecord)
+
+        result.shouldNotBeNull()
+        result.status shouldBeEqual RegulaStatus.OK
+    }
+
+    @Test
+    fun `test verifyRegulaRules with invalid message that has been validated wrong in syk-inn`() =
+        runTest {
+            val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+            val sykmeldingRecord =
+                getSykmeldingDigitalRecord(
+                    ValidationResult(
+                        status = RuleType.INVALID,
+                        timestamp = timestamp,
+                        rules = emptyList(),
+                    )
+                )
+            val pasient = mockk<Person>(relaxed = true)
+            mockVerifyRegulaMethods(pasient)
+            val result = sykmeldingService.verifyRegulaRules(sykmeldingRecord)
+
+            result.shouldNotBeNull()
+            result.status shouldBeEqual RegulaStatus.OK
+        }
+
+    @Test
+    fun `test byIdents with one ident`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns
+            listOf(sykmeldingRecord)
+
+        val idents = listOf("21914897936")
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold({}, { result -> result shouldBeEqual listOf(sykmeldingRecord) })
+    }
+
+    @Test
+    fun `test byIdents with two idents and two sykmeldinger`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+        val sykmeldingRecord2 =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                ),
+                Pasient(
+                    navn = Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
+                    navKontor = null,
+                    navnFastlege = null,
+                    fnr = "11111111111",
+                    kontaktinfo = emptyList(),
+                ),
+            )
+
+        coEvery {
+            sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(
+                listOf("21914897936", "11111111111")
+            )
+        } returns listOf(sykmeldingRecord, sykmeldingRecord2)
+
+        val idents = listOf("21914897936", "11111111111")
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold(
+            {},
+            { result -> result shouldBeEqual listOf(sykmeldingRecord, sykmeldingRecord2) },
+        )
+    }
+
+    @Test
+    fun `test byIdents with two idents and only one sykmelding`() = runTest {
+        val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+        val sykmeldingRecord =
+            getSykmeldingDigitalRecord(
+                ValidationResult(
+                    status = RuleType.INVALID,
+                    timestamp = timestamp,
+                    rules = emptyList(),
+                )
+            )
+
+        coEvery {
+            sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(
+                listOf("21914897936", "11111111111")
+            )
+        } returns listOf(sykmeldingRecord)
+
+        val idents = listOf("21914897936", "11111111111")
+
+        val result = sykmeldingService.byIdents(idents)
+        result.fold({}, { result -> result shouldBeEqual listOf(sykmeldingRecord) })
+    }
+
+    private fun mockVerifyRegulaMethods(pasient: Person) {
+        val regulaResult = mockk<RegulaResult>()
+        coEvery { pdlClient.getPerson("21914897936") } returns pasient.right()
+        coEvery { sykmelderService.byHpr("565501872") } returns
+            Sykmelder.MedSuspensjon(
+                    hpr = "565501872",
+                    navn = SimpleNavn("GRØNN", null, "VITS"),
+                    godkjenninger = emptyList(),
+                    ident = "05898597468",
+                    suspendert = false,
+                )
+                .right()
+        coEvery { sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(any()) } returns
+            emptyList()
+        every { regulaResult.status } returns RegulaStatus.OK
+        every { ruleService.verify(any(), any(), any(), any()) } returns okRuleResultPair.right()
+    }
 }
+
+val okRuleResultPair: Pair<RegulaResult, List<RegulaJuridiskVurdering>> =
+    RegulaResult.Ok(emptyList()) to emptyList()
 
 private fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord {
     return SykmeldingRecord.Xml(
@@ -355,6 +518,85 @@ private fun getSykmeldingRecord(validation: ValidationResult): SykmeldingRecord 
                     ),
                 tilbakedatering = null,
                 utdypendeOpplysninger = null,
+            ),
+        validation = validation,
+    )
+}
+
+// TODO: create sykmeldingBuilder
+private fun getSykmeldingDigitalRecord(
+    validation: ValidationResult,
+    pasient: Pasient? = null,
+): SykmeldingRecord {
+    val timestamp = OffsetDateTime.parse("2026-09-30T10:39:08.326777Z")
+    return SykmeldingRecord.Digital(
+        metadata = MessageMetadata.Digital("864425208"),
+        sykmelding =
+            Sykmelding.Digital(
+                id = "eb0a9800-b1b2-49e1-b7c8-ccef6ca3ab75",
+                metadata =
+                    SykmeldingMeta.Digital(
+                        mottattDato = timestamp,
+                        genDate = timestamp,
+                        avsenderSystem = AvsenderSystem(navn = "nav-epj (FHIR)", versjon = "1"),
+                    ),
+                pasient =
+                    pasient
+                        ?: Pasient(
+                            navn =
+                                Navn(fornavn = "MATEMATISK", mellomnavn = null, etternavn = "APE"),
+                            navKontor = null,
+                            navnFastlege = null,
+                            fnr = "21914897936",
+                            kontaktinfo = emptyList(),
+                        ),
+                medisinskVurdering =
+                    MedisinskVurdering.Digital(
+                        hovedDiagnose = DiagnoseInfo(DiagnoseSystem.ICPC2, "A02", "Frysninger"),
+                        biDiagnoser =
+                            listOf(
+                                DiagnoseInfo(DiagnoseSystem.ICPC2, "A03", "Feber"),
+                                DiagnoseInfo(
+                                    DiagnoseSystem.ICPC2,
+                                    "A01",
+                                    "Smerte generell/flere steder",
+                                ),
+                            ),
+                        svangerskap = true,
+                        yrkesskade = null,
+                        skjermetForPasient = false,
+                        annenFravarsgrunn = null,
+                    ),
+                aktivitet =
+                    listOf(
+                        Aktivitet.IkkeMulig(
+                            fom = LocalDate.parse("2026-09-30"),
+                            tom = LocalDate.parse("2026-10-07"),
+                            medisinskArsak = null,
+                            arbeidsrelatertArsak = null,
+                        )
+                    ),
+                behandler =
+                    Behandler(
+                        navn = Navn(fornavn = "GRØNN", mellomnavn = null, etternavn = "VITS"),
+                        adresse = null,
+                        ids =
+                            listOf(
+                                PersonId("565501872", type = PersonIdType.HPR),
+                                PersonId("05898597468", type = PersonIdType.FNR),
+                            ),
+                        kontaktinfo = emptyList(),
+                    ),
+                sykmelder =
+                    Sykmelder(
+                        ids = listOf(PersonId("565501872", type = PersonIdType.HPR)),
+                        helsepersonellKategori = HelsepersonellKategori.LEGE,
+                    ),
+                arbeidsgiver = ArbeidsgiverInfo.Ingen(),
+                tilbakedatering = null,
+                bistandNav = null,
+                utdypendeSporsmal = null,
+                prognose = null,
             ),
         validation = validation,
     )

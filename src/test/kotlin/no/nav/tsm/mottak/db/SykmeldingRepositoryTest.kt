@@ -1,5 +1,6 @@
 package no.nav.tsm.mottak.db
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -69,6 +70,33 @@ class SykmeldingRepositoryTest : WithPostgresql() {
         val found = sykmeldingRepository.findBySykmeldingId("to-delete")
         found.shouldBeNull()
     }
+
+    @Test
+    fun `allSykmeldingerLastThreeYearsForIdent returns all sykmeldinger for multiple idents`() =
+        runTest {
+            val sykmeldingId1 = "id1"
+            val pasientIdent1 = "11111111111"
+
+            val sykmeldingId2 = "id2"
+            val pasientIdent2 = "22222222222"
+            sykmeldingRepository.upsertSykmelding(
+                createSykmelding(sykmeldingId = sykmeldingId1, pasientIdent = pasientIdent1)
+            )
+            sykmeldingRepository.upsertSykmelding(
+                createSykmelding(sykmeldingId = sykmeldingId2, pasientIdent = pasientIdent2)
+            )
+
+            val sykmeldinger =
+                sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(
+                    listOf(pasientIdent1, pasientIdent2)
+                )
+
+            sykmeldinger[0].sykmelding.id shouldEqual sykmeldingId1
+            sykmeldinger[0].sykmelding.pasient.fnr shouldEqual pasientIdent1
+
+            sykmeldinger[1].sykmelding.id shouldEqual sykmeldingId2
+            sykmeldinger[1].sykmelding.pasient.fnr shouldEqual pasientIdent2
+        }
 }
 
 private fun createSykmelding(
