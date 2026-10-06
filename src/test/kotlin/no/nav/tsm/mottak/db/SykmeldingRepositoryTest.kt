@@ -1,6 +1,5 @@
 package no.nav.tsm.mottak.db
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull

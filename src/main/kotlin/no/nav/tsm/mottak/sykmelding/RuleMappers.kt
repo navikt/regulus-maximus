@@ -76,8 +76,7 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
                 AnnenFravarsArsak(grunn = listOf(it.name), beskrivelse = null)
             },
         tidligereSykmeldinger = otherSykmeldinger.map { it.toTidligereSykmelding() },
-        besvarteUtdypendeOpplysninger =
-            sykmelding.sykmelding.utdypendeSporsmal?.toRegulaBesvartUtdypende(),
+        besvarteUtdypendeOpplysninger = emptyList(), // Regulus regula sjekker kun uke 39 spørsmål for versjon 2 av xml, ikke digital sykmelding
         kontaktPasientBegrunnelseIkkeKontakt = sykmelding.sykmelding.tilbakedatering?.begrunnelse,
         behandletTidspunkt = behandletTidspunkt,
     )
