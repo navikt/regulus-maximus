@@ -2,6 +2,7 @@ package no.nav.tsm.utils
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
+import io.mockk.mockk
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
@@ -40,4 +41,5 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer) =
                 password = postgres.password,
             ),
         behandlingsdagerIds = emptyList(),
+        external = { mockk() },
     )

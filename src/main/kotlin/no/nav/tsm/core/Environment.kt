@@ -8,6 +8,8 @@ class Runtime(val env: RuntimeCluster, val name: String)
 
 class PostgresR2DBCConfig(val url: String, val sslCert: String?, val sslKeyPk8: String?)
 
+class ExternalApi(val tsmBehandler: String)
+
 class PostgresConfig(
     val jdbc: String,
     val r2: PostgresR2DBCConfig,
@@ -19,6 +21,7 @@ class Environment(
     val runtime: Runtime,
     val postgres: PostgresConfig,
     val behandlingsdagerIds: List<String>,
+    val external: () -> ExternalApi,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -41,5 +44,8 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             config.property("behandlingsdager.ids").getString().split(',').filter {
                 it.isNotEmpty()
             },
+        external = {
+            ExternalApi(tsmBehandler = config.property("external.tsmBehandler").getString())
+        },
     )
 }

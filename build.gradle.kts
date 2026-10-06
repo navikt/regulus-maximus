@@ -18,7 +18,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(libs.versions.jvmVersion.get().toInt())
 }
 
 dependencies {
@@ -83,7 +83,7 @@ tasks {
     }
 
     configure<SpotlessExtension> {
-        kotlin { ktfmt("0.62").kotlinlangStyle() }
+        kotlin { ktfmt(libs.versions.ktfmt.get()).kotlinlangStyle() }
         check {
             dependsOn("spotlessApply")
         }
@@ -96,6 +96,7 @@ tasks.register<Exec>("preRunLocal") {
 }
 
 tasks.register<JavaExec>("runLocal") {
+    description = "Running the application localy"
     group = "application"
     mainClass.set("io.ktor.server.netty.EngineMain")
     classpath = sourceSets["main"].runtimeClasspath
