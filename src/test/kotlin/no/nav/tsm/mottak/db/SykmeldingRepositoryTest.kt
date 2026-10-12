@@ -96,6 +96,22 @@ class SykmeldingRepositoryTest : WithPostgresql() {
             sykmeldinger[1].sykmelding.id shouldEqual sykmeldingId2
             sykmeldinger[1].sykmelding.pasient.fnr shouldEqual pasientIdent2
         }
+
+    @Test
+    fun `allSykmeldingerLastThreeYearsForIdent does not return other pasienters sykmeldinger`() =
+        runTest {
+            sykmeldingRepository.upsertSykmelding(
+                createSykmelding(sykmeldingId = "id1", pasientIdent = "33333333333")
+            )
+            sykmeldingRepository.upsertSykmelding(
+                createSykmelding(sykmeldingId = "id2", pasientIdent = "99999999999")
+            )
+
+            val sykmeldinger =
+                sykmeldingRepository.allSykmeldingerLastThreeYearsForIdent(listOf("33333333333"))
+
+            sykmeldinger.map { it.sykmelding.id } shouldEqual listOf("id1")
+        }
 }
 
 private fun createSykmelding(

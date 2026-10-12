@@ -8,6 +8,7 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.upsert
@@ -51,10 +52,8 @@ class SykmeldingRepository {
         idents: List<String>
     ): List<SykmeldingRecord> = dbQuery {
         SykmeldingTable.selectAll()
-            .where {
-                SykmeldingTable.pasientIdent inList idents
-                SykmeldingTable.generatedDate greaterEq OffsetDateTime.now().minusYears(3)
-            }
+            .where { SykmeldingTable.pasientIdent inList idents }
+            .andWhere { SykmeldingTable.generatedDate greaterEq OffsetDateTime.now().minusYears(3) }
             .map {
                 toSpecificSykmeldingRecord(
                     sykmelding = it[SykmeldingTable.sykmelding],
