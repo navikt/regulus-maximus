@@ -50,8 +50,7 @@ dependencies {
     // Database and such
     implementation(libs.flyway.postgres)
     implementation(libs.flyway.core)
-    runtimeOnly(libs.postgresql)
-    implementation(libs.postgresql.r2dbc)
+    implementation(libs.postgresql)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.json)

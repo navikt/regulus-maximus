@@ -1,8 +1,5 @@
 package no.nav.tsm.admin
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.mottak.db.SykmeldingTable
 import no.nav.tsm.mottak.db.toSpecificSykmeldingRecord
@@ -10,7 +7,7 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
-import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 enum class SykmeldingHistoryRanges {
     LAST_1_YEARS,

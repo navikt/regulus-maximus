@@ -2,7 +2,7 @@ package no.nav.tsm.utils
 
 import no.nav.tsm.core.db.runConcurrentIndexes
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.postgresql.PostgreSQLContainer
 
 abstract class WithPostgresql {
@@ -35,8 +35,8 @@ abstract class WithPostgresql {
         }
 
         fun connect() {
-            R2dbcDatabase.connect(
-                url = config.postgres.r2.url,
+            Database.connect(
+                url = config.postgres.jdbc,
                 user = config.postgres.username,
                 password = config.postgres.password,
             )

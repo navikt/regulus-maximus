@@ -6,16 +6,9 @@ import no.nav.tsm.ktor.nais.getRuntimeCluster
 
 class Runtime(val env: RuntimeCluster, val name: String)
 
-class PostgresR2DBCConfig(val url: String, val sslCert: String?, val sslKeyPk8: String?)
-
 class ExternalApi(val tsmBehandler: String)
 
-class PostgresConfig(
-    val jdbc: String,
-    val r2: PostgresR2DBCConfig,
-    val username: String,
-    val password: String,
-)
+class PostgresConfig(val jdbc: String, val username: String, val password: String)
 
 class Environment(
     val runtime: Runtime,
@@ -31,12 +24,6 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         postgres =
             PostgresConfig(
                 jdbc = config.property("postgres.jdbc").getString(),
-                r2 =
-                    PostgresR2DBCConfig(
-                        url = config.property("postgres.r2dbc.url").getString(),
-                        sslCert = config.propertyOrNull("postgres.r2dbc.sslCert")?.getString(),
-                        sslKeyPk8 = config.propertyOrNull("postgres.r2dbc.sslKeyPk8")?.getString(),
-                    ),
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
             ),
