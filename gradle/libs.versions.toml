@@ -14,7 +14,7 @@ arrow = "2.2.3"
 kotest-assertions = "6.2.4"
 ktfmt = "0.62"
 
-tsm-sykmeldinger-input = "30"
+tsm-sykmeldinger-input = "31"
 tsm-pdl-client = "0.0.2"
 tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
